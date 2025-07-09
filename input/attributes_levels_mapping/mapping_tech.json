@@ -1,0 +1,227 @@
+{
+    "support": {
+        "attributes": {
+            " Will I receive support from the municipality?": [
+                " Will I receive support from the municipality?"
+            ]
+        },
+        "levels": {
+            "Yes, everything is arranged for you, you only have to sign.": {
+                "tags": [
+                    "Yes, everything is arranged for you, you only have to sign.",
+                    "Yes, everything is arranged, you only have to sign."
+                ],
+                "rank": 1
+            },
+            "No, you arrange the transition on your own. This must be done within 8 years.": {
+                "tags": [
+                    "No, you arrange the transition on your own. This must be done within 8 years.",
+                    "No, you control the transition completely yourself. This must be done within 8 years."
+                ],
+                "rank": 0
+            }
+        }
+    },
+    "supplier": {
+        "attributes": {
+            "Who is the heat supplier?": [
+                "Who is the heat supplier?"
+            ]
+        },
+        "levels": {
+            "There is one fixed heat supplier owned by your municipality.": {
+                "tags": [
+                    "There is one fixed heat supplier owned by your municipality."
+                ],
+                "rank": 2
+            },
+            "You choose now your gas supplier yourself,until you switch.": {
+                "tags": [
+                    "You choose now your gas supplier yourself,until you switch.",
+                    "You choose your gas supplier yourself,until you switch."
+                ],
+                "rank": 0
+            },
+            "You choose the company that supplies heat.": {
+                "tags": [
+                    "You choose the company that supplies heat."
+                ],
+                "rank": 1
+            }
+        }
+    },
+    "nuisance": {
+        "attributes": {
+            "How long will there be nuisance due to the switch to a gas-free system in my neighborhood?": [
+                "How long will there be nuisance due to the switch to a gas-free system in my neighborhood?"
+            ]
+        },
+        "levels": {
+            "2 months of noise and streets open.": {
+                "tags": [
+                    "2 months of noise and streets open."
+                ],
+                "rank": 2
+            },
+            "1 month of noise and streets open.": {
+                "tags": [
+                    "1 month of noise and streets open."
+                ],
+                "rank": 1
+            },
+            "2 months of noise and streets open,because the switch to a gas-free system is going ahead.": {
+                "tags": [
+                    "2 months of noise and streets open,because the switch to a gas-free system is going ahead."
+                ],
+                "rank": 0
+            }
+        }
+    },
+    "power_outages": {
+        "attributes": {
+            "Are there any power outages in the near future?": [
+                "Are there any power outages in the near future?"
+            ]
+        },
+        "levels": {
+            "On average, one day a year power outage.": {
+                "tags": [
+                    "On average, one day a year power outage."
+                ],
+                "rank": 2
+            },
+            "Never power outage.": {
+                "tags": [
+                    "Never power outage."
+                ],
+                "rank": 1
+            }
+        }
+    },
+    "one_time_costs": {
+        "attributes": {
+            "What is my one-time cost, including the subsidy?": [
+                "What is my one-time cost, including the subsidy?"
+            ]
+        },
+        "levels": {
+            "tech1 31,000 euros.": {
+                "tags": [
+                    "tech1 31,000 euros."
+                ],
+                "rank": 4
+            },
+            "tech1 10,000 euros.": {
+                "tags": [
+                    "tech1 10,000 euros."
+                ],
+                "rank": 1
+            },
+            "tech0 0 euros,until you switch.": {
+                "tags": [
+                    "tech0 0 euros,until you switch."
+                ],
+                "rank": 0
+            },
+            "tech1 17,000 euros.": {
+                "tags": [
+                    "tech1 17,000 euros."
+                ],
+                "rank": 2
+            },
+            "tech0 4,000 euros.": {
+                "tags": [
+                    "tech0 4,000 euros."
+                ],
+                "rank": 3
+            },
+            "tech0 0 euros.": {
+                "tags": [
+                    "tech0 0 euros."
+                ],
+                "rank": 1
+            },
+            "tech1 24,000 euros.": {
+                "tags": [
+                    "tech1 24,000 euros."
+                ],
+                "rank": 3
+            },
+            "tech0 6,000 euros.": {
+                "tags": [
+                    "tech0 6,000 euros."
+                ],
+                "rank": 4
+            },
+            "tech0 2,000 euros.": {
+                "tags": [
+                    "tech0 2,000 euros."
+                ],
+                "rank": 2
+            }
+        }
+    },
+    "heating_costs": {
+        "attributes": {
+            "How much will my heating costs be per month?": [
+                "How much will my heating costs be per month?"
+            ]
+        },
+        "levels": {
+            "tech1 200 euros less than now.": {
+                "tags": [
+                    "tech1 200 euros less than now."
+                ],
+                "rank": 1
+            },
+            "tech1 150 euros less than now.": {
+                "tags": [
+                    "tech1 150 euros less than now."
+                ],
+                "rank": 2
+            },
+            "tech1 100 euros less than now.": {
+                "tags": [
+                    "tech1 100 euros less than now."
+                ],
+                "rank": 3
+            },
+            "tech1 50 euros less than now.": {
+                "tags": [
+                    "tech1 50 euros less than now."
+                ],
+                "rank": 4
+            },
+            "tech0 Same as now,until you switch.": {
+                "tags": [
+                    "tech0 Same as now,until you switch."
+                ],
+                "rank": 0
+            },
+            "tech0 100 euros less than now.": {
+                "tags": [
+                    "tech0 100 euros less than now."
+                ],
+                "rank": 1
+            },
+            "tech0 50 euros less than now.": {
+                "tags": [
+                    "tech0 50 euros less than now."
+                ],
+                "rank": 2
+            },
+            "tech0 Same as now.": {
+                "tags": [
+                    "tech0 Same as now."
+                ],
+                "rank": 3
+            },
+            "tech0 50 euros more than now.": {
+                "tags": [
+                    "tech0 50 euros more than now."
+                ],
+                "rank": 4
+            }
+        }
+    }
+}

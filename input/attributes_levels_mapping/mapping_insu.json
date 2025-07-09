@@ -1,0 +1,200 @@
+{
+    "comfort": {
+        "attributes": {
+            " How will my comfort improve?": [
+                " How will my comfort improve?",
+                "NAME_2"
+            ]
+        },
+        "levels": {
+            "Warmer house in the winter and draft-free.": {
+                "tags": [
+                    " Warmer house in the winter and draft-free."
+                ],
+                "rank": 3
+            },
+            "Warmer house in the winter, draft-free and you have less problems with street noise.": {
+                "tags": [
+                    " Warmer house in the winter, draft-free and you have less problems with street noise."
+                ],
+                "rank": 2
+            },
+            "No change,until you switch.": {
+                "tags": [
+                    " No change,until you switch."
+                ],
+                "rank": 0
+            },
+            "Warmer house in the winter, draft-free and the house can be cooled in the summer.": {
+                "tags": [
+                    " Warmer house in the winter, draft-free and the house can be cooled in the summer."
+                ],
+                "rank": 1
+            }
+        }
+    },
+    "support": {
+        "attributes": {
+            "Will I receive support from the municipality?": [
+                "Will I receive support from the municipality?",
+                "NAME_2"
+            ]
+        },
+        "levels": {
+            "You'll get help with selecting the contractor and reviewing the quotations.": {
+                "tags": [
+                    " You'll get help with selecting the contractor and reviewing the quotations."
+                ],
+                "rank": 2
+            },
+            "No change,until you switch.": {
+                "tags": [
+                    " No change,until you switch."
+                ],
+                "rank": 0
+            },
+            "You arrange everything yourself.": {
+                "tags": [
+                    " You arrange everything yourself."
+                ],
+                "rank": 3
+            },
+            "Everything is arranged for you, you only have to sign.": {
+                "tags": [
+                    " Everything is arranged for you, you only have to sign."
+                ],
+                "rank": 1
+            }
+        }
+    },
+    "nuisance": {
+        "attributes": {
+            "Will there be any nuisance in the dwelling due to home improvements?": [
+                "Will there be any nuisance in the dwelling due to home improvements?",
+                "NAME_2"
+            ]
+        },
+        "levels": {
+            "3 days noise and nuisance due to works in the dwelling.": {
+                "tags": [
+                    " 3 days noise and nuisance due to works in the dwelling."
+                ],
+                "rank": 2
+            },
+            "1 day noise and nuisance due to works in the dwelling.": {
+                "tags": [
+                    " 1 day noise and nuisance due to works in the dwelling."
+                ],
+                "rank": 1
+            },
+            "No change,until you switch.": {
+                "tags": [
+                    " No change,until you switch."
+                ],
+                "rank": 0
+            },
+            "6 days noise and nuisance due to works in the dwelling.": {
+                "tags": [
+                    " 6 days noise and nuisance due to works in the dwelling."
+                ],
+                "rank": 3
+            }
+        }
+    },
+    "co2": {
+        "attributes": {
+            "How much CO2 will be saved?": [
+                "How much CO2 will be saved?",
+                "NAME_2"
+            ]
+        },
+        "levels": {
+            "300 kg/year, equal to planting 12 trees.": {
+                "tags": [
+                    " 300 kg/year, equal to planting 12 trees."
+                ],
+                "rank": 2
+            },
+            "No change,until you switch.": {
+                "tags": [
+                    " No change,until you switch."
+                ],
+                "rank": 0
+            },
+            "500 kg/year, equal to planting 20 trees.": {
+                "tags": [
+                    " 500 kg/year, equal to planting 20 trees."
+                ],
+                "rank": 1
+            }
+        }
+    },
+    "one_time_amount": {
+        "attributes": {
+            "What is the one-time amount I have to pay, after correcting for available subsidies?": [
+                "What is the one-time amount I have to pay, after correcting for available subsidies?",
+                "NAME_2"
+            ]
+        },
+        "levels": {
+            "5,000 euros.": {
+                "tags": [
+                    " 5,000 euros."
+                ],
+                "rank": 1
+            },
+            "10,000 euros.": {
+                "tags": [
+                    " 10,000 euros."
+                ],
+                "rank": 2
+            },
+            "No change,until you switch.": {
+                "tags": [
+                    " No change,until you switch."
+                ],
+                "rank": 0
+            },
+            "15,000 euros.": {
+                "tags": [
+                    " 15,000 euros."
+                ],
+                "rank": 3
+            }
+        }
+    },
+    "heating_costs": {
+        "attributes": {
+            "What are my heating costs per month?": [
+                "What are my heating costs per month?",
+                "NAME_2"
+            ]
+        },
+        "levels": {
+            "40 euros less than now.": {
+                "tags": [
+                    " 40 euros less than now."
+                ],
+                "rank": 2
+            },
+            "No change,until you switch.": {
+                "tags": [
+                    " No change,until you switch."
+                ],
+                "rank": 0
+            },
+            "70 euros less than now.": {
+                "tags": [
+                    " 70 euros less than now."
+                ],
+                "rank": 1
+            },
+            "10 euros less than now.": {
+                "tags": [
+                    " 10 euros less than now."
+                ],
+                "rank": 3
+            }
+        }
+    }
+}
