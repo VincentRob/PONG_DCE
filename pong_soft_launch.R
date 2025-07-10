@@ -510,7 +510,7 @@ for (survey.name in survey.names){
   
   # WTP ----
   # Use use median value across all models
-  dt.wtp <- dt.coefs[!grepl("cost",Term),.(game,Attribute,Term,Estimate)]
+  dt.wtp <- dt.coefs[,.(game,Attribute,Term,Estimate)]
   dt.wtp[,`WTP (1,000 euro)` := round(Estimate/abs(dt.irr.tp.all[game == "all" & cost_month == FALSE,median_utility]),1)]
   
   print_table(dt.wtp[,.(Term,`WTP (1,000 euro)`)],"results_wtp.tex")
