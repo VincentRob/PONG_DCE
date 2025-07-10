@@ -2,13 +2,11 @@
   "Do you agree and want to participate?": {
     "question_tags": [
       [
-        "",
-        ""
+        "consent"
       ]
     ],
     "question_rank": 1,
     "answers": {
-
       "I agree and want to participate": {
         "answer_tags": [
           "I agree and want to participate"
@@ -154,7 +152,7 @@
         "answer_rank": 21
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Referrer URL": {
     "question_tags": [
@@ -165,7 +163,6 @@
     ],
     "question_rank": 3,
     "answers": {
-
       "android-app://com.google.android.googlequicksearchbox/": {
         "answer_tags": [
           "android-app://com.google.android.googlequicksearchbox/"
@@ -227,7 +224,7 @@
         "answer_rank": 1
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " What is your opinion on heat pumps after having heard everything?": {
     "question_tags": [
@@ -269,7 +266,7 @@
         "answer_rank": 1
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " What is your opinion on district heating after having heard everything?": {
     "question_tags": [
@@ -311,7 +308,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?": {
     "question_tags": [
@@ -322,7 +319,6 @@
     ],
     "question_rank": 7,
     "answers": {
-
       "Yes about heat pump": {
         "answer_tags": [
           "Yes about heat pump"
@@ -348,7 +344,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " If I switch away from natural gas, I would appreciate the following:": {
     "question_tags": [
@@ -540,7 +536,7 @@
         "answer_rank": 30
       }
     },
-    "question_group": null
+    "question_group": "comm"
   },
   " What is your energy supplier?": {
     "question_tags": [
@@ -551,7 +547,6 @@
     ],
     "question_rank": 9,
     "answers": {
-
       "Vattenfall": {
         "answer_tags": [
           "Vattenfall"
@@ -1123,7 +1118,7 @@
         "answer_rank": 25
       }
     },
-    "question_group": null
+    "question_group": "comm"
   },
   " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]": {
     "question_tags": [
@@ -1165,7 +1160,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I am climate-conscious]": {
     "question_tags": [
@@ -1207,7 +1202,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Heat prices should be as equal as possible for everyone in the municipality]": {
     "question_tags": [
@@ -1249,7 +1244,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Residents are capable of deciding for themselves how to phase out natural gas]": {
     "question_tags": [
@@ -1291,7 +1286,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " On a scale from 1 to 5, to what extent do you agree with the following statements?  [The municipality is best able to determine the most affordable way to phase out natural gas]": {
     "question_tags": [
@@ -1333,7 +1328,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my neighborhood]": {
     "question_tags": [
@@ -1375,7 +1370,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my municipality]": {
     "question_tags": [
@@ -1417,7 +1412,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "bias"
   },
   " Which best describes the employment situation of your partner?": {
     "question_tags": [
@@ -1434,7 +1429,6 @@
         ],
         "answer_rank": 1
       }
-
     },
     "question_group": null
   },
@@ -1459,7 +1453,6 @@
         ],
         "answer_rank": 2
       }
-
     },
     "question_group": null
   },
@@ -1477,10 +1470,45 @@
           "25-34"
         ],
         "answer_rank": 1
+      },
+      "35-44": {
+        "answer_tags": [
+          "35-44"
+        ],
+        "answer_rank": 2
+      },
+      "65-74": {
+        "answer_tags": [
+          "65-74"
+        ],
+        "answer_rank": 3
+      },
+      "55-64": {
+        "answer_tags": [
+          "55-64"
+        ],
+        "answer_rank": 4
+      },
+      "45-54": {
+        "answer_tags": [
+          "45-54"
+        ],
+        "answer_rank": 5
+      },
+      "24 or younger": {
+        "answer_tags": [
+          "24 or younger"
+        ],
+        "answer_rank": 6
+      },
+      "75 or older": {
+        "answer_tags": [
+          "75 or older"
+        ],
+        "answer_rank": 7
       }
-
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " To which age group do you belong?": {
     "question_tags": [
@@ -1534,7 +1562,7 @@
         "answer_rank": 7
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Who is currently part of your household?": {
     "question_tags": [
@@ -1547,7 +1575,8 @@
     "answers": {
       "With my partner / spouse": {
         "answer_tags": [
-          "With my partner / spouse"
+          "With my partner / spouse",
+          "I live with my partner / spouse"
         ],
         "answer_rank": 1
       },
@@ -1559,33 +1588,17 @@
       },
       "With my child(ren)": {
         "answer_tags": [
-          "With my child(ren)"
+          "With my child(ren)",
+          "I live with my child(ren)"
         ],
         "answer_rank": 3
       },
       "With my partner and child(ren)": {
         "answer_tags": [
-          "With my partner and child(ren)"
-        ],
-        "answer_rank": 4
-      },
-      "I live with my partner / spouse": {
-        "answer_tags": [
-          "I live with my partner / spouse"
-        ],
-        "answer_rank": 5
-      },
-      "I live with my partner and child(ren)": {
-        "answer_tags": [
+          "With my partner and child(ren)",
           "I live with my partner and child(ren)"
         ],
-        "answer_rank": 6
-      },
-      "I live with my child(ren)": {
-        "answer_tags": [
-          "I live with my child(ren)"
-        ],
-        "answer_rank": 7
+        "answer_rank": 4
       },
       "Other": {
         "answer_tags": [
@@ -1594,7 +1607,7 @@
         "answer_rank": 8
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What is your native language?": {
     "question_tags": [
@@ -1611,9 +1624,8 @@
         ],
         "answer_rank": 1
       }
-
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Which gender do you identify with the most?": {
     "question_tags": [
@@ -1637,7 +1649,7 @@
         "answer_rank": 2
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What is the WOZ value of your dwelling?": {
     "question_tags": [
@@ -1703,7 +1715,7 @@
         "answer_rank": 9
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Do you have solar panels?": {
     "question_tags": [
@@ -1727,7 +1739,7 @@
         "answer_rank": 2
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What do you use for cooking?": {
     "question_tags": [
@@ -1769,7 +1781,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " How much do you pay monthly for gas?": {
     "question_tags": [
@@ -1817,7 +1829,7 @@
         "answer_rank": 7
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What is your gas consumption per year?": {
     "question_tags": [
@@ -1871,7 +1883,7 @@
         "answer_rank": 8
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What is the size of your dwelling?": {
     "question_tags": [
@@ -1913,7 +1925,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " On which device are you playing this choice game?": {
     "question_tags": [
@@ -1943,7 +1955,7 @@
         "answer_rank": 3
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What is your highest completed education?": {
     "question_tags": [
@@ -1965,6 +1977,12 @@
           "HBO/WO master or higher"
         ],
         "answer_rank": 2
+      },
+      "HBO/HTS/WO bachelor": {
+        "answer_tags": [
+          "HBO/HTS/WO bachelor"
+        ],
+        "answer_rank": 9
       },
       "VMBO/MAVO/MBO-niveau 1": {
         "answer_tags": [
@@ -2003,7 +2021,7 @@
         "answer_rank": 8
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Do you use natural gas or wood stove to heat your house?": {
     "question_tags": [
@@ -2033,7 +2051,7 @@
         "answer_rank": 3
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What is the construction period of your dwelling?": {
     "question_tags": [
@@ -2075,7 +2093,7 @@
         "answer_rank": 5
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " What type of residence do you live in?": {
     "question_tags": [
@@ -2093,7 +2111,7 @@
         "answer_rank": 1
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Start language": {
     "question_tags": [
@@ -2117,7 +2135,7 @@
         "answer_rank": 2
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Last page": {
     "question_tags": [
@@ -2147,6 +2165,6 @@
         "answer_rank": 3
       }
     },
-    "question_group": null
+    "question_group": "desc"
   }
 }

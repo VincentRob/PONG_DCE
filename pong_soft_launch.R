@@ -16,7 +16,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("all_panelclix_hoorn") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("all_panelclix_hoorn","full_launch_panelclix_first_sample") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
@@ -28,6 +28,7 @@ for (survey.name in survey.names){
   data = data.table()
   for (file.name in input_specs[survey_name == survey.name,unique(data_path)]){
     data_tmp <- readxl::read_excel(paste0(file.name)) %>% as.data.table()
+    data_tmp[,survey_name := gsub("^.*/|\\.xlsx$", "", file.name)]
     data <- rbindlist(list(data,data_tmp),use.names = TRUE, fill = TRUE)
   }
   
@@ -71,12 +72,20 @@ for (survey.name in survey.names){
   
   tab.desc <- data.table()
   for (cl in names(data.desc)){
-    tab.desc <- rbindlist(list(data.desc[,.(Q = names.desc[cl] ,Q_clean=cl,.N),by = c(answer = cl)],tab.desc),use.names = TRUE,fill = TRUE)
+    tab.tmp <- data.desc[survey_name %in% data.desc[!is.na(get(cl)),unique(survey_name)] ,.(Q = names.desc[cl] ,Q_clean=cl,.N),by = c(answer = cl)]
+    survey_count <- data.desc[survey_name %in% data.desc[!is.na(get(cl)),unique(survey_name)],.N,by = c(answer = cl,survey_name = "survey_name")]
+    survey_count[,N_s := sum(N),by=survey_name]
+    survey_count[,N_tot := sum(N_s),by=answer]
+    survey_count <- unique(survey_count[,.(answer,N_tot)])
+    
+    tab.tmp <- tab.tmp[survey_count,on="answer"]
+    tab.desc <- rbindlist(list(tab.tmp,tab.desc),use.names = TRUE,fill = TRUE)
   }
   tab.desc[,Q_org := copy(Q)]
   tab.desc[grepl("\\[multiple",Q_org), `:=` (Q = gsub("(.*?)\\ \\[multipl.*","\\1",Q_org), answer = paste0(gsub(".*\\[(.*)\\].*","\\1",Q_org)," - ",answer))]
   tab.desc[,Q := gsub(".*?\\.(.*)","\\1",Q)]
   tab.desc[,unique(Q)]
+  tab.desc[Q == "",Q := Q_clean]
   
   # Descriptives mapping template
   # Assign question ranks
@@ -114,13 +123,53 @@ for (survey.name in survey.names){
   # Output JSON
   write(toJSON(result_list, pretty = TRUE, auto_unbox = TRUE), file = paste0(dir.out,"mapping_descriptives_template.json"))
   
-  tab.grps <- read.csv2(paste0(dir.out,"descriptives_mapping_complete.csv")) 
-  setDT(tab.grps)
-  tab.desc[tab.grps,Group := i.Group,on=c("Q" = "Question")]
+  # Read JSON mapping descriptives
+  fljson <- paste0("input/attributes_levels_mapping/mapping_descriptives.json")
+  mapping <- jsonlite::read_json(fljson)
   
-  tab.desc[,N_total := sum(N,na.rm = TRUE),by=Q_org]
   
-  for (grp in tab.desc[,unique(na.omit(Group))]){
+  # Loop over each question and rename
+  tab.desc[,Q_mapped := NA_character_]
+
+  for (new_q_name in names(mapping)) {
+    
+    old_q_names <- unlist(mapping[[new_q_name]][["question_tags"]])
+    
+    if (tab.desc[,any(Q %in% old_q_names & !is.na(Q_mapped))]) stop(sprintf("Already mapped: %s \n\t Please fix %s.",
+                                                                            paste0(old_q_names,collapse ="; "),
+                                                                            fljson))
+    
+    grp_q <- ifelse(is.null(mapping[[new_q_name]][["question_group"]]),NA_character_,mapping[[new_q_name]][["question_group"]])
+    tab.desc[Q %in% old_q_names,`:=` (Q_mapped = new_q_name,
+                                      question_rank_mapped = mapping[[new_q_name]][["question_rank"]],
+                                      question_group_mapped = grp_q)]
+    
+    # Loop over each level and rename
+    for (new_answer_name in names(mapping[[new_q_name]][["answers"]])) {
+      old_answer_names <- unlist(mapping[[new_q_name]][["answers"]][[new_answer_name]]$answer_tags)
+      
+      tab.desc[Q %in% old_q_names & answer %in% old_answer_names,`:=` (answer_mapped = new_answer_name,
+                                                                       answer_rank_mapped = mapping[[new_q_name]][["answers"]][[new_answer_name]]$answer_rank)]
+
+    }
+  }
+  
+  # Merge 
+  cols.unique <- c("Q_mapped","answer_mapped")
+  tab.desc.merged <- tab.desc[!is.na(Q_mapped),.(N = sum(N),
+                                                 N_total = sum(N_tot),
+                                                 question_rank_mapped = unique(question_rank_mapped),
+                                                 question_group_mapped = unique(question_group_mapped),
+                                                 answer_rank_mapped = unique(answer_rank_mapped)),by=cols.unique]
+  tab.desc.merged[,nrows := .N,by=cols.unique]
+  
+  if (tab.desc.merged[,any(nrows != 1)]) stop("nrows should have only ones; fix it")
+  tab.desc.merged[,nrows := NULL]
+  tab.desc.merged <- tab.desc.merged[order(question_rank_mapped,answer_rank_mapped,Q_mapped,answer_mapped),]
+  
+  #tab.desc.merged[,N_total := data[,uniqueN(`id. Response ID`)]]
+  
+  for (grp in tab.desc.merged[,unique(na.omit(question_group_mapped))]){
     
     if (grp == "bias_monet"){
       # All answers
@@ -165,7 +214,7 @@ for (survey.name in survey.names){
       next
     }
     
-    tab <- tab.desc[Group == grp,.(Question = Q, Answer = answer, Share = sprintf("%.0f%% (%.d)", 100*N/N_total,N))]
+    tab <- tab.desc.merged[question_group_mapped == grp,.(Question = Q_mapped, Answer = answer_mapped, Share = sprintf("%.0f%% (%.d)", 100*N/N_total,N))]
     tab <- tab %>% purrr::map_df(rev) %>% as.data.table()
     #tab[, Share := gsub("%", "\\\\%", Share)]
     
