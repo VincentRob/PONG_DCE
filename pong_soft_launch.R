@@ -79,34 +79,37 @@ for (survey.name in survey.names){
   tab.desc[,unique(Q)]
   
   # Descriptives mapping template
-  # Add rank based on unique Q
+  # Assign question ranks
   tab.desc[, question_rank := .GRP, by = Q]
   
-  # Get unique questions
-  questions <- unique(tab.desc[, .(Q, question_rank)])
-  
-  # Build nested result
+  # Build result list
   result_list <- setNames(
     lapply(split(tab.desc, by = "Q", keep.by = TRUE), function(group) {
+      # Unique answers per question, preserving order
+      unique_answers <- unique(group$answer)
+      
       answers_list <- setNames(
-        lapply(seq_len(nrow(group)), function(i) {
-          ans <- group$answer[i]
+        lapply(seq_along(unique_answers), function(i) {
+          ans <- unique_answers[i]
           list(
             answer_tags = list(ans),
             answer_rank = i
           )
         }),
-        group$answer
+        unique_answers
       )
       
       list(
         question_tags = list(rep(group$Q[1], 2)),
         question_rank = group$question_rank[1],
-        answers = answers_list
+        answers = answers_list,
+        question_group = NA
       )
     }),
     unique(tab.desc$Q)
   )
+  
+  cat(toJSON(result_list, pretty = TRUE, auto_unbox = TRUE))
   
   # Output JSON
   write(toJSON(result_list, pretty = TRUE, auto_unbox = TRUE), file = paste0(dir.out,"mapping_descriptives_template.json"))
