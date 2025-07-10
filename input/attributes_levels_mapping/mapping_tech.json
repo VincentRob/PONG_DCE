@@ -2,7 +2,8 @@
     "support": {
         "attributes": {
             " Will I receive support from the municipality?": [
-                " Will I receive support from the municipality?"
+                " Will I receive support from the municipality?",
+                " Do I receive support from the municipality?"
             ]
         },
         "levels": {
@@ -53,7 +54,8 @@
     "nuisance": {
         "attributes": {
             "How long will there be nuisance due to the switch to a gas-free system in my neighborhood?": [
-                "How long will there be nuisance due to the switch to a gas-free system in my neighborhood?"
+                "How long will there be nuisance due to the switch to a gas-free system in my neighborhood?",
+                "Is there nuisance in my neighbourhood due to phasing out of natural gas?"
             ]
         },
         "levels": {
@@ -101,7 +103,8 @@
     "one_time_costs": {
         "attributes": {
             "What is my one-time cost, including the subsidy?": [
-                "What is my one-time cost, including the subsidy?"
+                "What is my one-time cost, including the subsidy?",
+                "What is the one-time amount I have to pay, after correcting for available subsidies?"
             ]
         },
         "levels": {
@@ -164,7 +167,8 @@
     "heating_costs": {
         "attributes": {
             "How much will my heating costs be per month?": [
-                "How much will my heating costs be per month?"
+                "How much will my heating costs be per month?",
+                "What are my heating costs per month?"
             ]
         },
         "levels": {

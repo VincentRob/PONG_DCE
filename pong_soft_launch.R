@@ -2,6 +2,7 @@ require(mlogit)
 library(dplyr)
 library(data.table)
 library(ggplot2)
+library(jsonlite)
 
 # Background ----
 source("Figure_theme.R")
@@ -15,7 +16,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("full_launch_panelclix_test") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("all_panelclix_hoorn") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
@@ -64,113 +65,143 @@ for (survey.name in survey.names){
   #data <- data[`ConstructionPeriod2. What is the construction period of your dwelling?` %in% c("1991-2005","2006-2025")]
   
   # Descriptives - respondent characteristics ----
-  if (FALSE){
-    col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])",names(data))]
-    data.desc <- janitor::clean_names(data[,.SD,.SDcols = col.desc])
-    names.desc <- setNames(col.desc,names(data.desc))
-    
-    tab.desc <- data.table()
-    for (cl in names(data.desc)){
-      tab.desc <- rbindlist(list(data.desc[,.(Q = names.desc[cl] ,Q_clean=cl,.N),by = c(answer = cl)],tab.desc),use.names = TRUE,fill = TRUE)
-    }
-    tab.desc[,Q_org := copy(Q)]
-    tab.desc[grepl("\\[multiple",Q_org), `:=` (Q = gsub("(.*?)\\ \\[multipl.*","\\1",Q_org), answer = paste0(gsub(".*\\[(.*)\\].*","\\1",Q_org)," - ",answer))]
-    tab.desc[,Q := gsub(".*?\\.(.*)","\\1",Q)]
-    tab.desc[,unique(Q)]
-    
-    write.csv2(tab.desc[,.(Question = unique(Q), Group = NA)],paste0(dir.out,"descriptives_mapping.csv"),row.names = FALSE)
-    
-    tab.grps <- read.csv2(paste0(dir.out,"descriptives_mapping_complete.csv")) 
-    setDT(tab.grps)
-    tab.desc[tab.grps,Group := i.Group,on=c("Q" = "Question")]
-    
-    tab.desc[,N_total := sum(N,na.rm = TRUE),by=Q_org]
-    
-    for (grp in tab.desc[,unique(na.omit(Group))]){
+  col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Response ID)|(Date)|(Seed)|(zipcode)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(lottery)|(Thank you for your participation)|(Total time)|(save 50 euros)|(please enter the code that is in your letter)",names(data))]
+  data.desc <- janitor::clean_names(data[,.SD,.SDcols = col.desc])
+  names.desc <- setNames(col.desc,names(data.desc))
+  
+  tab.desc <- data.table()
+  for (cl in names(data.desc)){
+    tab.desc <- rbindlist(list(data.desc[,.(Q = names.desc[cl] ,Q_clean=cl,.N),by = c(answer = cl)],tab.desc),use.names = TRUE,fill = TRUE)
+  }
+  tab.desc[,Q_org := copy(Q)]
+  tab.desc[grepl("\\[multiple",Q_org), `:=` (Q = gsub("(.*?)\\ \\[multipl.*","\\1",Q_org), answer = paste0(gsub(".*\\[(.*)\\].*","\\1",Q_org)," - ",answer))]
+  tab.desc[,Q := gsub(".*?\\.(.*)","\\1",Q)]
+  tab.desc[,unique(Q)]
+  
+  # Descriptives mapping template
+  # Add rank based on unique Q
+  tab.desc[, question_rank := .GRP, by = Q]
+  
+  # Get unique questions
+  questions <- unique(tab.desc[, .(Q, question_rank)])
+  
+  # Build nested result
+  result_list <- setNames(
+    lapply(split(tab.desc, by = "Q", keep.by = TRUE), function(group) {
+      answers_list <- setNames(
+        lapply(seq_len(nrow(group)), function(i) {
+          ans <- group$answer[i]
+          list(
+            answer_tags = list(ans),
+            answer_rank = i
+          )
+        }),
+        group$answer
+      )
       
-      if (grp == "bias_monet"){
-        # All answers
-        tab <-  data.desc[,.(Answer = last9_if_you_could_save_50_euros_per_month_from_now_on_by_better_insulating_your_home_how_much_would_you_be_willing_to_pay_to_have_that_insulation_installed)]
+      list(
+        question_tags = list(rep(group$Q[1], 2)),
+        question_rank = group$question_rank[1],
+        answers = answers_list
+      )
+    }),
+    unique(tab.desc$Q)
+  )
+  
+  # Output JSON
+  write(toJSON(result_list, pretty = TRUE, auto_unbox = TRUE), file = paste0(dir.out,"mapping_descriptives_template.json"))
+  
+  tab.grps <- read.csv2(paste0(dir.out,"descriptives_mapping_complete.csv")) 
+  setDT(tab.grps)
+  tab.desc[tab.grps,Group := i.Group,on=c("Q" = "Question")]
+  
+  tab.desc[,N_total := sum(N,na.rm = TRUE),by=Q_org]
+  
+  for (grp in tab.desc[,unique(na.omit(Group))]){
+    
+    if (grp == "bias_monet"){
+      # All answers
+      tab <-  data.desc[,.(Answer = last9_if_you_could_save_50_euros_per_month_from_now_on_by_better_insulating_your_home_how_much_would_you_be_willing_to_pay_to_have_that_insulation_installed)]
+      
+      ggplot(tab,aes(x = Answer)) + geom_histogram(binwidth = 500, fill=grey2, col=grey3) + theme.graphs
+      ggsave(paste0(dir.out, "wtp_50_eur.pdf"),device = "pdf", units = "cm",height = height, width = width)
+      
+      tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE))]
+      
+      sink(paste0(dir.out, "wtp_50_eur_mean.tex"))
+      print(xtable::xtable(tab.mean), type = "latex")
+      sink()
+      
+      # Answers by insulation groups
+      nm.wall <- names(data.desc)[grepl("hollow_wall_insulation",names(data.desc))]
+      nm.roof <- names(data.desc)[grepl("roof_and_or_floor_insulation",names(data.desc))]
+      nm.glass <- names(data.desc)[grepl("high_efficiency_double_or_triple_glazing",names(data.desc))]
+      
+      if (length(nm.glass) == 1 & length(nm.roof) == 1 & length(nm.wall) == 1){
         
-        ggplot(tab,aes(x = Answer)) + geom_histogram(binwidth = 500, fill=grey2, col=grey3) + theme.graphs
-        ggsave(paste0(dir.out, "wtp_50_eur.pdf"),device = "pdf", units = "cm",height = height, width = width)
+        tab <-  data.desc[,.(Answer = last9_if_you_could_save_50_euros_per_month_from_now_on_by_better_insulating_your_home_how_much_would_you_be_willing_to_pay_to_have_that_insulation_installed,
+                             insu_wall  = get(nm.wall),
+                             insu_roof_floor = get(nm.roof),
+                             insu_glass = get(nm.glass))]
         
-        tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE))]
+        tab[, any_insulation := as.factor(insu_wall == "Yes" | insu_glass == "Yes" | insu_roof_floor == "Yes")]
         
-        sink(paste0(dir.out, "wtp_50_eur_mean.tex"))
+        ggplot(tab,aes(x = Answer,group = any_insulation, fill = any_insulation)) + geom_histogram(binwidth = 500, col=grey3) + theme.graphs
+        ggsave(paste0(dir.out, "wtp_50_eur_insu.pdf"),device = "pdf", units = "cm",height = height, width = width)
+        
+        
+        tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE)),by=.(any_insulation)]
+        
+        sink(paste0(dir.out, "wtp_50_eur_insu_mean.tex"))
         print(xtable::xtable(tab.mean), type = "latex")
         sink()
         
-        # Answers by insulation groups
-        nm.wall <- names(data.desc)[grepl("hollow_wall_insulation",names(data.desc))]
-        nm.roof <- names(data.desc)[grepl("roof_and_or_floor_insulation",names(data.desc))]
-        nm.glass <- names(data.desc)[grepl("high_efficiency_double_or_triple_glazing",names(data.desc))]
-        
-        if (length(nm.glass) == 1 & length(nm.roof) == 1 & length(nm.wall) == 1){
-          
-          tab <-  data.desc[,.(Answer = last9_if_you_could_save_50_euros_per_month_from_now_on_by_better_insulating_your_home_how_much_would_you_be_willing_to_pay_to_have_that_insulation_installed,
-                               insu_wall  = get(nm.wall),
-                               insu_roof_floor = get(nm.roof),
-                               insu_glass = get(nm.glass))]
-          
-          tab[, any_insulation := as.factor(insu_wall == "Yes" | insu_glass == "Yes" | insu_roof_floor == "Yes")]
-          
-          ggplot(tab,aes(x = Answer,group = any_insulation, fill = any_insulation)) + geom_histogram(binwidth = 500, col=grey3) + theme.graphs
-          ggsave(paste0(dir.out, "wtp_50_eur_insu.pdf"),device = "pdf", units = "cm",height = height, width = width)
-          
-          
-          tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE)),by=.(any_insulation)]
-          
-          sink(paste0(dir.out, "wtp_50_eur_insu_mean.tex"))
-          print(xtable::xtable(tab.mean), type = "latex")
-          sink()
-          
-        }
-        
-        
-        next
-      }
-      
-      tab <- tab.desc[Group == grp,.(Question = Q, Answer = answer, Share = sprintf("%.0f%% (%.d)", 100*N/N_total,N))]
-      tab <- tab %>% purrr::map_df(rev) %>% as.data.table()
-      #tab[, Share := gsub("%", "\\\\%", Share)]
-      
-      # Add number to positive negative scale
-      scale.list <- list(pos.neg = c("Very negative","Negative","Neutral","Positive","Very positive"),
-                         shares = c("Almost no one", "Less than a quarter","Less than half", "About half", "More than half","More than three quarters","Almost everyone")
-      )
-      for (nm in names(scale.list)){
-        tab[!is.na(match(Answer,scale.list[[nm]])),Answer := paste0(match(Answer,scale.list[[nm]])," - ",Answer)]  
       }
       
       
-      # Re order answers within each question
-      tab <- tab[, .SD[order(Answer)], by = Question]
-      
-      # Blank out repeated question values for LaTeX formatting
-      tab[, Question_display := ifelse(.I == 1 | Question != shift(Question), Question, "")]
-      
-      # Remove scale question instruction
-      tab[,Question_display := gsub("On a scale from 1 to 5, to what extent do you agree with the following statements? ","",Question_display,fixed = TRUE)]
-      
-      
-      tab.body <- tab[, .(Question = c(Question_display[1], Answer),Share = c("", Share)), by = .(Group = Question)][,-"Group"]
-      latex_body <- knitr::kable(tab.body,
-                                 format = "latex",
-                                 longtable  = TRUE,
-                                 booktabs = TRUE) %>%  kableExtra::kable_styling(latex_options = "basic")
-      latex_body <- paste0("\\scriptsize",latex_body)
-      lines <- strsplit(latex_body, "\n")[[1]]
-      lines <- lines[lines != "\\addlinespace"]
-      idx <- which(grepl("^\\ \\&",lines) & !shift(grepl("^\\ \\&",lines), type = "lead"))
-      for (i in rev(idx)){
-        lines <- append(lines, "\\addlinespace", after = i)
-      }
-      
-      writeLines(paste(lines, collapse = "\n"), paste0(dir.out,"descriptives_",grp,".tex"))
-      
+      next
     }
+    
+    tab <- tab.desc[Group == grp,.(Question = Q, Answer = answer, Share = sprintf("%.0f%% (%.d)", 100*N/N_total,N))]
+    tab <- tab %>% purrr::map_df(rev) %>% as.data.table()
+    #tab[, Share := gsub("%", "\\\\%", Share)]
+    
+    # Add number to positive negative scale
+    scale.list <- list(pos.neg = c("Very negative","Negative","Neutral","Positive","Very positive"),
+                       shares = c("Almost no one", "Less than a quarter","Less than half", "About half", "More than half","More than three quarters","Almost everyone")
+    )
+    for (nm in names(scale.list)){
+      tab[!is.na(match(Answer,scale.list[[nm]])),Answer := paste0(match(Answer,scale.list[[nm]])," - ",Answer)]  
+    }
+    
+    
+    # Re order answers within each question
+    tab <- tab[, .SD[order(Answer)], by = Question]
+    
+    # Blank out repeated question values for LaTeX formatting
+    tab[, Question_display := ifelse(.I == 1 | Question != shift(Question), Question, "")]
+    
+    # Remove scale question instruction
+    tab[,Question_display := gsub("On a scale from 1 to 5, to what extent do you agree with the following statements? ","",Question_display,fixed = TRUE)]
+    
+    
+    tab.body <- tab[, .(Question = c(Question_display[1], Answer),Share = c("", Share)), by = .(Group = Question)][,-"Group"]
+    latex_body <- knitr::kable(tab.body,
+                               format = "latex",
+                               longtable  = TRUE,
+                               booktabs = TRUE) %>%  kableExtra::kable_styling(latex_options = "basic")
+    latex_body <- paste0("\\scriptsize",latex_body)
+    lines <- strsplit(latex_body, "\n")[[1]]
+    lines <- lines[lines != "\\addlinespace"]
+    idx <- which(grepl("^\\ \\&",lines) & !shift(grepl("^\\ \\&",lines), type = "lead"))
+    for (i in rev(idx)){
+      lines <- append(lines, "\\addlinespace", after = i)
+    }
+    
+    writeLines(paste(lines, collapse = "\n"), paste0(dir.out,"descriptives_",grp,".tex"))
+    
   }
+  
   # Results ----
   
   options(modelsummary_format_numeric_latex = "plain")
@@ -284,38 +315,6 @@ for (survey.name in survey.names){
   
   dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
   
-  
-  ### WTP ----
-  invest.lvl = invest.list.lvl[["insu"]]
-  logit_wtp <- wtp_logit(logit_interact.insu,
-                         invest.lvl = invest.lvl,
-                         savings.lvl = savings.lvl,
-                         invest.name = invest.name,
-                         savings.name = savings.name,
-                         ref = ref.invest.wtp)
-  
-  rows.refs <- get_row_refs(coef_names,col.att.int,col.ref,ref.lvl)
-  
-  tab.tex <- modelsummary::modelsummary(list(Logit = logit_wtp), 
-                                        coef_map = coef_names[names(coef_names) %in% col.att.int], 
-                                        add_rows = rows.refs,
-                                        shape = term ~ statistic,
-                                        estimate = "{estimate}",
-                                        statistic = NULL,
-                                        output = "latex",
-                                        stars = FALSE)
-  
-  writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_wtp_", game, ".tex"))
-  
-  
-  ### Simulations ----
-  cf.simu <- data.table(copy(t(summary(logit_interact.insu)$coefficients)),keep.rownames = TRUE)
-  tab.simu <- simu_subsid(cf.simu,invest.lvl,ref.invest.wtp,invest.name,game,ref.lvl)
-  print(tab.simu)
-  sink(paste0(dir.out, "results_simu_", game, ".tex"))
-  print(xtable::xtable(tab.simu), type = "latex")
-  sink()
-  
   ## Tech results ----
   att.mn <- c("support","nuisance","supplier","power_outages","co2","one_time_amount","heating_costs")
   game <- "tech"
@@ -358,57 +357,14 @@ for (survey.name in survey.names){
   dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
   
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
-  for (tech in c(0,1)){
-    
-    ### WTP ----
-    
-    ref.invest.wtp = 3
-    tech.to.delete <- abs(tech-1)
-    if (tech == 0){
-      tech.name <- "heat_networks"
-    } else if (tech == 1){
-      tech.name <- "heat_pumps"
-    }
-    invest.lvl = invest.list.lvl[[tech.name]]*2
-    
-    
-    logit_wtp <- wtp_logit(logit_interact.tech,
-                           invest.lvl = invest.lvl,
-                           savings.lvl = savings.lvl,
-                           invest.name = paste0("factor\\(tech\\)",tech,"\\:",invest.name),
-                           savings.name = savings.name,
-                           ref = ref.invest.wtp)
-    
-    tech.coef.map <- tech.map[names(tech.map) %in% col.att.int]
-    rows.refs <- get_row_refs(tech.map[!grepl(paste0("factor\\(tech\\)",tech.to.delete),names(tech.map))],col.att.int = names(tech.coef.map),col.ref = col.ref[!grepl(paste0("factor\\(tech\\)",tech.to.delete),col.ref)],ref.lvl)
-    
-    coef_to_na <- names(logit_interact.tech$coefficients)[grepl(paste0("factor\\(tech\\)",tech.to.delete),names(logit_interact.tech$coefficients))]
-    
-    tab.tex <- modelsummary::modelsummary(list(Logit = logit_wtp), 
-                                          coef_map = tech.coef.map,
-                                          coef_omit = which(names(tech.coef.map) %in% coef_to_na),
-                                          add_rows = rows.refs,
-                                          shape = term ~ statistic,
-                                          estimate = "{estimate}",
-                                          statistic = NULL,
-                                          output = "latex",
-                                          stars = FALSE)
-    
-    
-    
-    writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_wtp_", game, "_",tech.name,".tex"))
-    
-    ### Simulations ----
-    cf.simu <- data.table(copy(t(summary(logit_interact.tech)$coefficients)),keep.rownames = TRUE)
-    cf.simu[,(names(cf.simu)[names(cf.simu) %in% coef_to_na]) := NULL]
-    
-    tab.simu <- simu_subsid(cf.simu,invest.lvl,ref.invest.wtp,invest.name = paste0("factor(tech)",tech,":",invest.name),game,ref.lvl)
-    print(tab.simu)
-    sink(paste0(dir.out, "results_simu_", game, "_",tech.name,".tex"))
-    print(xtable::xtable(tab.simu), type = "latex")
-    sink()
-  }
+  
+  
   print(dt.coefs)
+  
+  # Costs columns
+  reg.onetimecosts <- "(time amount)|(time costs)"
+  reg.monthcosts <- "(eating costs)"
+  reg.costs <- paste(reg.onetimecosts,reg.monthcosts,sep="|")
   
   # Step 1: Extract attribute group name (everything before the colon)
   dt.coefs[, Attribute := sub(":.*", "", Term)]
@@ -435,7 +391,7 @@ for (survey.name in survey.names){
   }
   
   dt.coefs[, CostValue := NA_real_]
-  dt.coefs[grepl("cost|heating costs", Term, ignore.case = TRUE), 
+  dt.coefs[grepl(reg.costs, Term, ignore.case = TRUE), 
            CostValue := sapply(Term, extract_cost_value)]
   
   # Step 3: Find reference CostValue per Attribute group
@@ -447,7 +403,7 @@ for (survey.name in survey.names){
   
   # Step 5: Calculate relative cost level for cost rows (excluding references)
   dt.coefs[, CostLevelRelative := NA_real_]
-  dt.coefs[grepl("cost|heating costs", Term, ignore.case = TRUE), 
+  dt.coefs[grepl(reg.costs, Term, ignore.case = TRUE), 
            CostLevelRelative := CostValue - ReferenceCost]
   
   dt.coefs[,(c("CostLevel","CostValue","ReferenceCost")) := NULL]
@@ -455,13 +411,14 @@ for (survey.name in survey.names){
   dt.coefs <- dt.coefs[order(game,grepl("cost",Attribute),Attribute),]
   
   # IRR ----
-  dt.coefs[grepl("eating costs",Term),unit := 10]
-  dt.coefs[grepl("time cost",Term),unit := 1000]
+  
+  dt.coefs[grepl(reg.onetimecosts,Term),unit := 1000]
+  dt.coefs[grepl(reg.monthcosts,Term),unit := 10]
   
   
   dt.coefs[,value_money := unit*Estimate/CostLevelRelative]
   
-  dt.irr.tp <- dt.coefs[grepl("(time cost)|(eating costs)",Term),.(unit = unique(unit),median_utility = median(value_money, na.rm = TRUE)),by=.(cost_month = grepl("eating costs",Term))]
+  dt.irr.tp <- dt.coefs[grepl(reg.costs,Term),.(unit = unique(unit),median_utility = median(value_money, na.rm = TRUE)),by=.(cost_month = grepl(reg.monthcosts,Term))]
   dt.irr.tp[,(paste0(irr.years," years")) := lapply(irr.years,
                                                     \(x) irr(unit[cost_month == FALSE]*median_utility[cost_month == TRUE]/median_utility[cost_month == FALSE],
                                                              unit[cost_month == TRUE]*12,
@@ -469,7 +426,7 @@ for (survey.name in survey.names){
                                                     )),]
   dt.irr.tp[,game := "all"]
   
-  dt.irr.tp.mdl <- dt.coefs[grepl("(time cost)|(eating costs)",Term),.(unit = unique(unit),median_utility = median(value_money, na.rm = TRUE)),by=.(game,netwrk = grepl("Heat network",Attribute),cost_month = grepl("eating costs",Term))]
+  dt.irr.tp.mdl <- dt.coefs[grepl(reg.costs,Term),.(unit = unique(unit),median_utility = median(value_money, na.rm = TRUE)),by=.(game,netwrk = grepl("Heat network",Attribute),cost_month = grepl(reg.monthcosts,Term))]
   
   dt.irr.tp.mdl[,(paste0(irr.years," years")) := lapply(irr.years,
                                                         \(x) irr(unit[cost_month == FALSE]*median_utility[cost_month == TRUE]/median_utility[cost_month == FALSE],

@@ -71,19 +71,21 @@
         "attributes": {
             "Will there be any nuisance in the dwelling due to home improvements?": [
                 "Will there be any nuisance in the dwelling due to home improvements?",
-                "NAME_2"
+                "How long will there be nuisance due to work in my house?"
             ]
         },
         "levels": {
             "3 days noise and nuisance due to works in the dwelling.": {
                 "tags": [
-                    " 3 days noise and nuisance due to works in the dwelling."
+                    " 3 days noise and nuisance due to works in the dwelling.",
+                    " Three working days."
                 ],
                 "rank": 2
             },
             "1 day noise and nuisance due to works in the dwelling.": {
                 "tags": [
-                    " 1 day noise and nuisance due to works in the dwelling."
+                    " 1 day noise and nuisance due to works in the dwelling.",
+                    " Half a working day."
                 ],
                 "rank": 1
             },
@@ -95,7 +97,8 @@
             },
             "6 days noise and nuisance due to works in the dwelling.": {
                 "tags": [
-                    " 6 days noise and nuisance due to works in the dwelling."
+                    " 6 days noise and nuisance due to works in the dwelling.",
+                    " Six working days." 
                 ],
                 "rank": 3
             }
@@ -133,7 +136,7 @@
         "attributes": {
             "What is the one-time amount I have to pay, after correcting for available subsidies?": [
                 "What is the one-time amount I have to pay, after correcting for available subsidies?",
-                "NAME_2"
+                "What is my one-time cost, including the subsidy?"
             ]
         },
         "levels": {
@@ -167,7 +170,7 @@
         "attributes": {
             "What are my heating costs per month?": [
                 "What are my heating costs per month?",
-                "NAME_2"
+                "How much will my heating costs be per month?"
             ]
         },
         "levels": {

@@ -17,38 +17,29 @@ add_scriptsize <- function(tab, insert_after_pattern) {
 
 get_json_mapping_4_coefs <- function(game,col.att.int){
   # Function to replace number with label
-  mapping <- jsonlite::read_json(paste0(directory_path,"mapping_",game,"_complete.json"))
-  
-  if (game == "tech"){
-    cols.costs <- names(mapping)[grepl("cost|amount",names(mapping))]
-    for (cl in cols.costs){
-      lvls <- names(mapping[[cl]])
-      
-      for (lvl.tech in c(0,1)){
-        if (any(grepl(paste0("tech",lvl.tech),lvls))){
-          new.nm <- mapping[[cl]][grepl(paste0("tech",lvl.tech),lvls)]
-          names(new.nm) <- gsub(paste0("tech",lvl.tech," "),"",names(new.nm))
-          mapping[[paste0("factor(tech)",lvl.tech,":",cl)]] = new.nm
-        } 
-      }
-      mapping[[cl]] <- NULL
-    }
-  }
+  fljson <- paste0("input/attributes_levels_mapping/mapping_",game,".json")
+  mapping <- jsonlite::read_json(fljson)
   
   # Reverse the mapping: integer -> label
-  reverse_mapping <- lapply(mapping, function(x) {
-    setNames(names(x), as.character(x))  # flip keys and values
-  })
+  reverse_mapping <- lapply(names(mapping),\(x) setNames(list("a" = sapply(mapping[[x]]$levels,\(y) y$rank)),x))
+  reverse_mapping <- do.call(c, reverse_mapping)
   
   rename_col <- function(colname) {
     parts <- strsplit(colname, "_")[[1]]
     base <- paste(parts[-length(parts)], collapse = "_")
-    code <- parts[[length(parts)]]
-    if (!is.null(reverse_mapping[[base]]) && code %in% names(reverse_mapping[[base]])) {
-      label <- reverse_mapping[[base]][[code]]
-      label.sentence <- stringr::str_to_sentence(paste0(gsub("_"," ",base), ": ", label))
-      label.sentence <- gsub("Factor(tech)0:","Heat network ",label.sentence,fixed = TRUE)
-      label.sentence <- gsub("Factor(tech)1:","Heat pump ",label.sentence,fixed = TRUE)
+    tech = as.integer(gsub("factor\\(tech\\)([0-9]).*","\\1",base))
+    base <- gsub("factor\\(tech\\)[0-9]\\:","",base)
+    code <- as.integer(parts[[length(parts)]])
+    if (!is.null(reverse_mapping[[base]]) && code %in% reverse_mapping[[base]]) {
+      label <- names(reverse_mapping[[base]][which(reverse_mapping[[base]] == code)])
+      if (!is.na(tech) & (tech %in% c(0,1))){
+        label <- label[grepl(paste0("tech",tech),label)]
+        label <- gsub(paste0("tech",tech," "),"",label)
+        label.sentence <- stringr::str_to_sentence(paste0(if_else(tech == 1,"Heat pump ","Heat network "),gsub("_"," ",base), ": ", label))
+      } else {
+        label.sentence <- stringr::str_to_sentence(paste0(gsub("_"," ",base), ": ", label))
+      }
+      
       return(label.sentence)
     }
     return(colname)
@@ -74,9 +65,11 @@ wtp_logit <- function(logit_interact,invest.lvl,savings.lvl,invest.name = "one_t
   return(logit_wtp)
 }
 
-irr <- function(cst,cf,yrs) {if (cst <=0 | cf <=0) return(NA);
+irr <- function(cst,cf,yrs) {
+  if (is.null(cst) | is.null(cf)) return(NA);
+  if (cst <=0 | cf <=0) return(NA);
   q <- unlist(mapply(\(cf.var) uniroot(\(x) cf.var*x*(1-x**yrs)/(1-x)-cst,c(0,1000),extendInt = "yes",maxiter = 1e9)$root,cf),use.names = FALSE); return(1/q-1)  
-  } 
+} 
 
 aar <- function(cst,cf,yrs) {if (cst <=0 | cf <=0) return(NA);
   q = ((yrs*cf)/cst)^(1/yrs)-1; return(q)
@@ -98,7 +91,7 @@ get_row_refs <- function(coef_names,col.att.int,col.ref,ref.lvl,stats.table = NA
 }
 
 simu_subsid <- function(cf.simu,invest.lvl,ref.invest.wtp,invest.name,game,ref.lvl){
-
+  
   # 2 packages: insu good and none
   pack <- data.table(level = c("package",names(cf.simu)))
   
@@ -238,15 +231,27 @@ merge_choices_and_situations <- function(data,game,str_question,n.att,n.choices,
   nb.mtch <- sapply(new_names,\(x) length(x))
   if (any(nb.mtch != 1)){
     stop(sprintf(
-      "Attributes level mapping failed for %s.\n\t Not found: %s\n\t Duplicates: %s.",
+      "Attributes level mapping failed for %s.\n\t Please update %s.\n\t Details: \n\t Not found:%s\n\t Duplicates: %s.",
       game,
-      paste(names(nb.mtch[nb.mtch == 0]), collapse = "; "),
-      paste(names(nb.mtch[nb.mtch > 1]), collapse = "; ")
+      fljson,
+      paste(names(nb.mtch[nb.mtch == 0]), collapse = ";"),
+      paste(names(nb.mtch[nb.mtch > 1]), collapse = ";")
     ))
   }
   new_names <- unlist(new_names,use.names = TRUE)
-  setnames(dt.situ,new = new_names,old = names(new_names))
-
+  
+  # Merge duplicates
+  for (nmdup  in which(duplicated(new_names))){
+    col_ref <- names(new_names[head(which(new_names == new_names[nmdup]),1)])
+    for (col_dup in names(new_names[nmdup])){
+      if(dt.situ[,any(!is.na(get(col_ref)) & !is.na(get(col_dup)))]) stop("Merged columns should not overlap")
+      dt.situ[,(col_ref) := fcoalesce(get(col_ref), get(col_dup))]
+      dt.situ[,(col_dup) := NULL]
+    }
+  }
+  
+  setnames(dt.situ,new = new_names,old = names(new_names), skip_absent=TRUE)
+  
   
   # If tech, merge monetary levels and then interact in model
   if (game == "tech") {
@@ -272,11 +277,14 @@ merge_choices_and_situations <- function(data,game,str_question,n.att,n.choices,
     }
   }
   
+  # Remove duplicated choices (happens when two surveys, with identical packages but different names, are merged)
+  dt.situ <- dt.situ[!duplicated(dt.situ),]
   
+  if (any(dt.situ[,.N != 1,by = c("id_question","package")][,V1])) stop("Different attributes-levels for the same package not allowed")
   
   dt.choice <- data_to_choices(choice.str)
   
-
+  
   dt.ce <- merge.data.table(dt.choice,dt.situ,by = cst$id_q,all = TRUE,allow.cartesian=TRUE) 
   dt.ce <- dt.ce[!is.na(id_respondent)] # Delete questions not asked
   dt.ce[, choice := ifelse(gsub(" ","",choice) == gsub(" ","",package), 1, 0)]

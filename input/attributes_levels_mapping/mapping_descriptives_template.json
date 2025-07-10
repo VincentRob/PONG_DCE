@@ -1,0 +1,2564 @@
+{
+  "1": {
+    "question_tags": [
+      ["", ""]
+    ],
+    "question_rank": 1,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "I agree and want to participate": {
+        "answer_tags": [
+          "I agree and want to participate"
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " What sustainability improvements have you already made?": {
+    "question_tags": [
+      [" What sustainability improvements have you already made?", " What sustainability improvements have you already made?"]
+    ],
+    "question_rank": 2,
+    "answers": {
+      "None of these - NA": {
+        "answer_tags": [
+          "None of these - NA"
+        ],
+        "answer_rank": 1
+      },
+      "None of these - No": {
+        "answer_tags": [
+          "None of these - No"
+        ],
+        "answer_rank": 2
+      },
+      "None of these - Yes": {
+        "answer_tags": [
+          "None of these - Yes"
+        ],
+        "answer_rank": 3
+      },
+      "Air-source or ground-source heat pump - NA": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - NA"
+        ],
+        "answer_rank": 4
+      },
+      "Air-source or ground-source heat pump - No": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - No"
+        ],
+        "answer_rank": 5
+      },
+      "Air-source or ground-source heat pump - Yes": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - Yes"
+        ],
+        "answer_rank": 6
+      },
+      "Hybrid heat pump - NA": {
+        "answer_tags": [
+          "Hybrid heat pump - NA"
+        ],
+        "answer_rank": 7
+      },
+      "Hybrid heat pump - No": {
+        "answer_tags": [
+          "Hybrid heat pump - No"
+        ],
+        "answer_rank": 8
+      },
+      "Hybrid heat pump - Yes": {
+        "answer_tags": [
+          "Hybrid heat pump - Yes"
+        ],
+        "answer_rank": 9
+      },
+      "High-efficiency, double or triple glazing - NA": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - NA"
+        ],
+        "answer_rank": 10
+      },
+      "High-efficiency, double or triple glazing - No": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - No"
+        ],
+        "answer_rank": 11
+      },
+      "High-efficiency, double or triple glazing - Yes": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - Yes"
+        ],
+        "answer_rank": 12
+      },
+      "Additional insulation - NA": {
+        "answer_tags": [
+          "Additional insulation - NA"
+        ],
+        "answer_rank": 13
+      },
+      "Additional insulation - No": {
+        "answer_tags": [
+          "Additional insulation - No"
+        ],
+        "answer_rank": 14
+      },
+      "Additional insulation - Yes": {
+        "answer_tags": [
+          "Additional insulation - Yes"
+        ],
+        "answer_rank": 15
+      },
+      "Roof and/or floor insulation - NA": {
+        "answer_tags": [
+          "Roof and/or floor insulation - NA"
+        ],
+        "answer_rank": 16
+      },
+      "Roof and/or floor insulation - No": {
+        "answer_tags": [
+          "Roof and/or floor insulation - No"
+        ],
+        "answer_rank": 17
+      },
+      "Roof and/or floor insulation - Yes": {
+        "answer_tags": [
+          "Roof and/or floor insulation - Yes"
+        ],
+        "answer_rank": 18
+      },
+      "Hollow wall insulation - NA": {
+        "answer_tags": [
+          "Hollow wall insulation - NA"
+        ],
+        "answer_rank": 19
+      },
+      "Hollow wall insulation - Yes": {
+        "answer_tags": [
+          "Hollow wall insulation - Yes"
+        ],
+        "answer_rank": 20
+      },
+      "Hollow wall insulation - No": {
+        "answer_tags": [
+          "Hollow wall insulation - No"
+        ],
+        "answer_rank": 21
+      },
+      "None of these - NA.1": {
+        "answer_tags": [
+          "None of these - NA"
+        ],
+        "answer_rank": 22
+      },
+      "None of these - No.1": {
+        "answer_tags": [
+          "None of these - No"
+        ],
+        "answer_rank": 23
+      },
+      "None of these - Yes.1": {
+        "answer_tags": [
+          "None of these - Yes"
+        ],
+        "answer_rank": 24
+      },
+      "Air-source or ground-source heat pump - NA.1": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - NA"
+        ],
+        "answer_rank": 25
+      },
+      "Air-source or ground-source heat pump - No.1": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - No"
+        ],
+        "answer_rank": 26
+      },
+      "Air-source or ground-source heat pump - Yes.1": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - Yes"
+        ],
+        "answer_rank": 27
+      },
+      "Hybrid heat pump - NA.1": {
+        "answer_tags": [
+          "Hybrid heat pump - NA"
+        ],
+        "answer_rank": 28
+      },
+      "Hybrid heat pump - No.1": {
+        "answer_tags": [
+          "Hybrid heat pump - No"
+        ],
+        "answer_rank": 29
+      },
+      "Hybrid heat pump - Yes.1": {
+        "answer_tags": [
+          "Hybrid heat pump - Yes"
+        ],
+        "answer_rank": 30
+      },
+      "High-efficiency, double or triple glazing - NA.1": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - NA"
+        ],
+        "answer_rank": 31
+      },
+      "High-efficiency, double or triple glazing - Yes.1": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - Yes"
+        ],
+        "answer_rank": 32
+      },
+      "High-efficiency, double or triple glazing - No.1": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - No"
+        ],
+        "answer_rank": 33
+      },
+      "Additional insulation - NA.1": {
+        "answer_tags": [
+          "Additional insulation - NA"
+        ],
+        "answer_rank": 34
+      },
+      "Additional insulation - No.1": {
+        "answer_tags": [
+          "Additional insulation - No"
+        ],
+        "answer_rank": 35
+      },
+      "Additional insulation - Yes.1": {
+        "answer_tags": [
+          "Additional insulation - Yes"
+        ],
+        "answer_rank": 36
+      },
+      "Roof and/or floor insulation - NA.1": {
+        "answer_tags": [
+          "Roof and/or floor insulation - NA"
+        ],
+        "answer_rank": 37
+      },
+      "Roof and/or floor insulation - No.1": {
+        "answer_tags": [
+          "Roof and/or floor insulation - No"
+        ],
+        "answer_rank": 38
+      },
+      "Roof and/or floor insulation - Yes.1": {
+        "answer_tags": [
+          "Roof and/or floor insulation - Yes"
+        ],
+        "answer_rank": 39
+      },
+      "Hollow wall insulation - NA.1": {
+        "answer_tags": [
+          "Hollow wall insulation - NA"
+        ],
+        "answer_rank": 40
+      },
+      "Hollow wall insulation - No.1": {
+        "answer_tags": [
+          "Hollow wall insulation - No"
+        ],
+        "answer_rank": 41
+      },
+      "Hollow wall insulation - Yes.1": {
+        "answer_tags": [
+          "Hollow wall insulation - Yes"
+        ],
+        "answer_rank": 42
+      },
+      "None of these - No.2": {
+        "answer_tags": [
+          "None of these - No"
+        ],
+        "answer_rank": 43
+      },
+      "None of these - NA.2": {
+        "answer_tags": [
+          "None of these - NA"
+        ],
+        "answer_rank": 44
+      },
+      "Air-source or ground-source heat pump - No.2": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - No"
+        ],
+        "answer_rank": 45
+      },
+      "Air-source or ground-source heat pump - Yes.2": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - Yes"
+        ],
+        "answer_rank": 46
+      },
+      "Air-source or ground-source heat pump - NA.2": {
+        "answer_tags": [
+          "Air-source or ground-source heat pump - NA"
+        ],
+        "answer_rank": 47
+      },
+      "Hybrid heat pump - No.2": {
+        "answer_tags": [
+          "Hybrid heat pump - No"
+        ],
+        "answer_rank": 48
+      },
+      "Hybrid heat pump - NA.2": {
+        "answer_tags": [
+          "Hybrid heat pump - NA"
+        ],
+        "answer_rank": 49
+      },
+      "High-efficiency, double or triple glazing - No.2": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - No"
+        ],
+        "answer_rank": 50
+      },
+      "High-efficiency, double or triple glazing - Yes.2": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - Yes"
+        ],
+        "answer_rank": 51
+      },
+      "High-efficiency, double or triple glazing - NA.2": {
+        "answer_tags": [
+          "High-efficiency, double or triple glazing - NA"
+        ],
+        "answer_rank": 52
+      },
+      "Additional insulation - No.2": {
+        "answer_tags": [
+          "Additional insulation - No"
+        ],
+        "answer_rank": 53
+      },
+      "Additional insulation - NA.2": {
+        "answer_tags": [
+          "Additional insulation - NA"
+        ],
+        "answer_rank": 54
+      },
+      "Roof and/or floor insulation - No.2": {
+        "answer_tags": [
+          "Roof and/or floor insulation - No"
+        ],
+        "answer_rank": 55
+      },
+      "Roof and/or floor insulation - NA.2": {
+        "answer_tags": [
+          "Roof and/or floor insulation - NA"
+        ],
+        "answer_rank": 56
+      },
+      "Hollow wall insulation - No.2": {
+        "answer_tags": [
+          "Hollow wall insulation - No"
+        ],
+        "answer_rank": 57
+      },
+      "Hollow wall insulation - Yes.2": {
+        "answer_tags": [
+          "Hollow wall insulation - Yes"
+        ],
+        "answer_rank": 58
+      },
+      "Hollow wall insulation - NA.2": {
+        "answer_tags": [
+          "Hollow wall insulation - NA"
+        ],
+        "answer_rank": 59
+      }
+    }
+  },
+  " Referrer URL": {
+    "question_tags": [
+      [" Referrer URL", " Referrer URL"]
+    ],
+    "question_rank": 3,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "android-app://com.google.android.googlequicksearchbox/": {
+        "answer_tags": [
+          "android-app://com.google.android.googlequicksearchbox/"
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " In your opinion, how many people are positive about phasing out natural gas?": {
+    "question_tags": [
+      [" In your opinion, how many people are positive about phasing out natural gas?", " In your opinion, how many people are positive about phasing out natural gas?"]
+    ],
+    "question_rank": 4,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "Less than half": {
+        "answer_tags": [
+          "Less than half"
+        ],
+        "answer_rank": 2
+      },
+      "Less than a quarter": {
+        "answer_tags": [
+          "Less than a quarter"
+        ],
+        "answer_rank": 3
+      },
+      "More than three quarters": {
+        "answer_tags": [
+          "More than three quarters"
+        ],
+        "answer_rank": 4
+      },
+      "About half": {
+        "answer_tags": [
+          "About half"
+        ],
+        "answer_rank": 5
+      },
+      "Almost everyone": {
+        "answer_tags": [
+          "Almost everyone"
+        ],
+        "answer_rank": 6
+      },
+      "More than half": {
+        "answer_tags": [
+          "More than half"
+        ],
+        "answer_rank": 7
+      },
+      "Almost no one": {
+        "answer_tags": [
+          "Almost no one"
+        ],
+        "answer_rank": 8
+      }
+    }
+  },
+  " What is your opinion on heat pumps after having heard everything?": {
+    "question_tags": [
+      [" What is your opinion on heat pumps after having heard everything?", " What is your opinion on heat pumps after having heard everything?"]
+    ],
+    "question_rank": 5,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "Positive": {
+        "answer_tags": [
+          "Positive"
+        ],
+        "answer_rank": 2
+      },
+      "Very positive": {
+        "answer_tags": [
+          "Very positive"
+        ],
+        "answer_rank": 3
+      },
+      "Neutral": {
+        "answer_tags": [
+          "Neutral"
+        ],
+        "answer_rank": 4
+      },
+      "Negative": {
+        "answer_tags": [
+          "Negative"
+        ],
+        "answer_rank": 5
+      },
+      "Very negative": {
+        "answer_tags": [
+          "Very negative"
+        ],
+        "answer_rank": 6
+      }
+    }
+  },
+  " What is your opinion on district heating after having heard everything?": {
+    "question_tags": [
+      [" What is your opinion on district heating after having heard everything?", " What is your opinion on district heating after having heard everything?"]
+    ],
+    "question_rank": 6,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "Neutral": {
+        "answer_tags": [
+          "Neutral"
+        ],
+        "answer_rank": 2
+      },
+      "Very negative": {
+        "answer_tags": [
+          "Very negative"
+        ],
+        "answer_rank": 3
+      },
+      "Positive": {
+        "answer_tags": [
+          "Positive"
+        ],
+        "answer_rank": 4
+      },
+      "Negative": {
+        "answer_tags": [
+          "Negative"
+        ],
+        "answer_rank": 5
+      },
+      "Very positive": {
+        "answer_tags": [
+          "Very positive"
+        ],
+        "answer_rank": 6
+      }
+    }
+  },
+  " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?": {
+    "question_tags": [
+      [" Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?", " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?"]
+    ],
+    "question_rank": 7,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "Yes about heat pump": {
+        "answer_tags": [
+          "Yes about heat pump"
+        ],
+        "answer_rank": 2
+      },
+      "Yes about both": {
+        "answer_tags": [
+          "Yes about both"
+        ],
+        "answer_rank": 3
+      },
+      "No": {
+        "answer_tags": [
+          "No"
+        ],
+        "answer_rank": 4
+      },
+      "Yes about heat network": {
+        "answer_tags": [
+          "Yes about heat network"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " If I switch away from natural gas, i would appreciate the following:": {
+    "question_tags": [
+      [" If I switch away from natural gas, i would appreciate the following:", " If I switch away from natural gas, i would appreciate the following:"]
+    ],
+    "question_rank": 8,
+    "answers": {
+      "Other - NA": {
+        "answer_tags": [
+          "Other - NA"
+        ],
+        "answer_rank": 1
+      },
+      "Other - Juridische bijstand": {
+        "answer_tags": [
+          "Other - Juridische bijstand"
+        ],
+        "answer_rank": 2
+      },
+      "Other - dat de gemeente een bindend referendum organiseert of burgers überhaupt af willen stappen van aardgas": {
+        "answer_tags": [
+          "Other - dat de gemeente een bindend referendum organiseert of burgers überhaupt af willen stappen van aardgas"
+        ],
+        "answer_rank": 3
+      },
+      "Other - Nier van het gas af": {
+        "answer_tags": [
+          "Other - Nier van het gas af"
+        ],
+        "answer_rank": 4
+      },
+      "Other - zelf de keus te mogen maken of ik dat doe.": {
+        "answer_tags": [
+          "Other - zelf de keus te mogen maken of ik dat doe."
+        ],
+        "answer_rank": 5
+      },
+      "Other - Ik wil graag dat de gemeente het regelt en dat ik er niets aan hoef te doen": {
+        "answer_tags": [
+          "Other - Ik wil graag dat de gemeente het regelt en dat ik er niets aan hoef te doen"
+        ],
+        "answer_rank": 6
+      },
+      "Other - Niet afhankelijk te zijn van de gemeente, overheid en bedrijven maar zelfvoorzienende zijn en zo minder afhankelijk te zijn van de mensen die er niks van snappen": {
+        "answer_tags": [
+          "Other - Niet afhankelijk te zijn van de gemeente, overheid en bedrijven maar zelfvoorzienende zijn en zo minder afhankelijk te zijn van de mensen die er niks van snappen"
+        ],
+        "answer_rank": 7
+      },
+      "Other - Heb bodemwarmtepomp/1j Transitievisie Warmte Hoorn was nuttig bij het maken van de keuze": {
+        "answer_tags": [
+          "Other - Heb bodemwarmtepomp/1j Transitievisie Warmte Hoorn was nuttig bij het maken van de keuze"
+        ],
+        "answer_rank": 8
+      },
+      "Other - Kostenneutraal": {
+        "answer_tags": [
+          "Other - Kostenneutraal"
+        ],
+        "answer_rank": 9
+      },
+      "Other - ZO min mogelijk bij te betalen": {
+        "answer_tags": [
+          "Other - ZO min mogelijk bij te betalen"
+        ],
+        "answer_rank": 10
+      },
+      "Other - Wij willen niet van het gas af.": {
+        "answer_tags": [
+          "Other - Wij willen niet van het gas af."
+        ],
+        "answer_rank": 11
+      },
+      "Other - Ook advies te krijgen over de mogelijkheden voor een hete lucht verwarmingssysteem": {
+        "answer_tags": [
+          "Other - Ook advies te krijgen over de mogelijkheden voor een hete lucht verwarmingssysteem"
+        ],
+        "answer_rank": 12
+      },
+      "Other - Dan verhuis ik nog liever": {
+        "answer_tags": [
+          "Other - Dan verhuis ik nog liever"
+        ],
+        "answer_rank": 13
+      },
+      "Other - Wil helemaal niet van af": {
+        "answer_tags": [
+          "Other - Wil helemaal niet van af"
+        ],
+        "answer_rank": 14
+      },
+      "Other - Zelf over keuzes kunnen beschikken en zelf prijzen bekijken": {
+        "answer_tags": [
+          "Other - Zelf over keuzes kunnen beschikken en zelf prijzen bekijken"
+        ],
+        "answer_rank": 15
+      },
+      "Receiving financial support, such as a subsidy or low-interest loan - NA": {
+        "answer_tags": [
+          "Receiving financial support, such as a subsidy or low-interest loan - NA"
+        ],
+        "answer_rank": 16
+      },
+      "Receiving financial support, such as a subsidy or low-interest loan - Yes": {
+        "answer_tags": [
+          "Receiving financial support, such as a subsidy or low-interest loan - Yes"
+        ],
+        "answer_rank": 17
+      },
+      "Receiving financial support, such as a subsidy or low-interest loan - No": {
+        "answer_tags": [
+          "Receiving financial support, such as a subsidy or low-interest loan - No"
+        ],
+        "answer_rank": 18
+      },
+      "Receiving independent information about the costs and benefits - NA": {
+        "answer_tags": [
+          "Receiving independent information about the costs and benefits - NA"
+        ],
+        "answer_rank": 19
+      },
+      "Receiving independent information about the costs and benefits - Yes": {
+        "answer_tags": [
+          "Receiving independent information about the costs and benefits - Yes"
+        ],
+        "answer_rank": 20
+      },
+      "Receiving independent information about the costs and benefits - No": {
+        "answer_tags": [
+          "Receiving independent information about the costs and benefits - No"
+        ],
+        "answer_rank": 21
+      },
+      "Getting help selecting a contractor and evaluating the quotes - NA": {
+        "answer_tags": [
+          "Getting help selecting a contractor and evaluating the quotes - NA"
+        ],
+        "answer_rank": 22
+      },
+      "Getting help selecting a contractor and evaluating the quotes - No": {
+        "answer_tags": [
+          "Getting help selecting a contractor and evaluating the quotes - No"
+        ],
+        "answer_rank": 23
+      },
+      "Getting help selecting a contractor and evaluating the quotes - Yes": {
+        "answer_tags": [
+          "Getting help selecting a contractor and evaluating the quotes - Yes"
+        ],
+        "answer_rank": 24
+      },
+      "Receiving tailored advice from an expert: what is technically needed in my home? - NA": {
+        "answer_tags": [
+          "Receiving tailored advice from an expert: what is technically needed in my home? - NA"
+        ],
+        "answer_rank": 25
+      },
+      "Receiving tailored advice from an expert: what is technically needed in my home? - Yes": {
+        "answer_tags": [
+          "Receiving tailored advice from an expert: what is technically needed in my home? - Yes"
+        ],
+        "answer_rank": 26
+      },
+      "Receiving tailored advice from an expert: what is technically needed in my home? - No": {
+        "answer_tags": [
+          "Receiving tailored advice from an expert: what is technically needed in my home? - No"
+        ],
+        "answer_rank": 27
+      },
+      "Having a conversation in advance with an energy coach about experiences, for example from the municipality - NA": {
+        "answer_tags": [
+          "Having a conversation in advance with an energy coach about experiences, for example from the municipality - NA"
+        ],
+        "answer_rank": 28
+      },
+      "Having a conversation in advance with an energy coach about experiences, for example from the municipality - No": {
+        "answer_tags": [
+          "Having a conversation in advance with an energy coach about experiences, for example from the municipality - No"
+        ],
+        "answer_rank": 29
+      },
+      "Having a conversation in advance with an energy coach about experiences, for example from the municipality - Yes": {
+        "answer_tags": [
+          "Having a conversation in advance with an energy coach about experiences, for example from the municipality - Yes"
+        ],
+        "answer_rank": 30
+      }
+    }
+  },
+  " What is your energy supplier?": {
+    "question_tags": [
+      [" What is your energy supplier?", " What is your energy supplier?"]
+    ],
+    "question_rank": 9,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "Vattenfall": {
+        "answer_tags": [
+          "Vattenfall"
+        ],
+        "answer_rank": 2
+      },
+      "budgetenergie": {
+        "answer_tags": [
+          "budgetenergie"
+        ],
+        "answer_rank": 3
+      },
+      "Essent": {
+        "answer_tags": [
+          "Essent"
+        ],
+        "answer_rank": 4
+      },
+      "Gezinsenergie": {
+        "answer_tags": [
+          "Gezinsenergie"
+        ],
+        "answer_rank": 5
+      },
+      "Budget energie": {
+        "answer_tags": [
+          "Budget energie"
+        ],
+        "answer_rank": 6
+      },
+      "delta": {
+        "answer_tags": [
+          "delta"
+        ],
+        "answer_rank": 7
+      },
+      "eneco": {
+        "answer_tags": [
+          "eneco"
+        ],
+        "answer_rank": 8
+      },
+      "Eneco": {
+        "answer_tags": [
+          "Eneco"
+        ],
+        "answer_rank": 9
+      },
+      "Greenchoice": {
+        "answer_tags": [
+          "Greenchoice"
+        ],
+        "answer_rank": 10
+      },
+      "Budget Energie": {
+        "answer_tags": [
+          "Budget Energie"
+        ],
+        "answer_rank": 11
+      },
+      "Innova": {
+        "answer_tags": [
+          "Innova"
+        ],
+        "answer_rank": 12
+      },
+      "Delta": {
+        "answer_tags": [
+          "Delta"
+        ],
+        "answer_rank": 13
+      },
+      "Zonneplan": {
+        "answer_tags": [
+          "Zonneplan"
+        ],
+        "answer_rank": 14
+      },
+      "Vattenval": {
+        "answer_tags": [
+          "Vattenval"
+        ],
+        "answer_rank": 15
+      },
+      "BudgetEnergie": {
+        "answer_tags": [
+          "BudgetEnergie"
+        ],
+        "answer_rank": 16
+      },
+      "Pure energie": {
+        "answer_tags": [
+          "Pure energie"
+        ],
+        "answer_rank": 17
+      },
+      "Oxxio": {
+        "answer_tags": [
+          "Oxxio"
+        ],
+        "answer_rank": 18
+      },
+      "Frank Energie": {
+        "answer_tags": [
+          "Frank Energie"
+        ],
+        "answer_rank": 19
+      },
+      "Van de bron": {
+        "answer_tags": [
+          "Van de bron"
+        ],
+        "answer_rank": 20
+      },
+      "Vattenvall": {
+        "answer_tags": [
+          "Vattenvall"
+        ],
+        "answer_rank": 21
+      },
+      "Enexis": {
+        "answer_tags": [
+          "Enexis"
+        ],
+        "answer_rank": 22
+      },
+      "ENECO": {
+        "answer_tags": [
+          "ENECO"
+        ],
+        "answer_rank": 23
+      },
+      "budget energie": {
+        "answer_tags": [
+          "budget energie"
+        ],
+        "answer_rank": 24
+      },
+      "Vattenfal": {
+        "answer_tags": [
+          "Vattenfal"
+        ],
+        "answer_rank": 25
+      },
+      "essent": {
+        "answer_tags": [
+          "essent"
+        ],
+        "answer_rank": 26
+      },
+      "Vandebron": {
+        "answer_tags": [
+          "Vandebron"
+        ],
+        "answer_rank": 27
+      },
+      "GreenChoice": {
+        "answer_tags": [
+          "GreenChoice"
+        ],
+        "answer_rank": 28
+      },
+      "nvt": {
+        "answer_tags": [
+          "nvt"
+        ],
+        "answer_rank": 29
+      },
+      "Green Choice": {
+        "answer_tags": [
+          "Green Choice"
+        ],
+        "answer_rank": 30
+      },
+      "Tibber": {
+        "answer_tags": [
+          "Tibber"
+        ],
+        "answer_rank": 31
+      },
+      "Budget": {
+        "answer_tags": [
+          "Budget"
+        ],
+        "answer_rank": 32
+      },
+      "Energiedirect": {
+        "answer_tags": [
+          "Energiedirect"
+        ],
+        "answer_rank": 33
+      },
+      "UnitedCostumers": {
+        "answer_tags": [
+          "UnitedCostumers"
+        ],
+        "answer_rank": 34
+      },
+      "Anwb": {
+        "answer_tags": [
+          "Anwb"
+        ],
+        "answer_rank": 35
+      },
+      "Engie": {
+        "answer_tags": [
+          "Engie"
+        ],
+        "answer_rank": 36
+      },
+      "-": {
+        "answer_tags": [
+          "-"
+        ],
+        "answer_rank": 37
+      },
+      "Fattenvall": {
+        "answer_tags": [
+          "Fattenvall"
+        ],
+        "answer_rank": 38
+      },
+      "vattenfall": {
+        "answer_tags": [
+          "vattenfall"
+        ],
+        "answer_rank": 39
+      },
+      "Energie direct": {
+        "answer_tags": [
+          "Energie direct"
+        ],
+        "answer_rank": 40
+      },
+      "Van de Bron": {
+        "answer_tags": [
+          "Van de Bron"
+        ],
+        "answer_rank": 41
+      },
+      "oxxio": {
+        "answer_tags": [
+          "oxxio"
+        ],
+        "answer_rank": 42
+      },
+      "vandebron": {
+        "answer_tags": [
+          "vandebron"
+        ],
+        "answer_rank": 43
+      },
+      "United Consumers": {
+        "answer_tags": [
+          "United Consumers"
+        ],
+        "answer_rank": 44
+      },
+      "ANWB": {
+        "answer_tags": [
+          "ANWB"
+        ],
+        "answer_rank": 45
+      },
+      "onbekend": {
+        "answer_tags": [
+          "onbekend"
+        ],
+        "answer_rank": 46
+      },
+      "Om": {
+        "answer_tags": [
+          "Om"
+        ],
+        "answer_rank": 47
+      },
+      "Nuon": {
+        "answer_tags": [
+          "Nuon"
+        ],
+        "answer_rank": 48
+      },
+      "Quatt Energie": {
+        "answer_tags": [
+          "Quatt Energie"
+        ],
+        "answer_rank": 49
+      },
+      "mega": {
+        "answer_tags": [
+          "mega"
+        ],
+        "answer_rank": 50
+      },
+      "NEX ENERGIE": {
+        "answer_tags": [
+          "NEX ENERGIE"
+        ],
+        "answer_rank": 51
+      },
+      "Om nieuwe energie": {
+        "answer_tags": [
+          "Om nieuwe energie"
+        ],
+        "answer_rank": 52
+      },
+      "Vatafall": {
+        "answer_tags": [
+          "Vatafall"
+        ],
+        "answer_rank": 53
+      },
+      "PowerPeers": {
+        "answer_tags": [
+          "PowerPeers"
+        ],
+        "answer_rank": 54
+      },
+      "UnitedConsumers": {
+        "answer_tags": [
+          "UnitedConsumers"
+        ],
+        "answer_rank": 55
+      },
+      "Mega": {
+        "answer_tags": [
+          "Mega"
+        ],
+        "answer_rank": 56
+      },
+      "Powerpeers": {
+        "answer_tags": [
+          "Powerpeers"
+        ],
+        "answer_rank": 57
+      },
+      "innova": {
+        "answer_tags": [
+          "innova"
+        ],
+        "answer_rank": 58
+      },
+      "Niet relevant": {
+        "answer_tags": [
+          "Niet relevant"
+        ],
+        "answer_rank": 59
+      },
+      "Greenchoise": {
+        "answer_tags": [
+          "Greenchoise"
+        ],
+        "answer_rank": 60
+      },
+      "VATTENFALL": {
+        "answer_tags": [
+          "VATTENFALL"
+        ],
+        "answer_rank": 61
+      },
+      "greenchoice": {
+        "answer_tags": [
+          "greenchoice"
+        ],
+        "answer_rank": 62
+      },
+      "Vandenbron": {
+        "answer_tags": [
+          "Vandenbron"
+        ],
+        "answer_rank": 63
+      },
+      "engie": {
+        "answer_tags": [
+          "engie"
+        ],
+        "answer_rank": 64
+      },
+      "nuon": {
+        "answer_tags": [
+          "nuon"
+        ],
+        "answer_rank": 65
+      },
+      "Zonnenplan": {
+        "answer_tags": [
+          "Zonnenplan"
+        ],
+        "answer_rank": 66
+      }
+    }
+  },
+  " What is the type of your dwelling?": {
+    "question_tags": [
+      [" What is the type of your dwelling?", " What is the type of your dwelling?"]
+    ],
+    "question_rank": 10,
+    "answers": {
+      "Detached house": {
+        "answer_tags": [
+          "Detached house"
+        ],
+        "answer_rank": 1
+      },
+      "2": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 2
+      },
+      "Detached house.1": {
+        "answer_tags": [
+          "Detached house"
+        ],
+        "answer_rank": 3
+      },
+      "4": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 4
+      }
+    }
+  },
+  " In your opinion, how many people in your neighbourhood are positive about phasing out natural gas?": {
+    "question_tags": [
+      [" In your opinion, how many people in your neighbourhood are positive about phasing out natural gas?", " In your opinion, how many people in your neighbourhood are positive about phasing out natural gas?"]
+    ],
+    "question_rank": 11,
+    "answers": {
+      "Less than half": {
+        "answer_tags": [
+          "Less than half"
+        ],
+        "answer_rank": 1
+      },
+      "About half": {
+        "answer_tags": [
+          "About half"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " What is your opinion on heat pumps?": {
+    "question_tags": [
+      [" What is your opinion on heat pumps?", " What is your opinion on heat pumps?"]
+    ],
+    "question_rank": 12,
+    "answers": {
+      "Positive": {
+        "answer_tags": [
+          "Positive"
+        ],
+        "answer_rank": 1
+      },
+      "Neutral": {
+        "answer_tags": [
+          "Neutral"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " What is your opinion on district heating?": {
+    "question_tags": [
+      [" What is your opinion on district heating?", " What is your opinion on district heating?"]
+    ],
+    "question_rank": 13,
+    "answers": {
+      "Positive": {
+        "answer_tags": [
+          "Positive"
+        ],
+        "answer_rank": 1
+      },
+      "Neutral": {
+        "answer_tags": [
+          "Neutral"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?": {
+    "question_tags": [
+      [" Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?", " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?"]
+    ],
+    "question_rank": 14,
+    "answers": {
+      "Yes about both": {
+        "answer_tags": [
+          "Yes about both"
+        ],
+        "answer_rank": 1
+      },
+      "Yes about heat pump": {
+        "answer_tags": [
+          "Yes about heat pump"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way:": {
+    "question_tags": [
+      [" I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way:", " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way:"]
+    ],
+    "question_rank": 15,
+    "answers": {
+      "Other - NA": {
+        "answer_tags": [
+          "Other - NA"
+        ],
+        "answer_rank": 1
+      },
+      "Other - Email": {
+        "answer_tags": [
+          "Other - Email"
+        ],
+        "answer_rank": 2
+      },
+      "Other - nvt": {
+        "answer_tags": [
+          "Other - nvt"
+        ],
+        "answer_rank": 3
+      },
+      "Other - Wil het niet horen": {
+        "answer_tags": [
+          "Other - Wil het niet horen"
+        ],
+        "answer_rank": 4
+      },
+      "Other - Geen interesse om van gas af te gaan.": {
+        "answer_tags": [
+          "Other - Geen interesse om van gas af te gaan."
+        ],
+        "answer_rank": 5
+      },
+      "Other - Via email": {
+        "answer_tags": [
+          "Other - Via email"
+        ],
+        "answer_rank": 6
+      },
+      "Other - geen. ben al van het gas af": {
+        "answer_tags": [
+          "Other - geen. ben al van het gas af"
+        ],
+        "answer_rank": 7
+      },
+      "Other - Mail via mijn overheid": {
+        "answer_tags": [
+          "Other - Mail via mijn overheid"
+        ],
+        "answer_rank": 8
+      },
+      "Other - via email": {
+        "answer_tags": [
+          "Other - via email"
+        ],
+        "answer_rank": 9
+      },
+      "Other - emails van de gemeente (als we dan toch aan het milieu denken, doe dan geen brieven)": {
+        "answer_tags": [
+          "Other - emails van de gemeente (als we dan toch aan het milieu denken, doe dan geen brieven)"
+        ],
+        "answer_rank": 10
+      },
+      "Other - Niet": {
+        "answer_tags": [
+          "Other - Niet"
+        ],
+        "answer_rank": 11
+      },
+      "Other - geen": {
+        "answer_tags": [
+          "Other - geen"
+        ],
+        "answer_rank": 12
+      },
+      "Other - via e-mail": {
+        "answer_tags": [
+          "Other - via e-mail"
+        ],
+        "answer_rank": 13
+      },
+      "I would like to participate in a residents' panel - No": {
+        "answer_tags": [
+          "I would like to participate in a residents' panel - No"
+        ],
+        "answer_rank": 14
+      },
+      "I would like to participate in a residents' panel - Yes": {
+        "answer_tags": [
+          "I would like to participate in a residents' panel - Yes"
+        ],
+        "answer_rank": 15
+      },
+      "I want to be able to ask the municipality questions when needed - Yes": {
+        "answer_tags": [
+          "I want to be able to ask the municipality questions when needed - Yes"
+        ],
+        "answer_rank": 16
+      },
+      "I want to be able to ask the municipality questions when needed - No": {
+        "answer_tags": [
+          "I want to be able to ask the municipality questions when needed - No"
+        ],
+        "answer_rank": 17
+      },
+      "Through a website - Yes": {
+        "answer_tags": [
+          "Through a website - Yes"
+        ],
+        "answer_rank": 18
+      },
+      "Through a website - No": {
+        "answer_tags": [
+          "Through a website - No"
+        ],
+        "answer_rank": 19
+      },
+      "Through energy coaches - No": {
+        "answer_tags": [
+          "Through energy coaches - No"
+        ],
+        "answer_rank": 20
+      },
+      "Through energy coaches - Yes": {
+        "answer_tags": [
+          "Through energy coaches - Yes"
+        ],
+        "answer_rank": 21
+      },
+      "A community meeting - No": {
+        "answer_tags": [
+          "A community meeting - No"
+        ],
+        "answer_rank": 22
+      },
+      "A community meeting - Yes": {
+        "answer_tags": [
+          "A community meeting - Yes"
+        ],
+        "answer_rank": 23
+      },
+      "Letters from the municipality - Yes": {
+        "answer_tags": [
+          "Letters from the municipality - Yes"
+        ],
+        "answer_rank": 24
+      },
+      "Letters from the municipality - No": {
+        "answer_tags": [
+          "Letters from the municipality - No"
+        ],
+        "answer_rank": 25
+      }
+    }
+  },
+  " If I were to switch away from natural gas, I would appreciate the following:": {
+    "question_tags": [
+      [" If I were to switch away from natural gas, I would appreciate the following:", " If I were to switch away from natural gas, I would appreciate the following:"]
+    ],
+    "question_rank": 16,
+    "answers": {
+      "Other - NA": {
+        "answer_tags": [
+          "Other - NA"
+        ],
+        "answer_rank": 1
+      },
+      "Receiving financial support, such as a subsidy or low-interest loan - Yes": {
+        "answer_tags": [
+          "Receiving financial support, such as a subsidy or low-interest loan - Yes"
+        ],
+        "answer_rank": 2
+      },
+      "Receiving financial support, such as a subsidy or low-interest loan - No": {
+        "answer_tags": [
+          "Receiving financial support, such as a subsidy or low-interest loan - No"
+        ],
+        "answer_rank": 3
+      },
+      "Receiving financial support, such as a subsidy or low-interest loan - NA": {
+        "answer_tags": [
+          "Receiving financial support, such as a subsidy or low-interest loan - NA"
+        ],
+        "answer_rank": 4
+      },
+      "Receiving independent information about the costs and benefits - Yes": {
+        "answer_tags": [
+          "Receiving independent information about the costs and benefits - Yes"
+        ],
+        "answer_rank": 5
+      },
+      "Receiving independent information about the costs and benefits - No": {
+        "answer_tags": [
+          "Receiving independent information about the costs and benefits - No"
+        ],
+        "answer_rank": 6
+      },
+      "Receiving independent information about the costs and benefits - NA": {
+        "answer_tags": [
+          "Receiving independent information about the costs and benefits - NA"
+        ],
+        "answer_rank": 7
+      },
+      "Getting help selecting a contractor and evaluating the quotes - Yes": {
+        "answer_tags": [
+          "Getting help selecting a contractor and evaluating the quotes - Yes"
+        ],
+        "answer_rank": 8
+      },
+      "Getting help selecting a contractor and evaluating the quotes - No": {
+        "answer_tags": [
+          "Getting help selecting a contractor and evaluating the quotes - No"
+        ],
+        "answer_rank": 9
+      },
+      "Getting help selecting a contractor and evaluating the quotes - NA": {
+        "answer_tags": [
+          "Getting help selecting a contractor and evaluating the quotes - NA"
+        ],
+        "answer_rank": 10
+      },
+      "Receiving tailored advice from an expert: what is technically needed in my home? - Yes": {
+        "answer_tags": [
+          "Receiving tailored advice from an expert: what is technically needed in my home? - Yes"
+        ],
+        "answer_rank": 11
+      },
+      "Receiving tailored advice from an expert: what is technically needed in my home? - No": {
+        "answer_tags": [
+          "Receiving tailored advice from an expert: what is technically needed in my home? - No"
+        ],
+        "answer_rank": 12
+      },
+      "Receiving tailored advice from an expert: what is technically needed in my home? - NA": {
+        "answer_tags": [
+          "Receiving tailored advice from an expert: what is technically needed in my home? - NA"
+        ],
+        "answer_rank": 13
+      },
+      "Having a conversation in advance with an energy coach about experiences, for example from the municipality - No": {
+        "answer_tags": [
+          "Having a conversation in advance with an energy coach about experiences, for example from the municipality - No"
+        ],
+        "answer_rank": 14
+      },
+      "Having a conversation in advance with an energy coach about experiences, for example from the municipality - NA": {
+        "answer_tags": [
+          "Having a conversation in advance with an energy coach about experiences, for example from the municipality - NA"
+        ],
+        "answer_rank": 15
+      }
+    }
+  },
+  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]": {
+    "question_tags": [
+      [" On a scale from 1 to 5, to what extent do you agree with the following statements?  [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]", " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]"]
+    ],
+    "question_rank": 17,
+    "answers": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
+        "answer_tags": [
+          "3 - neither agree nor disagree"
+        ],
+        "answer_rank": 2
+      },
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 3
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 4
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I am climate-conscious]": {
+    "question_tags": [
+      [" On a scale from 1 to 5, to what extent do you agree with the following statements?  [I am climate-conscious]", " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I am climate-conscious]"]
+    ],
+    "question_rank": 18,
+    "answers": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
+        "answer_tags": [
+          "3 - neither agree nor disagree"
+        ],
+        "answer_rank": 2
+      },
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 3
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Heat prices should be as equal as possible for everyone in the municipality]": {
+    "question_tags": [
+      [" On a scale from 1 to 5, to what extent do you agree with the following statements?  [Heat prices should be as equal as possible for everyone in the municipality]", " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Heat prices should be as equal as possible for everyone in the municipality]"]
+    ],
+    "question_rank": 19,
+    "answers": {
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
+        "answer_tags": [
+          "3 - neither agree nor disagree"
+        ],
+        "answer_rank": 2
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 3
+      },
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Residents are capable of deciding for themselves how to phase out natural gas]": {
+    "question_tags": [
+      [" On a scale from 1 to 5, to what extent do you agree with the following statements?  [Residents are capable of deciding for themselves how to phase out natural gas]", " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Residents are capable of deciding for themselves how to phase out natural gas]"]
+    ],
+    "question_rank": 20,
+    "answers": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
+        "answer_tags": [
+          "3 - neither agree nor disagree"
+        ],
+        "answer_rank": 2
+      },
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 3
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [The municipality is best able to determine the most affordable way to phase out natural gas]": {
+    "question_tags": [
+      [" On a scale from 1 to 5, to what extent do you agree with the following statements?  [The municipality is best able to determine the most affordable way to phase out natural gas]", " On a scale from 1 to 5, to what extent do you agree with the following statements?  [The municipality is best able to determine the most affordable way to phase out natural gas]"]
+    ],
+    "question_rank": 21,
+    "answers": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
+        "answer_tags": [
+          "3 - neither agree nor disagree"
+        ],
+        "answer_rank": 2
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 3
+      },
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my neighborhood]": {
+    "question_tags": [
+      [" On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my neighborhood]", " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my neighborhood]"]
+    ],
+    "question_rank": 22,
+    "answers": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
+        "answer_tags": [
+          "3 - neither agree nor disagree"
+        ],
+        "answer_rank": 2
+      },
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 3
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my municipality]": {
+    "question_tags": [
+      [" On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my municipality]", " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my municipality]"]
+    ],
+    "question_rank": 23,
+    "answers": {
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
+        "answer_tags": [
+          "3 - neither agree nor disagree"
+        ],
+        "answer_rank": 2
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 3
+      },
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " Suppose you currently had some money available to invest in your home. And suppose that, starting now, a new insulation technique could save you 50 per month (600 per year) on your energy expenses.  How much would you be willing to pay to have that insulation installed?": {
+    "question_tags": [
+      [" Suppose you currently had some money available to invest in your home. And suppose that, starting now, a new insulation technique could save you 50 per month (600 per year) on your energy expenses.  How much would you be willing to pay to have that insulation installed?", " Suppose you currently had some money available to invest in your home. And suppose that, starting now, a new insulation technique could save you 50 per month (600 per year) on your energy expenses.  How much would you be willing to pay to have that insulation installed?"]
+    ],
+    "question_rank": 24,
+    "answers": {
+      "1200": {
+        "answer_tags": [
+          "1200"
+        ],
+        "answer_rank": 1
+      },
+      "6": {
+        "answer_tags": [
+          "6"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " Which best describes the employment situation of your partner?": {
+    "question_tags": [
+      [" Which best describes the employment situation of your partner?", " Which best describes the employment situation of your partner?"]
+    ],
+    "question_rank": 25,
+    "answers": {
+      "Working - Full Time (at least 32 hours per week)": {
+        "answer_tags": [
+          "Working - Full Time (at least 32 hours per week)"
+        ],
+        "answer_rank": 1
+      },
+      "2": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " Which best describes your employment situation?": {
+    "question_tags": [
+      [" Which best describes your employment situation?", " Which best describes your employment situation?"]
+    ],
+    "question_rank": 26,
+    "answers": {
+      "Going to school": {
+        "answer_tags": [
+          "Going to school"
+        ],
+        "answer_rank": 1
+      },
+      "Retired": {
+        "answer_tags": [
+          "Retired"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " To which age group does your partner belong?": {
+    "question_tags": [
+      [" To which age group does your partner belong?", " To which age group does your partner belong?"]
+    ],
+    "question_rank": 27,
+    "answers": {
+      "25-34": {
+        "answer_tags": [
+          "25-34"
+        ],
+        "answer_rank": 1
+      },
+      "2": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " To which age group do you belong?": {
+    "question_tags": [
+      [" To which age group do you belong?", " To which age group do you belong?"]
+    ],
+    "question_rank": 28,
+    "answers": {
+      "25-34": {
+        "answer_tags": [
+          "25-34"
+        ],
+        "answer_rank": 1
+      },
+      "35-44": {
+        "answer_tags": [
+          "35-44"
+        ],
+        "answer_rank": 2
+      },
+      "65-74": {
+        "answer_tags": [
+          "65-74"
+        ],
+        "answer_rank": 3
+      },
+      "55-64": {
+        "answer_tags": [
+          "55-64"
+        ],
+        "answer_rank": 4
+      },
+      "45-54": {
+        "answer_tags": [
+          "45-54"
+        ],
+        "answer_rank": 5
+      },
+      "24 or younger": {
+        "answer_tags": [
+          "24 or younger"
+        ],
+        "answer_rank": 6
+      },
+      "75 or older": {
+        "answer_tags": [
+          "75 or older"
+        ],
+        "answer_rank": 7
+      }
+    }
+  },
+  " Who is currently part of your household?": {
+    "question_tags": [
+      [" Who is currently part of your household?", " Who is currently part of your household?"]
+    ],
+    "question_rank": 29,
+    "answers": {
+      "With my partner / spouse": {
+        "answer_tags": [
+          "With my partner / spouse"
+        ],
+        "answer_rank": 1
+      },
+      "I live alone": {
+        "answer_tags": [
+          "I live alone"
+        ],
+        "answer_rank": 2
+      },
+      "With my child(ren)": {
+        "answer_tags": [
+          "With my child(ren)"
+        ],
+        "answer_rank": 3
+      },
+      "With my partner and child(ren)": {
+        "answer_tags": [
+          "With my partner and child(ren)"
+        ],
+        "answer_rank": 4
+      },
+      "I live with my partner / spouse": {
+        "answer_tags": [
+          "I live with my partner / spouse"
+        ],
+        "answer_rank": 5
+      },
+      "I live with my partner and child(ren)": {
+        "answer_tags": [
+          "I live with my partner and child(ren)"
+        ],
+        "answer_rank": 6
+      },
+      "I live with my child(ren)": {
+        "answer_tags": [
+          "I live with my child(ren)"
+        ],
+        "answer_rank": 7
+      },
+      "Other": {
+        "answer_tags": [
+          "Other"
+        ],
+        "answer_rank": 8
+      }
+    }
+  },
+  " What is your native language?": {
+    "question_tags": [
+      [" What is your native language?", " What is your native language?"]
+    ],
+    "question_rank": 30,
+    "answers": {
+      "Dutch": {
+        "answer_tags": [
+          "Dutch"
+        ],
+        "answer_rank": 1
+      },
+      "2": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " Which gender do you identify with the most?": {
+    "question_tags": [
+      [" Which gender do you identify with the most?", " Which gender do you identify with the most?"]
+    ],
+    "question_rank": 31,
+    "answers": {
+      "Woman": {
+        "answer_tags": [
+          "Woman"
+        ],
+        "answer_rank": 1
+      },
+      "Man": {
+        "answer_tags": [
+          "Man"
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " What is the WOZ value of your dwelling?": {
+    "question_tags": [
+      [" What is the WOZ value of your dwelling?", " What is the WOZ value of your dwelling?"]
+    ],
+    "question_rank": 32,
+    "answers": {
+      "200-300 thousand euros": {
+        "answer_tags": [
+          "200-300 thousand euros"
+        ],
+        "answer_rank": 1
+      },
+      "500-600 thousand euros": {
+        "answer_tags": [
+          "500-600 thousand euros"
+        ],
+        "answer_rank": 2
+      },
+      "300-400 thousand euros": {
+        "answer_tags": [
+          "300-400 thousand euros"
+        ],
+        "answer_rank": 3
+      },
+      "400-500 thousand euros": {
+        "answer_tags": [
+          "400-500 thousand euros"
+        ],
+        "answer_rank": 4
+      },
+      "100-200 thousand euros": {
+        "answer_tags": [
+          "100-200 thousand euros"
+        ],
+        "answer_rank": 5
+      },
+      "600-700 thousand euros": {
+        "answer_tags": [
+          "600-700 thousand euros"
+        ],
+        "answer_rank": 6
+      },
+      "800-900 thousand euros": {
+        "answer_tags": [
+          "800-900 thousand euros"
+        ],
+        "answer_rank": 7
+      },
+      "More than 900 thousand euros": {
+        "answer_tags": [
+          "More than 900 thousand euros"
+        ],
+        "answer_rank": 8
+      },
+      "700-800 thousand euros": {
+        "answer_tags": [
+          "700-800 thousand euros"
+        ],
+        "answer_rank": 9
+      }
+    }
+  },
+  " Do you have solar panels?": {
+    "question_tags": [
+      [" Do you have solar panels?", " Do you have solar panels?"]
+    ],
+    "question_rank": 33,
+    "answers": {
+      "Yes": {
+        "answer_tags": [
+          "Yes"
+        ],
+        "answer_rank": 1
+      },
+      "No": {
+        "answer_tags": [
+          "No"
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " What do you use for cooking?": {
+    "question_tags": [
+      [" What do you use for cooking?", " What do you use for cooking?"]
+    ],
+    "question_rank": 34,
+    "answers": {
+      "Natural gas stove": {
+        "answer_tags": [
+          "Natural gas stove"
+        ],
+        "answer_rank": 1
+      },
+      "Induction stove": {
+        "answer_tags": [
+          "Induction stove"
+        ],
+        "answer_rank": 2
+      },
+      "Ceramic stove": {
+        "answer_tags": [
+          "Ceramic stove"
+        ],
+        "answer_rank": 3
+      },
+      "Other": {
+        "answer_tags": [
+          "Other"
+        ],
+        "answer_rank": 4
+      },
+      "Traditional electric stove": {
+        "answer_tags": [
+          "Traditional electric stove"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " How much do you pay monthly for gas?": {
+    "question_tags": [
+      [" How much do you pay monthly for gas?", " How much do you pay monthly for gas?"]
+    ],
+    "question_rank": 35,
+    "answers": {
+      "Between 50 and 100 euro": {
+        "answer_tags": [
+          "Between 50 and 100 euro"
+        ],
+        "answer_rank": 1
+      },
+      "Between 150 and 200 euro": {
+        "answer_tags": [
+          "Between 150 and 200 euro"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      },
+      "Between 100 and 150 euro": {
+        "answer_tags": [
+          "Between 100 and 150 euro"
+        ],
+        "answer_rank": 4
+      },
+      "I do not know": {
+        "answer_tags": [
+          "I do not know"
+        ],
+        "answer_rank": 5
+      },
+      "More than 200 euro": {
+        "answer_tags": [
+          "More than 200 euro"
+        ],
+        "answer_rank": 6
+      },
+      "Less than 50 euro": {
+        "answer_tags": [
+          "Less than 50 euro"
+        ],
+        "answer_rank": 7
+      }
+    }
+  },
+  " Which company do you buy gas for heating from?": {
+    "question_tags": [
+      [" Which company do you buy gas for heating from?", " Which company do you buy gas for heating from?"]
+    ],
+    "question_rank": 36,
+    "answers": {
+      "1": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 1
+      },
+      "Enexis": {
+        "answer_tags": [
+          "Enexis"
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " What is your gas consumption per year?": {
+    "question_tags": [
+      [" What is your gas consumption per year?", " What is your gas consumption per year?"]
+    ],
+    "question_rank": 37,
+    "answers": {
+      "Between 1200 and 1400m3": {
+        "answer_tags": [
+          "Between 1200 and 1400m3"
+        ],
+        "answer_rank": 1
+      },
+      "Between 850 and 1200m3": {
+        "answer_tags": [
+          "Between 850 and 1200m3"
+        ],
+        "answer_rank": 2
+      },
+      "3": {
+        "answer_tags": [
+          null
+        ],
+        "answer_rank": 3
+      },
+      "I do not know": {
+        "answer_tags": [
+          "I do not know"
+        ],
+        "answer_rank": 4
+      },
+      "Less than 850m3": {
+        "answer_tags": [
+          "Less than 850m3"
+        ],
+        "answer_rank": 5
+      },
+      "Between 1400 and 1600m3": {
+        "answer_tags": [
+          "Between 1400 and 1600m3"
+        ],
+        "answer_rank": 6
+      },
+      "Between 1600 and 1800m3": {
+        "answer_tags": [
+          "Between 1600 and 1800m3"
+        ],
+        "answer_rank": 7
+      },
+      "More than 1800m3": {
+        "answer_tags": [
+          "More than 1800m3"
+        ],
+        "answer_rank": 8
+      }
+    }
+  },
+  " What is the size of your dwelling?": {
+    "question_tags": [
+      [" What is the size of your dwelling?", " What is the size of your dwelling?"]
+    ],
+    "question_rank": 38,
+    "answers": {
+      "Between 40 and 80m2": {
+        "answer_tags": [
+          "Between 40 and 80m2"
+        ],
+        "answer_rank": 1
+      },
+      "Between 80 and 120m2": {
+        "answer_tags": [
+          "Between 80 and 120m2"
+        ],
+        "answer_rank": 2
+      },
+      "Between 120 and 160m2": {
+        "answer_tags": [
+          "Between 120 and 160m2"
+        ],
+        "answer_rank": 3
+      },
+      "Bigger than 160m2": {
+        "answer_tags": [
+          "Bigger than 160m2"
+        ],
+        "answer_rank": 4
+      },
+      "Smaller than 40m2": {
+        "answer_tags": [
+          "Smaller than 40m2"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " On which device are you playing this choice game?": {
+    "question_tags": [
+      [" On which device are you playing this choice game?", " On which device are you playing this choice game?"]
+    ],
+    "question_rank": 39,
+    "answers": {
+      "Computer": {
+        "answer_tags": [
+          "Computer"
+        ],
+        "answer_rank": 1
+      },
+      "Tablet": {
+        "answer_tags": [
+          "Tablet"
+        ],
+        "answer_rank": 2
+      },
+      "Smartphone": {
+        "answer_tags": [
+          "Smartphone"
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " What is your highest completed education?": {
+    "question_tags": [
+      [" What is your highest completed education?", " What is your highest completed education?"]
+    ],
+    "question_rank": 40,
+    "answers": {
+      "HAVO/VWO/HBS/MBO-niveau 2 t/m 4 of MBO old structure (MTS/UTS/MEAO)": {
+        "answer_tags": [
+          "HAVO/VWO/HBS/MBO-niveau 2 t/m 4 of MBO old structure (MTS/UTS/MEAO)"
+        ],
+        "answer_rank": 1
+      },
+      "HBO/WO master or higher": {
+        "answer_tags": [
+          "HBO/WO master or higher"
+        ],
+        "answer_rank": 2
+      },
+      "VMBO/MAVO/MBO-niveau 1": {
+        "answer_tags": [
+          "VMBO/MAVO/MBO-niveau 1"
+        ],
+        "answer_rank": 3
+      },
+      "HBO/WO bachelor": {
+        "answer_tags": [
+          "HBO/WO bachelor"
+        ],
+        "answer_rank": 4
+      },
+      "HAVO/VWO/MBO": {
+        "answer_tags": [
+          "HAVO/VWO/MBO"
+        ],
+        "answer_rank": 5
+      },
+      "VMBO/MAVO": {
+        "answer_tags": [
+          "VMBO/MAVO"
+        ],
+        "answer_rank": 6
+      },
+      "Primary school": {
+        "answer_tags": [
+          "Primary school"
+        ],
+        "answer_rank": 7
+      },
+      "Other": {
+        "answer_tags": [
+          "Other"
+        ],
+        "answer_rank": 8
+      }
+    }
+  },
+  " Do you use natural gas or wood stove to heat your house?": {
+    "question_tags": [
+      [" Do you use natural gas or wood stove to heat your house?", " Do you use natural gas or wood stove to heat your house?"]
+    ],
+    "question_rank": 41,
+    "answers": {
+      "Yes, natural gas": {
+        "answer_tags": [
+          "Yes, natural gas"
+        ],
+        "answer_rank": 1
+      },
+      "Yes, wood stove": {
+        "answer_tags": [
+          "Yes, wood stove"
+        ],
+        "answer_rank": 2
+      },
+      "No, I heat my home differently": {
+        "answer_tags": [
+          "No, I heat my home differently"
+        ],
+        "answer_rank": 3
+      }
+    }
+  },
+  " What is the construction period of your dwelling?": {
+    "question_tags": [
+      [" What is the construction period of your dwelling?", " What is the construction period of your dwelling?"]
+    ],
+    "question_rank": 42,
+    "answers": {
+      "1991-2005": {
+        "answer_tags": [
+          "1991-2005"
+        ],
+        "answer_rank": 1
+      },
+      "1971-1990": {
+        "answer_tags": [
+          "1971-1990"
+        ],
+        "answer_rank": 2
+      },
+      "1946-1970": {
+        "answer_tags": [
+          "1946-1970"
+        ],
+        "answer_rank": 3
+      },
+      "2006-2025": {
+        "answer_tags": [
+          "2006-2025"
+        ],
+        "answer_rank": 4
+      },
+      "1945 or before": {
+        "answer_tags": [
+          "1945 or before"
+        ],
+        "answer_rank": 5
+      }
+    }
+  },
+  " What type of residence do you live in?": {
+    "question_tags": [
+      [" What type of residence do you live in?", " What type of residence do you live in?"]
+    ],
+    "question_rank": 43,
+    "answers": {
+      "Owner-occupied house": {
+        "answer_tags": [
+          "Owner-occupied house"
+        ],
+        "answer_rank": 1
+      }
+    }
+  },
+  " Start language": {
+    "question_tags": [
+      [" Start language", " Start language"]
+    ],
+    "question_rank": 44,
+    "answers": {
+      "nl": {
+        "answer_tags": [
+          "nl"
+        ],
+        "answer_rank": 1
+      },
+      "en": {
+        "answer_tags": [
+          "en"
+        ],
+        "answer_rank": 2
+      }
+    }
+  },
+  " Last page": {
+    "question_tags": [
+      [" Last page", " Last page"]
+    ],
+    "question_rank": 45,
+    "answers": {
+      "18": {
+        "answer_tags": [
+          "18"
+        ],
+        "answer_rank": 1
+      },
+      "20": {
+        "answer_tags": [
+          "20"
+        ],
+        "answer_rank": 2
+      },
+      "19": {
+        "answer_tags": [
+          "19"
+        ],
+        "answer_rank": 3
+      }
+    }
+  }
+}
