@@ -66,7 +66,7 @@ for (survey.name in survey.names){
   #data <- data[`ConstructionPeriod2. What is the construction period of your dwelling?` %in% c("1991-2005","2006-2025")]
   
   # Descriptives - respondent characteristics ----
-  col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Response ID)|(Date)|(Seed)|(zipcode)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(lottery)|(Thank you for your participation)|(Total time)|(save 50 euros)|(please enter the code that is in your letter)",names(data))]
+  col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Response ID)|(Date)|(Seed)|(zipcode)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(Thank you for your participation)|(Total time)|(please enter the code that is in your letter)",names(data))]
   data.desc <- janitor::clean_names(data[,.SD,.SDcols = col.desc])
   names.desc <- setNames(col.desc,names(data.desc))
   
@@ -152,6 +152,13 @@ for (survey.name in survey.names){
                                                                        answer_rank_mapped = mapping[[new_q_name]][["answers"]][[new_answer_name]]$answer_rank)]
 
     }
+    
+    # if (tab.desc[,any(Q %in% old_q_names & is.na(answer_mapped) & !is.na(answer))]) stop(sprintf("Mapping missing for question `%s`, answer `%s` \n\t Please add mapping for this answer in %s.",
+    #                                                                         paste0(old_q_names,collapse ="; "),
+    #                                                                         tab.desc[Q %in% old_q_names & is.na(answer_mapped) & !is.na(answer),paste0(answer,collapse ="; ")],
+    #                                                                         fljson))
+    
+    tab.desc[Q %in% old_q_names & is.na(answer_mapped) & !is.na(answer),answer_mapped := answer]
   }
   
   # Merge 
@@ -172,45 +179,28 @@ for (survey.name in survey.names){
   for (grp in tab.desc.merged[,unique(na.omit(question_group_mapped))]){
     
     if (grp == "bias_monet"){
-      # All answers
-      tab <-  data.desc[,.(Answer = last9_if_you_could_save_50_euros_per_month_from_now_on_by_better_insulating_your_home_how_much_would_you_be_willing_to_pay_to_have_that_insulation_installed)]
-      
-      ggplot(tab,aes(x = Answer)) + geom_histogram(binwidth = 500, fill=grey2, col=grey3) + theme.graphs
-      ggsave(paste0(dir.out, "wtp_50_eur.pdf"),device = "pdf", units = "cm",height = height, width = width)
-      
-      tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE))]
-      
-      sink(paste0(dir.out, "wtp_50_eur_mean.tex"))
-      print(xtable::xtable(tab.mean), type = "latex")
-      sink()
-      
-      # Answers by insulation groups
-      nm.wall <- names(data.desc)[grepl("hollow_wall_insulation",names(data.desc))]
-      nm.roof <- names(data.desc)[grepl("roof_and_or_floor_insulation",names(data.desc))]
-      nm.glass <- names(data.desc)[grepl("high_efficiency_double_or_triple_glazing",names(data.desc))]
-      
-      if (length(nm.glass) == 1 & length(nm.roof) == 1 & length(nm.wall) == 1){
+      for (monet_question in tab.desc.merged[question_group_mapped == "bias_monet",unique(Q_mapped)]){
+        tab <- tab.desc.merged[Q_mapped == monet_question,.(answer_mapped,N)][,.(Answer = rep(as.integer(answer_mapped),N))]
         
-        tab <-  data.desc[,.(Answer = last9_if_you_could_save_50_euros_per_month_from_now_on_by_better_insulating_your_home_how_much_would_you_be_willing_to_pay_to_have_that_insulation_installed,
-                             insu_wall  = get(nm.wall),
-                             insu_roof_floor = get(nm.roof),
-                             insu_glass = get(nm.glass))]
+        if (grepl("50 per month",monet_question)){
+          nm.fig <- "wtp_50_savings_per_month"
+          bd <- 10
+        }else if (grepl("lottery",monet_question)){
+          nm.fig <- "value_1_year_wait"
+          bd <- 10
+        } else {stop(sprintf("Give name to question `%s`",monet_question))}
         
-        tab[, any_insulation := as.factor(insu_wall == "Yes" | insu_glass == "Yes" | insu_roof_floor == "Yes")]
+        ggplot(tab,aes(x = Answer)) + geom_histogram(binwidth = bd, fill=grey2, col=grey3) + theme.graphs + labs(x = stringr::str_to_sentence(gsub("\\_"," ",nm.fig)))
+        ggsave(paste0(dir.out, nm.fig, ".pdf"),device = "pdf", units = "cm",height = height, width = width)
         
-        ggplot(tab,aes(x = Answer,group = any_insulation, fill = any_insulation)) + geom_histogram(binwidth = 500, col=grey3) + theme.graphs
-        ggsave(paste0(dir.out, "wtp_50_eur_insu.pdf"),device = "pdf", units = "cm",height = height, width = width)
+        tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE))]
         
-        
-        tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE)),by=.(any_insulation)]
-        
-        sink(paste0(dir.out, "wtp_50_eur_insu_mean.tex"))
+        sink(paste0(dir.out,nm.fig, ".tex"))
         print(xtable::xtable(tab.mean), type = "latex")
         sink()
         
       }
-      
-      
+
       next
     }
     

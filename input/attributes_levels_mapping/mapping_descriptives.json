@@ -16,6 +16,42 @@
     },
     "question_group": null
   },
+  " Imagine you win 1,000 in a lottery. You can either receive the money right now or choose to receive it exactly one year from today. Theres no riskyou are guaranteed to receive the money either way.  If you decide to wait one year, how much more money would you need to make that delay worthwhile? (If you're willing to wait a year without needing any extra money, enter 0.)": {
+    "question_tags": [
+      [
+        " Imagine you win 1,000 in a lottery. You can either receive the money right now or choose to receive it exactly one year from today. Theres no riskyou are guaranteed to receive the money either way.  If you decide to wait one year, how much more money would you need to make that delay worthwhile? (If you're willing to wait a year without needing any extra money, enter 0.)",
+        " Imagine you win 1,000 in a lottery. You can either receive the money right now or choose to receive it exactly one year from today. Theres no riskyou are guaranteed to receive the money either way.  If you decide to wait one year, how much more money would you need to make that delay worthwhile? (If you're willing to wait a year without needing any extra money, enter 0.)"
+      ]
+    ],
+    "question_rank": 25,
+    "answers": {
+      "500": {
+        "answer_tags": [
+          "500"
+        ],
+        "answer_rank": 1
+      }
+    },
+    "question_group": "bias_monet"
+  },
+  " Suppose you currently had some money available to invest in your home. And suppose that, starting now, a new insulation technique could save you 50 per month (600 per year) on your energy expenses.  How much would you be willing to pay to have that insulation installed?": {
+    "question_tags": [
+      [
+        " Suppose you currently had some money available to invest in your home. And suppose that, starting now, a new insulation technique could save you 50 per month (600 per year) on your energy expenses.  How much would you be willing to pay to have that insulation installed?",
+        " If you could save 50 euros per month from now on by better insulating your home, how much would you be willing to pay to have that insulation installed?"
+      ]
+    ],
+    "question_rank": 26,
+    "answers": {
+      "2000": {
+        "answer_tags": [
+          "2000"
+        ],
+        "answer_rank": 1
+      }
+    },
+    "question_group": "bias_monet"
+  },
   " What sustainability improvements have you already made?": {
     "question_tags": [
       [
@@ -1430,7 +1466,7 @@
         "answer_rank": 1
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " Which best describes your employment situation?": {
     "question_tags": [
@@ -1454,7 +1490,7 @@
         "answer_rank": 2
       }
     },
-    "question_group": null
+    "question_group": "desc"
   },
   " To which age group does your partner belong?": {
     "question_tags": [
