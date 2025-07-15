@@ -16,7 +16,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("all_panelclix_hoorn","full_launch_panelclix_first_sample") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("panelclix_hoorn","full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 

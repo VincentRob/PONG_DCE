@@ -1,9 +1,11 @@
 survey_name,data_path
 soft_launch_medemblik_hoorn,C:/Users/20204133/Dropbox/PONG/limesurvey responses/Medemblik_Hoorn/Hoorn_complete.xlsx
 soft_launch_panelclix,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/50 softlaunch results-survey743982.xlsx
-full_launch_panelclix_first_sample,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/incomplete full launch results-survey743982.xlsx
+full_launch_panelclix,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/complete full launch results-survey743982.xlsx
 soft_launch_pooled,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/50 softlaunch results-survey743982.xlsx
 soft_launch_pooled,C:/Users/20204133/Dropbox/PONG/limesurvey responses/Medemblik_Hoorn/Hoorn_complete.xlsx
-all_panelclix_hoorn,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/incomplete full launch results-survey743982.xlsx
+all_panelclix_hoorn,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/complete full launch results-survey743982.xlsx
 all_panelclix_hoorn,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/50 softlaunch results-survey743982.xlsx
 all_panelclix_hoorn,C:/Users/20204133/Dropbox/PONG/limesurvey responses/Medemblik_Hoorn/Hoorn_complete.xlsx
+panelclix_hoorn,C:/Users/20204133/Dropbox/PONG/limesurvey responses/panelclix/complete full launch results-survey743982.xlsx
+panelclix_hoorn,C:/Users/20204133/Dropbox/PONG/limesurvey responses/Medemblik_Hoorn/Hoorn_complete.xlsx
