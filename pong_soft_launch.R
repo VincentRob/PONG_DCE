@@ -29,12 +29,13 @@ for (survey.name in survey.names){
   for (file.name in input_specs[survey_name == survey.name,unique(data_path)]){
     data_tmp <- readxl::read_excel(paste0(file.name)) %>% as.data.table()
     data_tmp[,survey_name := gsub("^.*/|\\.xlsx$", "", file.name)]
+    
+    # Remove emoji
+    names(data_tmp) <- sapply(names(data_tmp),\(x) gsub("[^\x01-\x7F]", "", x)) 
+    
     data <- rbindlist(list(data,data_tmp),use.names = TRUE, fill = TRUE)
   }
   
-  
-  # Remove emoji
-  names(data) <- sapply(names(data),\(x) gsub("[^\x01-\x7F]", "", x)) 
   
   # Outliers ----
   # 1 Response time: overall too short; information page too short 
@@ -66,121 +67,72 @@ for (survey.name in survey.names){
   #data <- data[`ConstructionPeriod2. What is the construction period of your dwelling?` %in% c("1991-2005","2006-2025")]
   
   # Descriptives - respondent characteristics ----
-  col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Response ID)|(Date)|(Seed)|(zipcode)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(Thank you for your participation)|(Total time)|(please enter the code that is in your letter)",names(data))]
-  data.desc <- janitor::clean_names(data[,.SD,.SDcols = col.desc])
-  names.desc <- setNames(col.desc,names(data.desc))
+  col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Date)|(Seed)|(zipcode)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(Thank you for your participation)|(Total time)|(please enter the code that is in your letter)",names(data))]
+  data.desc <- data[,.SD,.SDcols = col.desc]
   
-  tab.desc <- data.table()
-  for (cl in names(data.desc)){
-    tab.tmp <- data.desc[survey_name %in% data.desc[!is.na(get(cl)),unique(survey_name)] ,.(Q = names.desc[cl] ,Q_clean=cl,.N),by = c(answer = cl)]
-    survey_count <- data.desc[survey_name %in% data.desc[!is.na(get(cl)),unique(survey_name)],.N,by = c(answer = cl,survey_name = "survey_name")]
-    survey_count[,N_s := sum(N),by=survey_name]
-    survey_count[,N_tot := sum(N_s),by=answer]
-    survey_count <- unique(survey_count[,.(answer,N_tot)])
-    
-    tab.tmp <- tab.tmp[survey_count,on="answer"]
-    tab.desc <- rbindlist(list(tab.tmp,tab.desc),use.names = TRUE,fill = TRUE)
-  }
-  tab.desc[,Q_org := copy(Q)]
-  tab.desc[grepl("\\[multiple",Q_org), `:=` (Q = gsub("(.*?)\\ \\[multipl.*","\\1",Q_org), answer = paste0(gsub(".*\\[(.*)\\].*","\\1",Q_org)," - ",answer))]
-  tab.desc[,Q := gsub(".*?\\.(.*)","\\1",Q)]
-  tab.desc[,unique(Q)]
-  tab.desc[Q == "",Q := Q_clean]
+  #old.nms <- names(data.desc)[grepl("\\[multiple",names(data.desc))]
+  #setnames(data.desc,old = old.nms,new = gsub("(.*?)\\ \\[multipl.*","\\1",old.nms))
+  old.nms <- names(data.desc)
+  new.nms <- gsub(".*?\\.(.*)","\\1",names(data.desc))
+  new.nms[new.nms == ""] <- old.nms[new.nms == ""]
   
-  # Descriptives mapping template
-  # Assign question ranks
-  tab.desc[, question_rank := .GRP, by = Q]
+  names(data.desc) <- new.nms
   
-  # Build result list
-  result_list <- setNames(
-    lapply(split(tab.desc, by = "Q", keep.by = TRUE), function(group) {
-      # Unique answers per question, preserving order
-      unique_answers <- unique(group$answer)
-      
-      answers_list <- setNames(
-        lapply(seq_along(unique_answers), function(i) {
-          ans <- unique_answers[i]
-          list(
-            answer_tags = list(ans),
-            answer_rank = i
-          )
-        }),
-        unique_answers
-      )
-      
-      list(
-        question_tags = list(rep(group$Q[1], 2)),
-        question_rank = group$question_rank[1],
-        answers = answers_list,
-        question_group = NA
-      )
-    }),
-    unique(tab.desc$Q)
-  )
-  
-  cat(toJSON(result_list, pretty = TRUE, auto_unbox = TRUE))
-  
-  # Output JSON
-  write(toJSON(result_list, pretty = TRUE, auto_unbox = TRUE), file = paste0(dir.out,"mapping_descriptives_template.json"))
-  
+  # Map descriptives
   # Read JSON mapping descriptives
   fljson <- paste0("input/attributes_levels_mapping/mapping_descriptives.json")
   mapping <- jsonlite::read_json(fljson)
   
   
   # Loop over each question and rename
-  tab.desc[,Q_mapped := NA_character_]
-
   for (new_q_name in names(mapping)) {
     
     old_q_names <- unlist(mapping[[new_q_name]][["question_tags"]])
     
-    if (tab.desc[,any(Q %in% old_q_names & !is.na(Q_mapped))]) stop(sprintf("Already mapped: %s \n\t Please fix %s.",
-                                                                            paste0(old_q_names,collapse ="; "),
-                                                                            fljson))
+    old.nms <- names(data.desc)
+    new.nms <- old.nms
     
-    grp_q <- ifelse(is.null(mapping[[new_q_name]][["question_group"]]),NA_character_,mapping[[new_q_name]][["question_group"]])
-    tab.desc[Q %in% old_q_names,`:=` (Q_mapped = new_q_name,
-                                      question_rank_mapped = mapping[[new_q_name]][["question_rank"]],
-                                      question_group_mapped = grp_q)]
+    if (!any(new.nms %in% old_q_names)) stop(paste0('new and old names are identical `',new_q_name,"` not mapped"))
+    new.nms[new.nms %in% old_q_names] <- new_q_name
+    if (length(old.nms) != length(new.nms)) stop('new and old names should have same lengths')
+    names(data.desc) <- new.nms
     
-    # Loop over each level and rename
-    for (new_answer_name in names(mapping[[new_q_name]][["answers"]])) {
-      old_answer_names <- unlist(mapping[[new_q_name]][["answers"]][[new_answer_name]]$answer_tags)
+    # Merge duplicated columns
+    if (any(duplicated(names(data.desc)))){
+      setnames(data.desc,make.unique(names(data.desc)))
+      base_names <- gsub("\\.\\d+$", "", names(data.desc))
+      dup_names <- unique(base_names[duplicated(base_names)])
+      for (name in dup_names) {
+        cols_to_merge <- names(data.desc)[base_names == name]
+        data.desc[, (name) := do.call(fcoalesce, .SD), .SDcols = cols_to_merge]
+      }
       
-      tab.desc[Q %in% old_q_names & answer %in% old_answer_names,`:=` (answer_mapped = new_answer_name,
-                                                                       answer_rank_mapped = mapping[[new_q_name]][["answers"]][[new_answer_name]]$answer_rank)]
-
+      cols_to_drop <- names(data.desc)[base_names %in% dup_names]
+      cols_to_keep <- setdiff(names(data.desc), cols_to_drop)
+      cols_to_keep <- union(cols_to_keep, dup_names)  # keep merged columns
+      data.desc <- data.desc[, ..cols_to_keep]
     }
     
-    # if (tab.desc[,any(Q %in% old_q_names & is.na(answer_mapped) & !is.na(answer))]) stop(sprintf("Mapping missing for question `%s`, answer `%s` \n\t Please add mapping for this answer in %s.",
-    #                                                                         paste0(old_q_names,collapse ="; "),
-    #                                                                         tab.desc[Q %in% old_q_names & is.na(answer_mapped) & !is.na(answer),paste0(answer,collapse ="; ")],
-    #                                                                         fljson))
+    # Loop over each level and rename
+    if ("answers" %in% names(mapping[[new_q_name]])){
+      for (new_answer_name in names(mapping[[new_q_name]][["answers"]])) {
+        old_answer_names <- unlist(mapping[[new_q_name]][["answers"]][[new_answer_name]]$answer_tags)
+        
+        data.desc[get(new_q_name) %in% old_answer_names, (new_q_name) := new_answer_name]
+        
+      }
+    }
     
-    tab.desc[Q %in% old_q_names & is.na(answer_mapped) & !is.na(answer),answer_mapped := answer]
   }
+
+  grp.q <- sapply(mapping, \(x) x$question_group)
   
-  # Merge 
-  cols.unique <- c("Q_mapped","answer_mapped")
-  tab.desc.merged <- tab.desc[!is.na(Q_mapped),.(N = sum(N),
-                                                 N_total = sum(N_tot),
-                                                 question_rank_mapped = unique(question_rank_mapped),
-                                                 question_group_mapped = unique(question_group_mapped),
-                                                 answer_rank_mapped = unique(answer_rank_mapped)),by=cols.unique]
-  tab.desc.merged[,nrows := .N,by=cols.unique]
-  
-  if (tab.desc.merged[,any(nrows != 1)]) stop("nrows should have only ones; fix it")
-  tab.desc.merged[,nrows := NULL]
-  tab.desc.merged <- tab.desc.merged[order(question_rank_mapped,answer_rank_mapped,Q_mapped,answer_mapped),]
-  
-  #tab.desc.merged[,N_total := data[,uniqueN(`id. Response ID`)]]
-  
-  for (grp in tab.desc.merged[,unique(na.omit(question_group_mapped))]){
+  for (grp in unique(unlist(grp.q))){
     
     if (grp == "bias_monet"){
-      for (monet_question in tab.desc.merged[question_group_mapped == "bias_monet",unique(Q_mapped)]){
-        tab <- tab.desc.merged[Q_mapped == monet_question,.(answer_mapped,N)][,.(Answer = rep(as.integer(answer_mapped),N))]
+      question_cols <- names(grp.q[grp.q == grp])
+      for (monet_question in question_cols){
+        tab <- data.desc[,.(Answer = get(monet_question))]
         
         if (grepl("50 per month",monet_question)){
           nm.fig <- "wtp_50_savings_per_month"
@@ -200,11 +152,22 @@ for (survey.name in survey.names){
         sink()
         
       }
-
+      
       next
     }
     
-    tab <- tab.desc.merged[question_group_mapped == grp,.(Question = Q_mapped, Answer = answer_mapped, Share = sprintf("%.0f%% (%.d)", 100*N/N_total,N))]
+    # Subset question columns by group
+    question_cols <- names(grp.q[grp.q == "desc"])
+    
+    # Melt only those columns
+    dt_long <- melt(data.desc[, ..question_cols], 
+                    measure.vars = question_cols,
+                    variable.name = "Question", value.name = "Answer")
+    
+    # Count answer frequencies
+    tab <- dt_long[, .N, by = .(Question, Answer)][order(Question, -N)]
+    tab[,Share := sprintf("%.0f%% (%.d)",100*N/sum(N),N),by=Question]
+    
     tab <- tab %>% purrr::map_df(rev) %>% as.data.table()
     #tab[, Share := gsub("%", "\\\\%", Share)]
     
@@ -227,7 +190,7 @@ for (survey.name in survey.names){
     tab[,Question_display := gsub("On a scale from 1 to 5, to what extent do you agree with the following statements? ","",Question_display,fixed = TRUE)]
     
     
-    tab.body <- tab[, .(Question = c(Question_display[1], Answer),Share = c("", Share)), by = .(Group = Question)][,-"Group"]
+    tab.body <-  tab[, .(Question2 = c(as.character(head(Question,1)), Answer),Share = c("", Share)), by = .(Group = Question)][,-"Group"]
     latex_body <- knitr::kable(tab.body,
                                format = "latex",
                                longtable  = TRUE,
@@ -257,7 +220,7 @@ for (survey.name in survey.names){
               pk = "package")
   
   # logit args
-  ref.lvl <- "_1$"
+  ref.lvl <- "_2$"
   stats.table <- c("S.E." = "({std.error}){stars}")
   
   # WTP args
@@ -276,9 +239,9 @@ for (survey.name in survey.names){
   ## Insulation results ----
   att.mn <- c("comfort","support","nuisance","co2","one_time_amount","heating_costs")
   game <- "insu"
-  dt.insu <- get_df_logit(data,game,att.mn,cst,ref.lvl)
+  dt.insu <- get_df_logit(data,game,att.mn,cst,ref.lvl,data.desc)
   
-  col.att.int <- names(dt.insu)[!(names(dt.insu) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx"))]
+  col.att.int <- names(dt.insu)[!(names(dt.insu) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("^desc_",names(dt.insu))]
   col.ref <- paste0(unique(gsub("_[0-9]$","",col.att.int[grepl("_[0-9]$",col.att.int)])),gsub(".*(_[0-9]).*","\\1",ref.lvl))
   
   logit_interact.insu <- mlogit(
@@ -357,12 +320,16 @@ for (survey.name in survey.names){
   
   dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
   
+  ## Insulation heterogeneity ----
+  
+  
+  
   ## Tech results ----
   att.mn <- c("support","nuisance","supplier","power_outages","co2","one_time_amount","heating_costs")
   game <- "tech"
-  dt.tech <- get_df_logit(data,game,att.mn,cst,ref.lvl)
+  dt.tech <- get_df_logit(data,game,att.mn,cst,ref.lvl,data.desc)
   
-  col.mdl <- names(dt.tech)[!(names(dt.tech) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx"))]
+  col.mdl <- names(dt.tech)[!(names(dt.tech) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("^desc_",names(dt.tech))]
   col.interact.tech <- col.mdl[grepl("cost",col.mdl)]
   col.rest <- setdiff(col.mdl,col.interact.tech)
   col.rest[col.rest == "tech"] <- "factor(tech)"
@@ -567,10 +534,10 @@ for (survey.name in survey.names){
     tab.simu_wide[,Attribute := if_else(cl == "u","utility","probability")]
     
     pack_wide <- rbindlist(list(pack_wide,tab.simu_wide),use.names = TRUE,fill = TRUE)
-  
+    
   }
   pack_wide <- pack_wide[order(game,Attribute %in% c("utility","probability"),Attribute == "None"),]
-
+  
   for (i in 1:dim(pack_wide)[1]){
     pack_wide[i,(names(pack_wide)[grepl("package",names(pack_wide))]) := lapply(.SD,\(x) gsub(paste0("(",Attribute,": )| (\\(reference\\))"),"",x)),.SDcols = (names(pack_wide)[grepl("package",names(pack_wide))])]
   }

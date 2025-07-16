@@ -143,7 +143,7 @@ simu_subsid <- function(cf.simu,invest.lvl,ref.invest.wtp,invest.name,game,ref.l
 
 get_id_question <- function(choice.str) gsub("^(.*?)\\..*$","\\1",choice.str)
 
-transform_to_mlogit_data <- function(dt.ce.int,ref.lvl.reg){
+transform_to_mlogit_data <- function(dt.ce.int,ref.lvl.reg,data.desc = NULL){
   # Unique ID
   dt.ce.int[, qid := paste(id_respondent, id_question, sep = "_")]
   
@@ -167,6 +167,13 @@ transform_to_mlogit_data <- function(dt.ce.int,ref.lvl.reg){
   dt.ce.dum[,qid_int := as.integer(factor(qid))]
   dt.ce.dum <- dt.ce.dum[order(qid,-package),]
   dt.ce.dum[,choice := as.integer(choice)]
+  
+  if(!is.null(data.desc)){
+    setnames(data.desc,names(data.desc),trimws(names(data.desc)))
+    cols.to.merge <- names(data.desc)[!(names(data.desc) %in% names(dt.ce.dum))]
+    dt.ce.dum[data.desc,(paste0("desc_",cols.to.merge)) := mget(paste0("i.",cols.to.merge)),on = c("id_respondent" = "Response ID")]
+    col.att.dum <- c(col.att.dum,paste0("desc_",cols.to.merge))
+  }
   
   dt.ce.to.logit <- dfidx(as.data.frame(dt.ce.dum[,.SD,.SDcols = c("qid_int","package_int",cst$ch,col.att.dum) ]),shape = "long",choice = cst$ch, idx = c("qid_int","package_int"))
   
@@ -295,7 +302,7 @@ merge_choices_and_situations <- function(data,game,str_question,n.att,n.choices,
   return(dt.ce)
 }
 
-get_df_logit <- function(data,game,att.mn,cst,ref.lvl){
+get_df_logit <- function(data,game,att.mn,cst,ref.lvl,data.desc = NULL){
   
   if (game == "insu"){
     str_question = "Home improvement"
@@ -312,6 +319,6 @@ get_df_logit <- function(data,game,att.mn,cst,ref.lvl){
   }
   dt.insu <- merge_choices_and_situations(data,game,str_question,n.att,n.choices,n.headers,cst,none_package_is_one_level)
   
-  dt.insu.to.logit <- transform_to_mlogit_data(dt.insu,ref.lvl)
+  dt.insu.to.logit <- transform_to_mlogit_data(dt.insu,ref.lvl, data.desc)
   return(dt.insu.to.logit)
 }
