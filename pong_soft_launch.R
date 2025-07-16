@@ -452,6 +452,25 @@ for (survey.name in survey.names){
   
   dt.coefs <- dt.coefs[order(game,grepl("cost",Attribute),Attribute),]
   
+  # Table for BEcrowd ----
+  dt.bcrwd <- dt.coefs[game == "insu",]
+  
+  for (i in 1:dim(dt.bcrwd)[1]){
+    dt.bcrwd[i,(names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))]) := lapply(.SD,\(x) stringr::str_to_sentence(gsub(paste0("(",Attribute,": )| (\\(reference\\))"),"",x))),.SDcols = (names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))])]
+  }
+  
+  dt.bcrwd[Attribute != "None",Attribute_int := .GRP,by=Attribute]
+  dt.bcrwd[Attribute == "None",Attribute_int := 0]
+  dt.bcrwd[,Level_int := (1:.N)-1,by=Attribute]
+  
+  dt.bcrwd.val <- dt.bcrwd[,.(Attribute_int = 99,Attribute = "Valuation",Term = "thousand euro",Level_int = 1,Estimate = Estimate[Attribute == "One time amount" & Term == "10,000 euros."]/5)]
+  dt.bcrwd <- rbindlist(list(dt.bcrwd,dt.bcrwd.val),use.names = TRUE,fill = TRUE)
+  
+  dt.bcrwd.to.csv <- dt.bcrwd[,.(attribute_nr = Attribute_int,attribute_text = Attribute, level_nr = Level_int,level_text = Term,weight = Estimate)]
+  dt.bcrwd.to.csv[is.na(weight),weight := 0]
+  
+  write.csv2(dt.bcrwd.to.csv,paste0(dir.out, "becrowd_table.csv"),row.names = FALSE,quote = FALSE)
+  
   # IRR ----
   
   dt.coefs[grepl(reg.onetimecosts,Term),unit := 1000]
@@ -515,6 +534,51 @@ for (survey.name in survey.names){
   
   print_table(dt.wtp[,.(Term,`WTP (1,000 euro)`)],"results_wtp.tex")
   
+  
+  ### Simulations ----
+  dt.cf.simu <- copy(dt.coefs)
+  dt.cf.simu[is.na(Estimate) & grepl("reference",Term),Estimate := 0]
+  
+  pack <- dt.cf.simu[,.(level = if_else(all(Attribute != "None"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
+  pack[,package := "package1"]
+  
+  pack.tmp <- dt.cf.simu[,.(level = if_else(all(Attribute != "None"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
+  pack.tmp[,package := "package2"]
+  pack <- rbindlist(list(pack,pack.tmp))
+  
+  pack.tmp <- dt.cf.simu[,.(level = if_else(all(Attribute == "None"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
+  pack.tmp[,package := "none"]
+  pack <- rbindlist(list(pack,pack.tmp))
+  
+  # Choose either HP or HT
+  pack[game == "tech",Attribute := if_else(grepl(sample(c("Heat network","Heat pump"),1),Attribute),NA_character_,Attribute),by=package]
+  pack <- pack[!is.na(Attribute),]
+  
+  pack[dt.cf.simu,Estimate := i.Estimate,on = c("level" = "Term","game","Attribute")]
+  
+  tab.simu <- pack[,.(u = sum(Estimate,na.rm=TRUE)) ,by=.(package,game)][,p := exp(u)/sum(exp(u)),by=game]
+  
+  pack_wide <- reshape(pack[,.(Attribute,game,level,package)],direction = "wide",idvar = c("game","Attribute"),timevar = "package")
+  setnames(pack_wide,names(pack_wide),gsub("level\\.","",names(pack_wide)))
+  
+  for (cl in c("u","p")){
+    tab.simu_wide <- reshape(tab.simu[,.(package,game,cl = round(get(cl),2))],direction = "wide",idvar = c("game"),timevar = "package")
+    setnames(tab.simu_wide,names(tab.simu_wide),gsub("cl\\.","",names(tab.simu_wide)))
+    tab.simu_wide[,Attribute := if_else(cl == "u","utility","probability")]
+    
+    pack_wide <- rbindlist(list(pack_wide,tab.simu_wide),use.names = TRUE,fill = TRUE)
+  
+  }
+  pack_wide <- pack_wide[order(game,Attribute %in% c("utility","probability"),Attribute == "None"),]
+
+  for (i in 1:dim(pack_wide)[1]){
+    pack_wide[i,(names(pack_wide)[grepl("package",names(pack_wide))]) := lapply(.SD,\(x) gsub(paste0("(",Attribute,": )| (\\(reference\\))"),"",x)),.SDcols = (names(pack_wide)[grepl("package",names(pack_wide))])]
+  }
+  
+  print(pack_wide)
+  sink(paste0(dir.out, "results_simu.tex"))
+  print(xtable::xtable(pack_wide), type = "latex", size = "\\tiny", include.rownames = FALSE)
+  sink()
   
 }
 
