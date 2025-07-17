@@ -80,7 +80,7 @@ for (survey.name in survey.names){
   
   # Map descriptives
   # Read JSON mapping descriptives
-  fljson <- paste0("input/attributes_levels_mapping/mapping_descriptives.json")
+  fljson <- paste0("input/mapping_descriptives.json")
   mapping <- jsonlite::read_json(fljson)
   
   
@@ -251,8 +251,9 @@ for (survey.name in survey.names){
   col.att.int <- names(dt.insu)[!(names(dt.insu) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("^desc_",names(dt.insu))]
   col.ref <- paste0(unique(gsub("_[0-9]$","",col.att.int[grepl("_[0-9]$",col.att.int)])),gsub(".*(_[0-9]).*","\\1",ref.lvl))
   
+  formula.insu <- paste0("choice ~ ",paste0(col.att.int,collapse = " + ")," | 0 ")
   logit_interact.insu <- mlogit(
-    formula = as.formula(paste0("choice ~ ",paste0(col.att.int,collapse = " + ")," | 0 ")),
+    formula = as.formula(formula.insu),
     dt.insu
   )
   
@@ -320,9 +321,6 @@ for (survey.name in survey.names){
     return(df)
   }
   
-  
-  
-  
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
   
   dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
@@ -336,7 +334,7 @@ for (survey.name in survey.names){
       setnames(dt.insu.tmp, old = grp.ht.list[[grp.ht]], new = grp.ht)
       
       logit_interact.insu.ht <- mlogit(
-        formula = as.formula(paste0("choice ~ ",paste0(gsub("none",paste0("`",grp.ht,"`:none"),col.att.int),collapse = " + ")," | 0 ")),
+        formula = as.formula(gsub("none",paste0("`",grp.ht,"`:none"),formula.insu)),
         dt.insu.tmp
       )
       logit.insu.list[[grp.ht]] <- logit_interact.insu.ht
@@ -379,8 +377,10 @@ for (survey.name in survey.names){
   col.rest <- setdiff(col.mdl,col.interact.tech)
   col.rest[col.rest == "tech"] <- "factor(tech)"
   
+  formula.tech <- paste0("choice ~ ",paste0(col.rest[col.rest != "none"],collapse = " + ")," + ",paste0(paste0(col.interact.tech,":factor(tech)"),collapse = " + ")," + none| 0 ")
+  
   logit_interact.tech <- mlogit(
-    formula = as.formula(paste0("choice ~ ",paste0(col.rest[col.rest != "none"],collapse = " + ")," + ",paste0(paste0(col.interact.tech,":factor(tech)"),collapse = " + ")," + none| 0 ")),
+    formula = as.formula(formula.tech),
     dt.tech
   )
   
@@ -412,6 +412,53 @@ for (survey.name in survey.names){
   
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
   
+  ## Tech heterogeneity ----
+  run_ht_tech <- function(grp.ht.list,run.name){
+    logit.tech.list <- list(Main = logit_interact.tech)
+    coef_names_ht <- c()
+    for (grp.ht in names(grp.ht.list)){
+      dt.tech.tmp <- copy(dt.tech)
+      setnames(dt.tech.tmp, old = grp.ht.list[[grp.ht]], new = grp.ht)
+      
+      logit_interact.tech.ht <- mlogit(
+        formula = as.formula(gsub("none",paste0("`",grp.ht,"`:none"),formula.tech)),
+        dt.tech.tmp
+      )
+      logit.tech.list[[grp.ht]] <- logit_interact.tech.ht
+      nm.tmp <- names(logit_interact.tech.ht$coefficients)
+      nm.tmp.org <- nm.tmp[grepl(grp.ht,nm.tmp)]
+      nm.tmp.new <- gsub(grp.ht,"",nm.tmp.org)
+      nm.tmp.new <- gsub("``","",nm.tmp.new)
+      names(nm.tmp.new) <- gsub("`","",nm.tmp.org)
+      coef_names_ht <- c(coef_names_ht,nm.tmp.new)
+    }
+    
+    tab.tex <- modelsummary::modelsummary(logit.tech.list, 
+                                          coef_rename = c(tech.map[names(tech.map) %in% col.att.int],coef_names_ht), 
+                                          add_rows = `attr<-`(do.call(cbind, c(list(rows.refs), rep(list(rows.refs[names(rows.refs) != "term"]), length(logit.tech.list)-1))), "position", attr(rows.refs, "position")),
+                                          shape = term ~ statistic,
+                                          estimate = "{estimate}",
+                                          statistic = stats.table,
+                                          output = "latex",
+                                          stars = c("*" = .1, "**" = .05, "***" = 0.01)) 
+    tab.tex <- add_tinysize(tab.tex,"^\\\\begin\\{table\\}")
+    lines <- unlist(strsplit(tab.tex, "\n"))
+    filtered_lines <- lines[!grepl("\\\\begin\\{table\\}|\\\\end\\{table\\}", lines)]
+    
+    writeLines(filtered_lines, paste0(dir.out, "results_heterogeneity_", game,"_",run.name, ".tex"))
+    
+  }
+  
+  grp.ht.list <- fromJSON("input/mlogit_heterogeneity_groups.json")
+  
+  for (grp.ht in names(grp.ht.list)){
+    run_ht_tech(grp.ht.list[[grp.ht]],grp.ht)
+  }
+  
+  
+  
+  
+  # Coef table ----
   
   print(dt.coefs)
   
