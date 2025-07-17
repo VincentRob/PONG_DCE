@@ -1,6 +1,8 @@
 {
   "house": {
     "Solar": "desc_Do you have solar panels?",
+    "Hoorn":"",
+    "Construction year":"desc_What is the construction period of your dwelling?",
     "Wall insulation": "desc_What sustainability improvements have you already made? Hollow wall insulation",
     "Additional insulation": "desc_What sustainability improvements have you already made? Additional insulation",
     "Roof/floor insulation": "desc_What sustainability improvements have you already made? Roof and/or floor insulation",
