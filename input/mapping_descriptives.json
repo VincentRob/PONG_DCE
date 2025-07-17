@@ -113,24 +113,6 @@
     "question_rank": 7,
     "question_group": "desc"
   },
-  " Referrer URL": {
-    "question_tags": [
-      [
-        " Referrer URL",
-        " Referrer URL"
-      ]
-    ],
-    "question_rank": 3,
-    "answers": {
-      "android-app://com.google.android.googlequicksearchbox/": {
-        "answer_tags": [
-          "android-app://com.google.android.googlequicksearchbox/"
-        ],
-        "answer_rank": 2
-      }
-    },
-    "question_group": null
-  },
   " In your opinion, how many people are positive about phasing out natural gas?": {
     "question_tags": [
       [
@@ -263,42 +245,6 @@
       "Very positive": {
         "answer_tags": [
           "Very positive"
-        ],
-        "answer_rank": 5
-      }
-    },
-    "question_group": "bias"
-  },
-  " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?": {
-    "question_tags": [
-      [
-        " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?",
-        " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?"
-      ]
-    ],
-    "question_rank": 7,
-    "answers": {
-      "Yes about heat pump": {
-        "answer_tags": [
-          "Yes about heat pump"
-        ],
-        "answer_rank": 2
-      },
-      "Yes about both": {
-        "answer_tags": [
-          "Yes about both"
-        ],
-        "answer_rank": 3
-      },
-      "No": {
-        "answer_tags": [
-          "No"
-        ],
-        "answer_rank": 4
-      },
-      "Yes about heat network": {
-        "answer_tags": [
-          "Yes about heat network"
         ],
         "answer_rank": 5
       }

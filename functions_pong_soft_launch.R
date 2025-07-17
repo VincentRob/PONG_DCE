@@ -15,9 +15,25 @@ add_scriptsize <- function(tab, insert_after_pattern) {
   return(paste(lines, collapse = "\n"))
 }
 
+add_tinysize <- function(tab, insert_after_pattern) {
+  # Split the LaTeX content into lines
+  lines <- strsplit(tab, "\n")[[1]]
+  
+  # Find the line index to insert \scriptsize after
+  insert_idx <- grep(insert_after_pattern, lines)
+  
+  # Insert \scriptsize if a match is found
+  if (length(insert_idx) > 0) {
+    lines <- append(lines, "\\tiny", after = insert_idx)
+  }
+  
+  # Recombine the lines into a single LaTeX string
+  return(paste(lines, collapse = "\n"))
+}
+
 get_json_mapping_4_coefs <- function(game,col.att.int){
   # Function to replace number with label
-  fljson <- paste0("input/attributes_levels_mapping/mapping_",game,".json")
+  fljson <- paste0("input/mapping_",game,".json")
   mapping <- jsonlite::read_json(fljson)
   
   # Reverse the mapping: integer -> label
@@ -84,9 +100,12 @@ get_row_refs <- function(coef_names,col.att.int,col.ref,ref.lvl,stats.table = NA
       rows.refs[stats.table[[1]]] = ""
     }
   }
-  rows.refs.pos <- sapply(gsub(ref.lvl,"",names(coef_names[names(coef_names) %in% col.ref])),\(x) first(which(grepl(x,names(coef_names[names(coef_names) %in% col.att.int]),fixed = TRUE))))
+  
+  shft.tmp <- as.integer(gsub(".*([0-9]{1}).*","\\1",ref.lvl)) - 1 
+  
+  rows.refs.pos <- sapply(gsub(ref.lvl,"",names(coef_names[names(coef_names) %in% col.ref])),\(x) first(which(grepl(x,names(coef_names[names(coef_names) %in% col.att.int]),fixed = TRUE))) + shft.tmp)
   rows.refs.pos <- rows.refs.pos + 0:(length(rows.refs.pos)-1)
-  attr(rows.refs, "position") <- rows.refs.pos 
+  attr(rows.refs, "position") <- rows.refs.pos
   return(rows.refs)
 }
 
@@ -226,7 +245,7 @@ merge_choices_and_situations <- function(data,game,str_question,n.att,n.choices,
   dt.situ <- data_to_choice_situations(choice.str,n.att, n.choices, n.headers,none_package_is_one_level)
   
   # Read the JSON with integer values filled in
-  fljson <- paste0("input/attributes_levels_mapping/mapping_",game,".json")
+  fljson <- paste0("input/mapping_",game,".json")
   category_map <- jsonlite::read_json(fljson)
   
   # rename attributes
@@ -302,7 +321,7 @@ merge_choices_and_situations <- function(data,game,str_question,n.att,n.choices,
   return(dt.ce)
 }
 
-get_df_logit <- function(data,game,att.mn,cst,ref.lvl,data.desc = NULL){
+get_df_logit <- function(data,game,cst,ref.lvl,data.desc = NULL){
   
   if (game == "insu"){
     str_question = "Home improvement"

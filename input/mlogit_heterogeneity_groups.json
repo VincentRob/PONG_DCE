@@ -1,0 +1,33 @@
+{
+  "house": {
+    "Solar": "desc_Do you have solar panels?",
+    "Wall insulation": "desc_What sustainability improvements have you already made? Hollow wall insulation",
+    "Additional insulation": "desc_What sustainability improvements have you already made? Additional insulation",
+    "Roof/floor insulation": "desc_What sustainability improvements have you already made? Roof and/or floor insulation",
+    "WOZ": "desc_What is the WOZ value of your dwelling?"
+  },
+  "hh": {
+    "Device": "desc_On which device are you playing this choice game?",
+    "Education": "desc_What is your highest completed education?",
+    "Gender": "desc_Which gender do you identify with the most?",
+    "Household": "desc_Who is currently part of your household?",
+    "Age": "desc_To which age group do you belong?",
+    "Employment": "desc_Which best describes your employment situation?"
+  },
+  "bias": {
+    "Municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my municipality]",
+    "Neighborhood": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my neighborhood]",
+    "Capable municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements?  [The municipality is best able to determine the most affordable way to phase out natural gas]",
+    "Capable individuals": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements?  [Residents are capable of deciding for themselves how to phase out natural gas]",
+    "Heat price": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements?  [Heat prices should be as equal as possible for everyone in the municipality]",
+    "Climate": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements?  [I am climate-conscious]",
+    "Reactance municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements?  [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]"
+  },
+  "bias2": {
+    "PONG alternatives": "desc_Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?",
+    "People PONG positive": "desc_In your opinion, how many people are positive about phasing out natural gas?",
+    "DH opinion": "desc_What is your opinion on district heating after having heard everything?",
+    "HP opinion": "desc_What is your opinion on heat pumps after having heard everything?",
+    "Lottery": "desc_lottery_quantile"
+  }
+}

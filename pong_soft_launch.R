@@ -92,7 +92,7 @@ for (survey.name in survey.names){
     old.nms <- names(data.desc)
     new.nms <- old.nms
     
-    if (!any(new.nms %in% old_q_names)) stop(paste0('new and old names are identical `',new_q_name,"` not mapped"))
+    if (!any(new.nms %in% old_q_names)) stop(paste0('`',new_q_name,"` not mapped"))
     new.nms[new.nms %in% old_q_names] <- new_q_name
     if (length(old.nms) != length(new.nms)) stop('new and old names should have same lengths')
     names(data.desc) <- new.nms
@@ -124,7 +124,7 @@ for (survey.name in survey.names){
     }
     
   }
-
+  
   grp.q <- sapply(mapping, \(x) x$question_group)
   
   for (grp in unique(unlist(grp.q))){
@@ -183,6 +183,9 @@ for (survey.name in survey.names){
     # Re order answers within each question
     tab <- tab[, .SD[order(Answer)], by = Question]
     
+    tab[,Answer := gsub("[^\x01-\x7F]", "", Answer)] 
+    
+    
     # Blank out repeated question values for LaTeX formatting
     tab[, Question_display := ifelse(.I == 1 | Question != shift(Question), Question, "")]
     
@@ -207,7 +210,12 @@ for (survey.name in survey.names){
     
   }
   
+  # Lottery quartiles ----
+  nm.lottery <- names(data.desc)[grepl("lottery",names(data.desc))]
+  data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+  
   # Results ----
+  
   
   options(modelsummary_format_numeric_latex = "plain")
   #options(modelsummary_align = "ldd")
@@ -237,9 +245,8 @@ for (survey.name in survey.names){
   dt.coefs <- data.table()
   
   ## Insulation results ----
-  att.mn <- c("comfort","support","nuisance","co2","one_time_amount","heating_costs")
   game <- "insu"
-  dt.insu <- get_df_logit(data,game,att.mn,cst,ref.lvl,data.desc)
+  dt.insu <- get_df_logit(data,game,cst,ref.lvl,data.desc)
   
   col.att.int <- names(dt.insu)[!(names(dt.insu) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("^desc_",names(dt.insu))]
   col.ref <- paste0(unique(gsub("_[0-9]$","",col.att.int[grepl("_[0-9]$",col.att.int)])),gsub(".*(_[0-9]).*","\\1",ref.lvl))
@@ -321,15 +328,53 @@ for (survey.name in survey.names){
   dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
   
   ## Insulation heterogeneity ----
+  run_ht_insu <- function(grp.ht.list,run.name){
+    logit.insu.list <- list(Main = logit_interact.insu)
+    coef_names_ht <- c()
+    for (grp.ht in names(grp.ht.list)){
+      dt.insu.tmp <- copy(dt.insu)
+      setnames(dt.insu.tmp, old = grp.ht.list[[grp.ht]], new = grp.ht)
+      
+      logit_interact.insu.ht <- mlogit(
+        formula = as.formula(paste0("choice ~ ",paste0(gsub("none",paste0("`",grp.ht,"`:none"),col.att.int),collapse = " + ")," | 0 ")),
+        dt.insu.tmp
+      )
+      logit.insu.list[[grp.ht]] <- logit_interact.insu.ht
+      nm.tmp <- names(logit_interact.insu.ht$coefficients)
+      nm.tmp.org <- nm.tmp[grepl(grp.ht,nm.tmp)]
+      nm.tmp.new <- gsub(grp.ht,"",nm.tmp.org)
+      nm.tmp.new <- gsub("``","",nm.tmp.new)
+      names(nm.tmp.new) <- gsub("`","",nm.tmp.org)
+      coef_names_ht <- c(coef_names_ht,nm.tmp.new)
+    }
+    
+    tab.tex <- modelsummary::modelsummary(logit.insu.list, 
+                                          coef_rename = c(coef_names[names(coef_names) %in% col.att.int],coef_names_ht), 
+                                          add_rows = `attr<-`(do.call(cbind, c(list(rows.refs), rep(list(rows.refs[names(rows.refs) != "term"]), length(logit.insu.list)-1))), "position", attr(rows.refs, "position")),
+                                          shape = term ~ statistic,
+                                          estimate = "{estimate}",
+                                          statistic = stats.table,
+                                          output = "latex",
+                                          stars = c("*" = .1, "**" = .05, "***" = 0.01)) 
+    tab.tex <- add_tinysize(tab.tex,"^\\\\begin\\{table\\}")
+    lines <- unlist(strsplit(tab.tex, "\n"))
+    filtered_lines <- lines[!grepl("\\\\begin\\{table\\}|\\\\end\\{table\\}", lines)]
+    
+    writeLines(filtered_lines, paste0(dir.out, "results_heterogeneity_", game,"_",run.name, ".tex"))
+    
+  }
   
+  grp.ht.list <- fromJSON("input/mlogit_heterogeneity_groups.json")
   
+  for (grp.ht in names(grp.ht.list)){
+    run_ht_insu(grp.ht.list[[grp.ht]],grp.ht)
+  }
   
   ## Tech results ----
-  att.mn <- c("support","nuisance","supplier","power_outages","co2","one_time_amount","heating_costs")
   game <- "tech"
-  dt.tech <- get_df_logit(data,game,att.mn,cst,ref.lvl,data.desc)
+  dt.tech <- get_df_logit(data,game,cst,ref.lvl,data.desc)
   
-  col.mdl <- names(dt.tech)[!(names(dt.tech) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("^desc_",names(dt.tech))]
+  col.mdl <- names(dt.tech)[!(names(dt.tech) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("(^desc_)|(^support_)",names(dt.tech))]
   col.interact.tech <- col.mdl[grepl("cost",col.mdl)]
   col.rest <- setdiff(col.mdl,col.interact.tech)
   col.rest[col.rest == "tech"] <- "factor(tech)"
