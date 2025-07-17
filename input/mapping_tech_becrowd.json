@@ -1,0 +1,14 @@
+{
+  "attribute_text": {
+    "Supplier": "Who is the heat supplier?",
+    "Nuisance": "Is there nuisance in my neighbourhood due to phasing out of natural gas?",
+    "Power outages": "Are there any power outages in the near future?",
+    "Heat network one time costs": "What is the one-time amount I have to pay?",
+    "Heat pump one time costs": "What is the one-time amount I have to pay?",
+    "Heat network heating costs": "What are my heating costs?",
+    "Heat pump heating costs": "What are my heating costs?",
+    "None": "None of these"
+  },
+  "level_text": {
+  }
+}

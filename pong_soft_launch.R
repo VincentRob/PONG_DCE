@@ -512,23 +512,72 @@ for (survey.name in survey.names){
   dt.coefs <- dt.coefs[order(game,grepl("cost",Attribute),Attribute),]
   
   # Table for BEcrowd ----
-  dt.bcrwd <- dt.coefs[game == "insu",]
+  gm = "tech"
+  dt.bcrwd <- dt.coefs[game == gm,]
   
   for (i in 1:dim(dt.bcrwd)[1]){
     dt.bcrwd[i,(names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))]) := lapply(.SD,\(x) stringr::str_to_sentence(gsub(paste0("(",Attribute,": )| (\\(reference\\))"),"",x))),.SDcols = (names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))])]
   }
   
-  dt.bcrwd[Attribute != "None",Attribute_int := .GRP,by=Attribute]
+  dt.bcrwd[Attribute != "None",Attribute_int := 1,by=Attribute]
   dt.bcrwd[Attribute == "None",Attribute_int := 0]
   dt.bcrwd[,Level_int := (1:.N)-1,by=Attribute]
   
-  dt.bcrwd.val <- dt.bcrwd[,.(Attribute_int = 99,Attribute = "Valuation",Term = "thousand euro",Level_int = 1,Estimate = Estimate[Attribute == "One time amount" & Term == "10,000 euros."]/5)]
+  dt.bcrwd.val <- dt.bcrwd[,.(Attribute_int = 99,Attribute = "Valuation",Term = "thousand euro",Level_int = 1,Estimate = NA_real_)]
   dt.bcrwd <- rbindlist(list(dt.bcrwd,dt.bcrwd.val),use.names = TRUE,fill = TRUE)
   
   dt.bcrwd.to.csv <- dt.bcrwd[,.(attribute_nr = Attribute_int,attribute_text = Attribute, level_nr = Level_int,level_text = Term,weight = Estimate)]
   dt.bcrwd.to.csv[is.na(weight),weight := 0]
   
-  write.csv2(dt.bcrwd.to.csv,paste0(dir.out, "becrowd_table.csv"),row.names = FALSE,quote = FALSE)
+  # Remove nuisance
+  if (gm == "insu"){
+    dt.bcrwd.to.csv <- dt.bcrwd.to.csv[attribute_text != "Nuisance"]
+  }
+  
+  # Distinguish HP and HN
+  if (gm == "tech"){
+    dt.bcrwd.to.csv[, tech := stringr::str_extract(attribute_text, "Heat pump|Heat network")]
+  }
+  
+  names.bcrwd <- read_json(paste0("input/mapping_",gm,"_becrowd.json"))
+  for (cl in names(names.bcrwd)){
+    old.nm <- names(names.bcrwd[[cl]])
+    if (length(old.nm)>0){
+      if (cl == "attribute_text"){
+        dt.bcrwd.to.csv <- dt.bcrwd.to.csv[order(match(get(cl),old.nm)),]
+        dt.bcrwd.to.csv[get(cl) %in% old.nm & get(cl) != "None", attribute_nr := .GRP,by=attribute_text]
+      }
+      dt.bcrwd.to.csv[get(cl) %in% old.nm, (cl) := as.character(names.bcrwd[[cl]][get(cl)])]
+      
+    }
+  }
+  
+  if ("tech" %in% names(dt.bcrwd.to.csv)){
+    for (tc in dt.bcrwd.to.csv[,unique(na.omit(tech))]){
+      dt.bcrwd.to.csv.tec <- dt.bcrwd.to.csv[is.na(tech) | tech == tc,][,-"tech"]
+      if (tc == "Heat pump"){
+        dt.bcrwd.to.csv.tec[level_text == "None", weight := weight - dt.bcrwd.to.csv.tec[level_text == "Heat pump",weight]]
+        dt.bcrwd.to.csv.tec <- dt.bcrwd.to.csv.tec[level_text != "Heat pump"]
+      }
+      dt.bcrwd.to.csv.tec[!(attribute_text %in% c("None of these","Valuation")), attribute_nr := .GRP,by=attribute_text]
+      
+      lvl <- if_else(tc == "Heat pump",invest.list.lvl$heat_pumps,invest.list.lvl$heat_networks)/1000
+      
+      dt.bcrwd.to.csv.tec[attribute_text == "Valuation", weight := dt.bcrwd.to.csv.tec[attribute_text == "What is the one-time amount I have to pay?" & level_nr == 0,weight]/lvl]
+      
+      write.csv(dt.bcrwd.to.csv.tec,paste0(dir.out, "becrowd_",gm,"_",gsub(" ","_",tolower(tc)),"_table.csv"),row.names = FALSE,quote = TRUE)
+      
+    }
+  } else {
+    # Add valuation
+    dt.bcrwd.to.csv[attribute_text == "Valuation", weight := dt.bcrwd.to.csv[attribute_text == "What will it cost me to insulate my house?" & level_text == "5,000 euros.",weight]/(invest.list.lvl$insu/1000)]
+    
+    write.csv(dt.bcrwd.to.csv,paste0(dir.out, "becrowd_",gm,"_table.csv"),row.names = FALSE,quote = TRUE)
+  }
+  
+  
+
+  
   
   # IRR ----
   

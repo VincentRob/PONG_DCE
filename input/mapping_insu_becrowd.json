@@ -1,0 +1,13 @@
+{
+  "attribute_text": {
+    "Comfort": "Does insulation improve comfort?",
+    "Support": "Do I receive support from the municipality?",
+    "Nuisance": "How long will works last?",
+    "Co2": "What are the yearly CO2 savings?",
+    "One time amount": "What will it cost me to insulate my house?",
+    "Heating costs": "What are my heating costs?",
+    "None": "None of these"
+  },
+  "level_text": {
+  }
+}
