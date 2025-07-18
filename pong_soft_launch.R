@@ -16,9 +16,12 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("panelclix_hoorn","full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("panelclix_hoorn")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
+
+# For heterogeneity analysis, replace missing by Hoorn when applicable
+hoorn.file.name <- "Hoorn_complete" 
 
 for (survey.name in survey.names){
   
@@ -210,11 +213,82 @@ for (survey.name in survey.names){
     
   }
   
-  # Lottery quartiles ----
+  # Groups respondents ----
   nm.lottery <- names(data.desc)[grepl("lottery",names(data.desc))]
   data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+  data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+  
+  data.desc[,WOZ := as.integer(stringr::str_extract(` What is the WOZ value of your dwelling?`,"[0-9]{3}"))]
+  data.desc[,WOZ_quantile := cut(WOZ,breaks = quantile(WOZ,c(0,0.33,0.66,1),na.rm=TRUE),include.lowest=TRUE)]
+  
+  nm.var <- " What is the construction period of your dwelling?"
+  data.desc[, constr_period := fcase(
+    get(nm.var) %in% c("1945 or before"), "1945 or before",
+    get(nm.var) %in% c("1946-1970", "1971-1990"), "1946-1990",
+    get(nm.var) %in% c("1991-2005"), "1991-2005",
+    get(nm.var) %in% c( "2006-2025"),  "2006-2025")]
+  
+  nm.var <- " Which best describes your employment situation?"
+  nm.var2 <- " Which best describes the employment situation of your partner?"
+  job.var.work <- c("Working - Full Time (at least 32 hours per week)","Working - Part Time")
+  job.var.home <- c("Keeping house or being home maker",
+                    "Retired",
+                    "Unemployed and looking for work",
+                    "Receiving/Awaiting approval for disability payments")
+  
+  data.desc[, work_status := fcase(
+    get(nm.var) %in% job.var.home & (get(nm.var2) %in% job.var.home | is.na(get(nm.var2))), "all_home",
+    (get(nm.var) %in% job.var.home & get(nm.var2) %in% job.var.work) | (get(nm.var2) %in% job.var.home & get(nm.var) %in% job.var.work), "one_working_one_home",
+    get(nm.var) %in% job.var.work & get(nm.var2) %in% job.var.work, "two_working",
+    get(nm.var) %in% job.var.work & is.na(get(nm.var2)), "single_worker",
+    !is.na(get(nm.var)) | !is.na(get(nm.var2)),"other"
+  )]
+  print(data.desc[,.N,by=.(work_status,get(nm.var),get(nm.var2))][order(work_status,N)])
+  
+  # Age
+  nm.var <- " To which age group do you belong?"
+  nm.var2 <- " To which age group does your partner belong?"
+  data.desc[, age_max := max(c(stringr::str_extract(get(nm.var),"[0-9]{2}"),
+                               stringr::str_extract(get(nm.var2),"[0-9]{2}")),
+                             na.rm=TRUE),by=" Response ID"]
+  print(data.desc[,.N,by=.(age_max,get(nm.var),get(nm.var2))][order(age_max,N)])
+  
+  
+  # Household type 
+  nm.var <- " Who is currently part of your household?"
+  data.desc[, hh_type := if_else(grepl("child",get(nm.var)),"Children","No children")]
+  
+  # Device
+  nm.var <- " On which device are you playing this choice game?"
+  data.desc[, device := if_else(grepl("Smartphone",get(nm.var)),"Smartphone","Computer/tablet")]
+  
+  # Education
+  nm.var <- " What is your highest completed education?"
+  data.desc[, education := fcase(
+    grepl("master",get(nm.var)), "master or higher",
+    grepl("bachelor",get(nm.var)), "bachelor",
+    grepl("HAVO",get(nm.var)), "HAVO",
+    grepl("VMBO|Primary",get(nm.var)), "VMBO or lower"
+    
+  )]
+  print(data.desc[,.N,by=.(education,get(nm.var))][order(education,N)])
+  
+  # Home improvement
+  nm.vars <- names(data.desc)[grepl("Do you have solar panels",names(data.desc)) | (grepl("improvements",names(data.desc)) & grepl("insulation",names(data.desc)))]
+  data.desc[,nb_house_improvement := sum(.SD == "Yes"),by=` Response ID`,.SDcols = nm.vars]
+  
   
   # Results ----
+  # Replace missings with Hoorn
+  varnm <- data.desc[survey_name == hoorn.file.name,sapply(.SD,\(x) all(is.na(x)))]
+  varname.not.hoorn <- names(varnm[varnm == TRUE])
+  print(varname.not.hoorn)
+  data.desc[,(varname.not.hoorn) := lapply(.SD,as.character),.SDcols = varname.not.hoorn]
+  data.desc[survey_name == hoorn.file.name,(varname.not.hoorn) := "Hoorn"]
+  
+  # Convert to plain data.frame and clean names
+  names(data.desc) <- trimws(names(data.desc))          # remove spaces around names
+  names(data.desc) <- gsub("\\s+", " ", names(data.desc))  # replace spaces with underscores
   
   
   options(modelsummary_format_numeric_latex = "plain")
@@ -247,6 +321,7 @@ for (survey.name in survey.names){
   ## Insulation results ----
   game <- "insu"
   dt.insu <- get_df_logit(data,game,cst,ref.lvl,data.desc)
+  
   
   write.csv2(dt.insu,paste0(dir.out,"data_mlogit_insu.csv"),quote = TRUE,row.names = FALSE)
   
@@ -328,6 +403,7 @@ for (survey.name in survey.names){
   dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
   
   ## Insulation heterogeneity ----
+  
   run_ht_insu <- function(grp.ht.list,run.name){
     logit.insu.list <- list(Main = logit_interact.insu)
     coef_names_ht <- c()
@@ -421,11 +497,33 @@ for (survey.name in survey.names){
     logit.tech.list <- list(Main = logit_interact.tech)
     coef_names_ht <- c()
     for (grp.ht in names(grp.ht.list)){
+      
       dt.tech.tmp <- copy(dt.tech)
-      setnames(dt.tech.tmp, old = grp.ht.list[[grp.ht]], new = grp.ht)
+      setnames(dt.tech.tmp,grp.ht.list[[grp.ht]],grp.ht)
+      
+      dt.tech.dum  <- fastDummies::dummy_columns(dt.tech.tmp[grp.ht],
+                                                 remove_most_frequent_dummy = TRUE, 
+                                                 remove_selected_columns  = TRUE)
+      nm.all <- fastDummies::dummy_columns(dt.tech.tmp[grp.ht],
+                                           remove_selected_columns = TRUE,
+                                           return_generated_variables = TRUE)
+      
+      nm.all <- nm.all[!grepl("idx\\.",nm.all)]
+      dt.tech.dum <- dt.tech.dum %>% select(names(dt.tech.dum)[!grepl("idx\\.",names(dt.tech.dum))])
+      
+      common <- Reduce(intersect, strsplit(nm.all, "_"))
+      ref.lvl.ht <- setdiff(nm.all,names(dt.tech.dum))
+      ref.lvl.ht <- gsub(paste0("_?", common, collapse = "|"), "", ref.lvl.ht)
+      ref.lvl.ht <- gsub("\\.|\\_"," ",ref.lvl.ht)
+      
+      
+      names(dt.tech.dum) <- paste0(names(dt.tech.dum)," (ref",ref.lvl.ht,")")
+      
+      dt.tech.tmp <- copy(dt.tech)
+      dt.tech.tmp[, names(dt.tech.dum)] <- dt.tech.dum
       
       logit_interact.tech.ht <- mlogit(
-        formula = as.formula(gsub("none",paste0("`",grp.ht,"`:none"),formula.tech)),
+        formula = as.formula(gsub("none",paste0("`",names(dt.tech.dum),"`:none",collapse = " + "),formula.tech)),
         dt.tech.tmp
       )
       logit.tech.list[[grp.ht]] <- logit_interact.tech.ht

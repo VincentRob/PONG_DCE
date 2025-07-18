@@ -167,6 +167,15 @@
     },
     "question_group": "bias"
   },
+  " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?":{
+    "question_tags": [
+      [
+        " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?",
+        " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?"
+      ]
+    ],
+    "question_rank": 5
+  },
   " What is your opinion on heat pumps after having heard everything?": {
     "question_tags": [
       [
@@ -794,7 +803,7 @@
     "question_rank": 7,
     "question_group": "comm"
   },
-  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]": {
+  "On a scale from 1 to 5, to what extent do you agree with the following statements? [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]": {
     "question_tags": [
       [
         " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]",
@@ -836,7 +845,7 @@
     },
     "question_group": "bias"
   },
-  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I am climate-conscious]": {
+  "On a scale from 1 to 5, to what extent do you agree with the following statements? [I am climate-conscious]": {
     "question_tags": [
       [
         " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I am climate-conscious]",
@@ -878,7 +887,7 @@
     },
     "question_group": "bias"
   },
-  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Heat prices should be as equal as possible for everyone in the municipality]": {
+  "On a scale from 1 to 5, to what extent do you agree with the following statements? [Heat prices should be as equal as possible for everyone in the municipality]": {
     "question_tags": [
       [
         " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Heat prices should be as equal as possible for everyone in the municipality]",
@@ -920,7 +929,7 @@
     },
     "question_group": "bias"
   },
-  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Residents are capable of deciding for themselves how to phase out natural gas]": {
+  "On a scale from 1 to 5, to what extent do you agree with the following statements? [Residents are capable of deciding for themselves how to phase out natural gas]": {
     "question_tags": [
       [
         " On a scale from 1 to 5, to what extent do you agree with the following statements?  [Residents are capable of deciding for themselves how to phase out natural gas]",
@@ -962,7 +971,7 @@
     },
     "question_group": "bias"
   },
-  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [The municipality is best able to determine the most affordable way to phase out natural gas]": {
+  "On a scale from 1 to 5, to what extent do you agree with the following statements? [The municipality is best able to determine the most affordable way to phase out natural gas]": {
     "question_tags": [
       [
         " On a scale from 1 to 5, to what extent do you agree with the following statements?  [The municipality is best able to determine the most affordable way to phase out natural gas]",
@@ -1004,7 +1013,7 @@
     },
     "question_group": "bias"
   },
-  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my neighborhood]": {
+  "On a scale from 1 to 5, to what extent do you agree with the following statements? [I enjoy living in my neighborhood]": {
     "question_tags": [
       [
         " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my neighborhood]",
@@ -1046,7 +1055,7 @@
     },
     "question_group": "bias"
   },
-  " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my municipality]": {
+  "On a scale from 1 to 5, to what extent do you agree with the following statements? [I enjoy living in my municipality]": {
     "question_tags": [
       [
         " On a scale from 1 to 5, to what extent do you agree with the following statements?  [I enjoy living in my municipality]",
