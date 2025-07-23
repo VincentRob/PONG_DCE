@@ -3,9 +3,24 @@ library(dplyr)
 library(data.table)
 library(ggplot2)
 library(jsonlite)
+library(scales) 
 
 # Background ----
 source("Figure_theme.R")
+
+font.axis.lbls <- 20
+font.ttls <- 20
+theme_pong <- theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = font.axis.lbls,color = "black"), 
+    axis.text.x = element_text(size = font.axis.lbls,color = "black"),
+    axis.title.x = element_text(size = font.ttls,color = "black"),
+    axis.title.y = element_text(size = font.ttls,color = "black"),
+    legend.title = element_text(size = font.ttls,color = "black"),
+    legend.text = element_text(size = font.axis.lbls,color = "black"),
+    axis.ticks = element_line(color = "black"),
+    plot.title = element_text(size = font.ttls + 2,hjust = 0.5,color = "black")
+    )
 
 source(file = "functions_pong_soft_launch.R")
 
@@ -16,7 +31,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("panelclix_hoorn","full_launch_panelclix")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("soft_launch_medemblik_hoorn","panelclix_hoorn","full_launch_panelclix")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
@@ -27,6 +42,8 @@ for (survey.name in survey.names){
   
   dir.out <- paste0("output/",survey.name,"/")
   dir.create(dir.out)
+  dir.out.figs <- paste0(dir.out,"figures/")
+  dir.create(dir.out.figs)
   
   data = data.table()
   for (file.name in input_specs[survey_name == survey.name,unique(data_path)]){
@@ -95,7 +112,10 @@ for (survey.name in survey.names){
     old.nms <- names(data.desc)
     new.nms <- old.nms
     
-    if (!any(new.nms %in% old_q_names)) stop(paste0('`',new_q_name,"` not mapped"))
+    if (!any(new.nms %in% old_q_names)) {
+      warning(paste0('`',new_q_name,"` not mapped"))
+      next
+    }
     new.nms[new.nms %in% old_q_names] <- new_q_name
     if (length(old.nms) != length(new.nms)) stop('new and old names should have same lengths')
     names(data.desc) <- new.nms
@@ -135,6 +155,7 @@ for (survey.name in survey.names){
     if (grp == "bias_monet"){
       question_cols <- names(grp.q[grp.q == grp])
       for (monet_question in question_cols){
+        if (!(monet_question %in% names(data.desc))) next
         tab <- data.desc[,.(Answer = get(monet_question))]
         
         if (grepl("50 per month",monet_question)){
@@ -161,6 +182,7 @@ for (survey.name in survey.names){
     
     # Subset question columns by group
     question_cols <- names(grp.q[grp.q == grp])
+    question_cols <- question_cols[question_cols %in% names(data.desc)]
     
     # Melt only those columns
     dt_long <- melt(data.desc[, ..question_cols], 
@@ -215,8 +237,10 @@ for (survey.name in survey.names){
   
   # Groups respondents ----
   nm.lottery <- names(data.desc)[grepl("lottery",names(data.desc))]
-  data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
-  data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+  if (length(nm.lottery)>0){
+    data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+    data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+  }
   
   data.desc[,WOZ := as.integer(stringr::str_extract(` What is the WOZ value of your dwelling?`,"[0-9]{3}"))]
   data.desc[,WOZ_quantile := cut(WOZ,breaks = quantile(WOZ,c(0,0.33,0.66,1),na.rm=TRUE),include.lowest=TRUE)]
@@ -235,19 +259,20 @@ for (survey.name in survey.names){
                     "Retired",
                     "Unemployed and looking for work",
                     "Receiving/Awaiting approval for disability payments")
-  
-  data.desc[, work_status := fcase(
-    get(nm.var) %in% job.var.home & (get(nm.var2) %in% job.var.home | is.na(get(nm.var2))), "4 - all_home",
-    (get(nm.var) %in% job.var.home & get(nm.var2) %in% job.var.work) | (get(nm.var2) %in% job.var.home & get(nm.var) %in% job.var.work), "2 - one_working_one_home",
-    get(nm.var) %in% job.var.work & get(nm.var2) %in% job.var.work, "1 - two_working",
-    get(nm.var) %in% job.var.work & is.na(get(nm.var2)), "3 - single_worker",
-    !is.na(get(nm.var)) | !is.na(get(nm.var2)),"5 - other"
-  )]
-  print(data.desc[,.N,by=.(work_status,get(nm.var),get(nm.var2))][order(work_status,N)])
-  
+  if (nm.var %in% names(data.desc)){
+    data.desc[, work_status := fcase(
+      get(nm.var) %in% job.var.home & (get(nm.var2) %in% job.var.home | is.na(get(nm.var2))), "4 - all_home",
+      (get(nm.var) %in% job.var.home & get(nm.var2) %in% job.var.work) | (get(nm.var2) %in% job.var.home & get(nm.var) %in% job.var.work), "2 - one_working_one_home",
+      get(nm.var) %in% job.var.work & get(nm.var2) %in% job.var.work, "1 - two_working",
+      get(nm.var) %in% job.var.work & is.na(get(nm.var2)), "3 - single_worker",
+      !is.na(get(nm.var)) | !is.na(get(nm.var2)),"5 - other"
+    )]
+    print(data.desc[,.N,by=.(work_status,get(nm.var),get(nm.var2))][order(work_status,N)])
+  }
   # Age
   nm.var <- " To which age group do you belong?"
   nm.var2 <- " To which age group does your partner belong?"
+  if (!(nm.var2 %in% names(data.desc))) nm.var2 <- nm.var
   data.desc[, age_max := max(c(stringr::str_extract(get(nm.var),"[0-9]{2}"),
                                stringr::str_extract(get(nm.var2),"[0-9]{2}")),
                              na.rm=TRUE),by=" Response ID"]
@@ -277,6 +302,114 @@ for (survey.name in survey.names){
   nm.vars <- names(data.desc)[grepl("Do you have solar panels",names(data.desc)) | (grepl("improvements",names(data.desc)) & grepl("insulation",names(data.desc)))]
   data.desc[,nb_house_improvement := sum(.SD == "Yes"),by=` Response ID`,.SDcols = nm.vars]
   
+  # Biases figure ----
+  grp.ht.list <- fromJSON("input/mapping_bias_figure.json")
+  
+  col.bias <- gsub("desc_","",unlist(grp.ht.list$bias))
+  dt.bais <- data.desc[,.SD,.SDcols =col.bias]
+  setnames(dt.bais,col.bias,names(grp.ht.list$bias))
+  #setnames(dt.bais,col.bias,sub(".*\\[(.*)\\].*", "\\1", col.bias))
+  
+  dt.long <- melt(dt.bais,
+                  measure.vars = names(dt.bais),
+                  variable.name = "Question",
+                  value.name = "Response"
+  )
+
+  # Count per Question + Response
+  dt.prop <- dt.long[, .N, by = .(Question, Response)]
+  dt.prop[, Share := N / sum(N), by = Question]
+
+  # Questions order 
+  dt.prop[, Question := factor(Question, levels = rev(names(grp.ht.list$bias)))]
+    
+  # Reverse factor levels to get "strongly disagree" first (bottom/left)
+  dt.prop[, Response := factor(Response, levels = rev(sort(unique(dt.prop$Response))))]
+  
+  # Try multiple widths and find the minimum one that gives max 2 lines
+  for (w in 20:80) {
+    dt.prop[, Question_wrapped := stringr::str_wrap(Question, width = w)]
+    max_lines <- max(stringr::str_count(dt.prop$Question_wrapped, "\n") + 1)
+    
+    if (max_lines <= 2) {
+      cat("Minimum width for max 2 lines:", w, "\n")
+      
+      # Re-factor to preserve ordering
+      dt.prop[, Question_wrapped := factor(Question_wrapped, 
+                                           levels = unique(Question_wrapped[order(Question)]))]
+      break
+    }
+  }
+  
+  ggplot(dt.prop, aes(x = Question_wrapped, y = Share, fill = Response)) +
+    geom_bar(stat = "identity", position = "stack", color = "white") +
+    scale_y_continuous(
+      labels = scales::percent_format(accuracy = 1),
+      sec.axis = dup_axis(trans = ~1 - ., labels = scales::percent_format(accuracy = 1), name = NULL)
+    ) +
+    scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+    labs(
+      x = NULL,
+      y = "Share of responses",
+      fill =NULL  
+    ) +
+    coord_flip() +
+    theme_pong + 
+    theme(
+      legend.position = c(0.25, -0.2),  # x < 0 moves left outside plot; y < 0 moves below plot
+      legend.direction = "horizontal",
+      plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
+    ) + 
+    guides(fill = guide_legend(reverse = TRUE))
+  
+
+  ggsave(paste0(dir.out.figs,"fig_desc_biases.png"),width = width*1.6,height = height, units = "cm")
+  
+  # Descriptives figures ----
+  clean_str <- \(x) stringr::str_to_sentence(gsub("_"," ",x))
+  
+  plot_percent_bar <- function(data, var_name_str) {
+    var_sym <- sym(var_name_str)
+    
+    ggplot(data, aes(x = !!var_sym)) +
+      geom_bar(aes(y = (..count..) / sum(..count..))) +
+      geom_text(aes(label = ..count.., y = (..count..) / sum(..count..)), 
+                stat = "count", hjust = -0.1,size = 16* 0.35) +
+      coord_flip() +
+      labs(
+        x = NULL,
+        y = NULL,
+        fill = NULL,
+        title  = stringr::str_wrap(var_name_str, width = 50)
+      ) + 
+      theme_pong +
+      theme(axis.text.y = element_text(angle = 0, vjust = 0.5, hjust = 1)) +
+      scale_y_continuous(labels = percent_format(), name = "Share of respondents")
+  }
+  
+  grp.ht.list <- fromJSON("input/mlogit_heterogeneity_groups.json")
+  
+  data.desc.adhoc <- copy(data.desc)
+  names(data.desc.adhoc) <- trimws(names(data.desc.adhoc))
+  
+  for (grp.ht in names(grp.ht.list)){
+    
+    for (desc in grp.ht.list[[grp.ht]]){
+      
+      colnm <- gsub("desc_","",desc)
+      if (!(colnm %in% names(data.desc.adhoc))) next
+      dt.plt <- data.desc.adhoc[, .(col = get(colnm))]
+      
+      new.nm <- names(grp.ht.list[[grp.ht]][which(grp.ht.list[[grp.ht]] == desc)])
+      setnames(dt.plt, "col", new.nm)
+      
+      plot_percent_bar(dt.plt, new.nm)
+      fig.nm <- paste0("fig_",grp.ht,"_",new.nm)
+      fig.nm <- gsub("[^A-Za-z0-9]", "_", fig.nm)
+      ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width*0.85,height = height*0.75, units = "cm")
+      
+    }
+  }
   
   # Results ----
   # Replace missings with Hoorn
@@ -508,85 +641,81 @@ for (survey.name in survey.names){
   
   dt.coefs <- dt.coefs[order(group,game,grepl("cost",Attribute),Attribute),]
   
-  # Table for heatmap ----
-  if (ref.lvl == "_1$"){
-    grps <- dt.coefs[,unique(group)]
-    for (grp in )
-    dt.pw <- rbindlist(list(dt.coefs[group == "all" & game == "tech",CJ(invest = Term[grepl("Heat pump",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat pump",Attribute) & grepl("heating costs",Attribute)])],
-                            dt.coefs[group == "all" & game == "tech",CJ(invest = Term[grepl("Heat network",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat network",Attribute) & grepl("heating costs",Attribute)])]))
-    
-    dt.pw[dt.coefs[group == "all" & game == "tech",],`:=` (coef.invest = i.Estimate,
-                         ref.invest = i.ReferenceCost,
-                         amount.invest = i.CostValue),on=c(invest = "Term")]
-    dt.pw[dt.coefs[group == "all" & game == "tech",],`:=` (coef.savings = i.Estimate,
-                         ref.savings = i.ReferenceCost,
-                         amount.savings = i.CostValue),on=c(savings = "Term")]
-    dt.pw[grepl("Heat network",invest), none := dt.coefs[Attribute == "None" & game == "tech" & group == "all",Estimate] ]
-    dt.pw[grepl("Heat pump",invest), none := dt.coefs[Attribute == "None" & game == "tech" & group == "all",Estimate] - dt.coefs[Attribute == "Heat pump" & game == "tech" & group == "all",Estimate] ]
-    
-    dt.pw <- dt.pw[order(grepl("Heat pump",invest),amount.invest,amount.savings),]
-    dt.pw[ref.invest == amount.invest,coef.invest := 0]
-    dt.pw[ref.savings == amount.savings,coef.savings := 0]
-    
-    # For costs, give 10K heat pump a value, based on heat networks, and it to higher levels
-    dt.pw[grepl("Heat network",invest),u.invest := coef.invest]
-    dt.pw[grepl("Heat pump",invest) & ref.invest == amount.invest,u.invest := coef.invest + amount.invest*dt.pw[grepl("Heat network",invest),median(u.invest/amount.invest,na.rm=TRUE)] ]
-    dt.pw[grepl("Heat pump",invest) & ref.invest != amount.invest,u.invest := coef.invest + dt.pw[grepl("Heat pump",invest) & ref.invest == amount.invest,unique(u.invest)] ]
-    
-    # Extrapolate savings heat netork
-    dt.svgs <- unique(dt.pw[,.(savings,coef.savings,amount.savings,ref.savings)])
-    dt.svgs <- dt.svgs[order(amount.savings,savings)]
-    dt.svgs[grepl("Heat pump",savings),u.savings := coef.savings]
-    dt.svgs[amount.savings %in% dt.svgs[grepl("Heat pump",savings),unique(amount.savings)],u.savings := coef.savings[grepl("Heat pump",savings)],by=amount.savings]
-    rf.hn <- dt.svgs[grepl("Heat net",savings) & !is.na(u.savings),tail(coef.savings,1)]
-    rf.hp <- dt.svgs[grepl("Heat pump",savings) & !is.na(u.savings),tail(coef.savings,1)]
-    dt.svgs[is.na(u.savings), u.savings := coef.savings - rf.hn + rf.hp]
-    
-    dt.pw[unique(dt.svgs[,.(amount.savings,u.savings)]),u.savings:= i.u.savings,on="amount.savings"]
-    
-    dt.pw[,u := u.invest + u.savings - none ] 
-    
-    dt.pw.plt <- copy(dt.pw)
-    reg.toclean <- "(Heat pump)|(Heat network)|( \\(reference\\))|(One time costs\\:)|(Heating costs\\:)"
-    dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
-    dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
-    dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
-    dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
-    #dt.pw.plt <- unique(dt.pw.plt,by=c("invest","savings"))
-    
-    dt.pw.plt[, savings := factor(savings, levels = unique(savings[order(amount.savings)]))]
-    dt.pw.plt[, invest := factor(invest, levels = unique(invest[order(amount.invest)]))]
-    
-    dt.pw.plt[,s := exp(coef.invest + coef.savings)/(exp(coef.invest + coef.savings)+exp(none))]
-    
-    dt.pw.plt[, s_cat := cut(s,
-                             breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
-                             labels = c("0-20%", "20-40%", "40-60%", "60-80%", "80-100%"),
-                             include.lowest = TRUE)]
-    
-    ggplot(dt.pw.plt, aes(x = savings, y = invest, fill = s_cat)) +
-      geom_tile(color = "white") +
-      scale_fill_brewer(palette = "RdYlGn", name = "Support") +  # Or use scale_fill_manual()
-      coord_fixed() +
-      theme_minimal() +
-      labs(
-        title = NULL,
-        x = "Savings",
-        y = "Investment costs"
-      ) +
-      theme(
-        panel.grid = element_blank(),
-        panel.background = element_blank(),
-        axis.title.x = element_text(size = 16),
-        axis.title.y = element_text(size = 16),
-        axis.text.x = element_text(size = 14,angle = 45, hjust = 1),  # axis label (tick numbers)
-        axis.text.y = element_text(size = 14)   # axis label (tick numbers)
-      )
-    ggsave(paste0(dir.out,"fig_hm_all.png"),width = width*2,height = height, units = "cm")
-    
-    
-    
+  # Fig heatmap ----
+  for (gm in c("insu","tech")){
+    for (charac in dt.coefs[game == gm,unique(group)]){
+      for (grp in dt.coefs[group == charac & Attribute == "None" & game == gm,unique(gsub(":(None|none)","",Term))]){
+        
+      }
+    }
   }
+  grp = "DH opinion 1 - Very negative"
+  
+  
+  dt.pw <- rbindlist(list(dt.coefs[group == charac & game == gm,CJ(invest = Term[grepl("Heat pump",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat pump",Attribute) & grepl("heating costs",Attribute)])],
+                          dt.coefs[group == charac & game == gm,CJ(invest = Term[grepl("Heat network",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat network",Attribute) & grepl("heating costs",Attribute)])]))
+  
+  dt.pw[dt.coefs[group == charac & game == gm,],`:=` (coef.invest = i.Estimate,
+                                                      ref.invest = i.ReferenceCost,
+                                                      amount.invest = i.CostValue),on=c(invest = "Term")]
+  dt.pw[dt.coefs[group == charac & game == gm,],`:=` (coef.savings = i.Estimate,
+                                                      ref.savings = i.ReferenceCost,
+                                                      amount.savings = i.CostValue),on=c(savings = "Term")]
+  dt.pw[grepl("Heat network",invest), none := dt.coefs[Attribute == "None" & game == gm & group == charac & grepl(grp,Term),Estimate] ]
+  dt.pw[grepl("Heat pump",invest), none := dt.coefs[Attribute == "None" & game == gm & group == charac & grepl(grp,Term),Estimate] - dt.coefs[Attribute == "Heat pump" & game == gm & group == charac,Estimate] ]
+  
+  dt.pw <- dt.pw[order(grepl("Heat pump",invest),amount.invest,amount.savings),]
+  dt.pw[ref.invest == amount.invest,coef.invest := 0]
+  dt.pw[ref.savings == amount.savings,coef.savings := 0]
+  
+  dt.pw.plt <- copy(dt.pw)
+  reg.toclean <- "(Heat pump)|(Heat network)|( \\(reference\\))|(One time costs\\:)|(Heating costs\\:)"
+  dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
+  dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
+  dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
+  dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
+  
+  dt.pw.plt[, savings := factor(savings, levels = unique(savings[order(amount.savings)]))]
+  dt.pw.plt[, invest := factor(invest, levels = unique(invest[order(amount.invest)]))]
+  
+  dt.pw.plt[,s := exp(coef.invest + coef.savings)/(exp(coef.invest + coef.savings)+exp(none))]
+  
+  support_colors <- c(
+    "0-30%"   = "#d73027",
+    "30-50%"  = "#fc8d59",
+    "50-70%"  = "#b2df8a",
+    "70-100%" = "#1a9850" 
+  )
+  
+  dt.pw.plt[, s_cat := cut(s,
+                           breaks = c(0, 0.3, 0.5, 0.7, 1),
+                           labels = c("0-30%", "30-50%", "50-70%", "70-100%"),
+                           include.lowest = TRUE)]
+  
+  ggplot(dt.pw.plt, aes(x = savings, y = invest, fill = s_cat)) +
+    geom_tile(color = "white") +
+    scale_fill_manual(values = support_colors, name = "Support") +
+    coord_fixed() +
+    theme_minimal() +
+    labs(
+      title = NULL,
+      x = "Savings",
+      y = "Investment costs"
+    ) +
+    theme(
+      panel.grid = element_blank(),
+      panel.background = element_blank(),
+      axis.title.x = element_text(size = 16),
+      axis.title.y = element_text(size = 16),
+      axis.text.x = element_text(size = 14, angle = 45, hjust = 1),
+      axis.text.y = element_text(size = 14)
+    )
+  
+  ggsave(paste0(dir.out.figs,"fig_hm_dh1veryneg.png"),width = width,height = height, units = "cm")
+  
+  
+  
+  
   
   dt.coefs[,(c("CostLevel","CostValue","ReferenceCost")) := NULL]
   

@@ -37,16 +37,16 @@ for (survey.name in survey.names){
   setDT(dt)
   for (grp.ht in names(grp.ht.list)){
     
-  for (desc in grp.ht.list[[grp.ht]]){
-    
-    dt.plt <- dt[, .(col = clean_str(get(gsub("desc_","",desc))))]
-    
-    new.nm <- names(grp.ht.list[[grp.ht]][which(grp.ht.list[[grp.ht]] == desc)])
-    setnames(dt.plt, "col", new.nm)
-    
-    p <- plot_percent_bar(dt.plt, new.nm)
-    show(p)
-  }
+    for (desc in grp.ht.list[[grp.ht]]){
+      
+      dt.plt <- dt[, .(col = clean_str(get(gsub("desc_","",desc))))]
+      
+      new.nm <- names(grp.ht.list[[grp.ht]][which(grp.ht.list[[grp.ht]] == desc)])
+      setnames(dt.plt, "col", new.nm)
+      
+      p <- plot_percent_bar(dt.plt, new.nm)
+      show(p)
+    }
   }
   
   
