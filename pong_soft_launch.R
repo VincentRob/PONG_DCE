@@ -16,7 +16,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("panelclix_hoorn")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("panelclix_hoorn","full_launch_panelclix")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
@@ -160,7 +160,7 @@ for (survey.name in survey.names){
     }
     
     # Subset question columns by group
-    question_cols <- names(grp.q[grp.q == "desc"])
+    question_cols <- names(grp.q[grp.q == grp])
     
     # Melt only those columns
     dt_long <- melt(data.desc[, ..question_cols], 
@@ -223,10 +223,10 @@ for (survey.name in survey.names){
   
   nm.var <- " What is the construction period of your dwelling?"
   data.desc[, constr_period := fcase(
-    get(nm.var) %in% c("1945 or before"), "1945 or before",
-    get(nm.var) %in% c("1946-1970", "1971-1990"), "1946-1990",
-    get(nm.var) %in% c("1991-2005"), "1991-2005",
-    get(nm.var) %in% c( "2006-2025"),  "2006-2025")]
+    get(nm.var) %in% c("1945 or before"), "1 - 1945 or before",
+    get(nm.var) %in% c("1946-1970", "1971-1990"), "2 - 1946-1990",
+    get(nm.var) %in% c("1991-2005"), "3 - 1991-2005",
+    get(nm.var) %in% c( "2006-2025"),  "4 - 2006-2025")]
   
   nm.var <- " Which best describes your employment situation?"
   nm.var2 <- " Which best describes the employment situation of your partner?"
@@ -237,11 +237,11 @@ for (survey.name in survey.names){
                     "Receiving/Awaiting approval for disability payments")
   
   data.desc[, work_status := fcase(
-    get(nm.var) %in% job.var.home & (get(nm.var2) %in% job.var.home | is.na(get(nm.var2))), "all_home",
-    (get(nm.var) %in% job.var.home & get(nm.var2) %in% job.var.work) | (get(nm.var2) %in% job.var.home & get(nm.var) %in% job.var.work), "one_working_one_home",
-    get(nm.var) %in% job.var.work & get(nm.var2) %in% job.var.work, "two_working",
-    get(nm.var) %in% job.var.work & is.na(get(nm.var2)), "single_worker",
-    !is.na(get(nm.var)) | !is.na(get(nm.var2)),"other"
+    get(nm.var) %in% job.var.home & (get(nm.var2) %in% job.var.home | is.na(get(nm.var2))), "4 - all_home",
+    (get(nm.var) %in% job.var.home & get(nm.var2) %in% job.var.work) | (get(nm.var2) %in% job.var.home & get(nm.var) %in% job.var.work), "2 - one_working_one_home",
+    get(nm.var) %in% job.var.work & get(nm.var2) %in% job.var.work, "1 - two_working",
+    get(nm.var) %in% job.var.work & is.na(get(nm.var2)), "3 - single_worker",
+    !is.na(get(nm.var)) | !is.na(get(nm.var2)),"5 - other"
   )]
   print(data.desc[,.N,by=.(work_status,get(nm.var),get(nm.var2))][order(work_status,N)])
   
@@ -265,10 +265,10 @@ for (survey.name in survey.names){
   # Education
   nm.var <- " What is your highest completed education?"
   data.desc[, education := fcase(
-    grepl("master",get(nm.var)), "master or higher",
-    grepl("bachelor",get(nm.var)), "bachelor",
-    grepl("HAVO",get(nm.var)), "HAVO",
-    grepl("VMBO|Primary",get(nm.var)), "VMBO or lower"
+    grepl("master",get(nm.var)), "4 - master or higher",
+    grepl("bachelor",get(nm.var)), "3 - bachelor",
+    grepl("HAVO",get(nm.var)), "2 - HAVO",
+    grepl("VMBO|Primary",get(nm.var)), "1 - VMBO or lower"
     
   )]
   print(data.desc[,.N,by=.(education,get(nm.var))][order(education,N)])
@@ -302,7 +302,7 @@ for (survey.name in survey.names){
               pk = "package")
   
   # logit args
-  ref.lvl <- "_2$"
+  ref.lvl <- "_1$"
   stats.table <- c("S.E." = "({std.error}){stars}")
   
   # WTP args
@@ -314,6 +314,10 @@ for (survey.name in survey.names){
   # IRR args
   irr.years <- c(1,5,10,15,25) # Horizon for IRR calculation
   irr.lvl = 3 # Energy savings reference level 
+  
+  
+  # Save descriptives ----
+  write.csv2(data.desc,paste0(dir.out,"data_descriptives.csv"),quote = TRUE,row.names = FALSE)
   
   # Store monetary coefficients (vom value of money)
   dt.coefs <- data.table()
@@ -350,100 +354,44 @@ for (survey.name in survey.names){
                                         stars = c("*" = .1, "**" = .05, "***" = 0.01))
   
   
-  parse_modelsummary_latex <- function(tex_output,game) {
-    # Split LaTeX into lines
-    tex_lines <- unlist(strsplit(tex_output, "\n"))
-    
-    # Find positions of first and second \midrule
-    midrule_lines <- grep("\\\\midrule", tex_lines)
-    if (length(midrule_lines) < 2) {
-      stop("Expected at least two \\midrule lines in the LaTeX output.")
-    }
-    
-    # Extract only coefficient lines (between first and second \midrule)
-    start_idx <- midrule_lines[1] + 1
-    end_idx <- midrule_lines[2] - 1
-    table_lines <- c(tex_lines[start_idx:end_idx],tex_lines[end_idx+2]) # end_idx+2 to include none coef
-    
-    # Clean formatting
-    table_lines <- gsub("\\\\", "", table_lines)
-    table_lines <- gsub("&", "|", table_lines)
-    table_lines <- trimws(table_lines)
-    table_lines <- table_lines[table_lines != ""]
-    
-    # Split rows into columns
-    split_lines <- strsplit(table_lines, "\\|")
-    df <- do.call(rbind, lapply(split_lines, function(x) {
-      x <- trimws(x)
-      length(x) <- 3  # ensure exactly 3 columns
-      return(x)
-    }))
-    df <- as.data.frame(df, stringsAsFactors = FALSE)
-    names(df) <- c("Term", "Estimate", "StdError")
-    
-    # Convert Estimate to numeric (remove stars)
-    df$Estimate <- suppressWarnings(as.numeric(gsub("\\*+", "", df$Estimate)))
-    
-    # Optional: keep stars separately
-    df$Stars <- regmatches(df$StdError, gregexpr("\\*+", df$StdError))
-    df$Stars <- sapply(df$Stars, function(x) if (length(x)) x else "")
-    
-    # Clean StdError: remove parentheses and stars
-    df$StdError <- gsub("\\(|\\)|\\*", "", df$StdError)
-    df$StdError <- suppressWarnings(as.numeric(df$StdError))
-    
-    setDT(df)
-    df[,game := game]
-    
-    return(df)
-  }
   
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
   
-  dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
+  dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
+  dt.cfs.tmp[,group := "all"]
+  dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
   
   ## Insulation heterogeneity ----
-  
-  run_ht_insu <- function(grp.ht.list,run.name){
-    logit.insu.list <- list(Main = logit_interact.insu)
-    coef_names_ht <- c()
-    for (grp.ht in names(grp.ht.list)){
-      dt.insu.tmp <- copy(dt.insu)
-      setnames(dt.insu.tmp, old = grp.ht.list[[grp.ht]], new = grp.ht)
-      
-      logit_interact.insu.ht <- mlogit(
-        formula = as.formula(gsub("none",paste0("`",grp.ht,"`:none"),formula.insu)),
-        dt.insu.tmp
-      )
-      logit.insu.list[[grp.ht]] <- logit_interact.insu.ht
-      nm.tmp <- names(logit_interact.insu.ht$coefficients)
-      nm.tmp.org <- nm.tmp[grepl(grp.ht,nm.tmp)]
-      nm.tmp.new <- gsub(grp.ht,"",nm.tmp.org)
-      nm.tmp.new <- gsub("``","",nm.tmp.new)
-      names(nm.tmp.new) <- gsub("`","",nm.tmp.org)
-      coef_names_ht <- c(coef_names_ht,nm.tmp.new)
-    }
-    
-    tab.tex <- modelsummary::modelsummary(logit.insu.list, 
-                                          coef_rename = c(coef_names[names(coef_names) %in% col.att.int],coef_names_ht), 
-                                          add_rows = `attr<-`(do.call(cbind, c(list(rows.refs), rep(list(rows.refs[names(rows.refs) != "term"]), length(logit.insu.list)-1))), "position", attr(rows.refs, "position")),
-                                          shape = term ~ statistic,
-                                          estimate = "{estimate}",
-                                          statistic = stats.table,
-                                          output = "latex",
-                                          stars = c("*" = .1, "**" = .05, "***" = 0.01)) 
-    tab.tex <- add_tinysize(tab.tex,"^\\\\begin\\{table\\}")
-    lines <- unlist(strsplit(tab.tex, "\n"))
-    filtered_lines <- lines[!grepl("\\\\begin\\{table\\}|\\\\end\\{table\\}", lines)]
-    
-    writeLines(filtered_lines, paste0(dir.out, "results_heterogeneity_", game,"_",run.name, ".tex"))
-    
-  }
   
   grp.ht.list <- fromJSON("input/mlogit_heterogeneity_groups.json")
   
   for (grp.ht in names(grp.ht.list)){
-    run_ht_insu(grp.ht.list[[grp.ht]],grp.ht)
+    # With reference level
+    run_ht_insu_with_ref_level(grp.ht.list[[grp.ht]],grp.ht)
+    
+    # Without reference level
+    for (ht.var in names(grp.ht.list[[grp.ht]])){
+      
+      logit_interact.insu.ht <- mlogit(
+        formula = as.formula(gsub("none",paste0("`",grp.ht.list[[grp.ht]][[ht.var]],"`:none"),formula.insu)),
+        dt.insu
+      )
+      
+      tab.tex <- modelsummary::modelsummary(list(Logit = logit_interact.insu.ht), 
+                                            coef_rename = coef_names[names(coef_names) %in% col.att.int], 
+                                            add_rows = rows.refs,
+                                            shape = term ~ statistic,
+                                            estimate = "{estimate}",
+                                            statistic = stats.table,
+                                            output = "latex",
+                                            stars = c("*" = .1, "**" = .05, "***" = 0.01))
+      
+      dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
+      dt.cfs.tmp[,group := ht.var]
+      dt.cfs.tmp[grepl(":None",Term),Term := gsub(grp.ht.list[[grp.ht]][[ht.var]],paste0(ht.var," "),Term,fixed = TRUE)]
+      dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
+      
+    }
   }
   
   ## Tech results ----
@@ -476,7 +424,6 @@ for (survey.name in survey.names){
                 tech.map[grepl("^(Heat net)",tech.map)],
                 tech.map[grepl("^(None)",tech.map)])
   
-  
   rows.refs <- get_row_refs(c(tech.map[names(tech.map) %in% col.att.int],tech.map[names(tech.map) %in% col.ref]),col.att.int,col.ref,ref.lvl,stats.table)
   
   tab.tex <- modelsummary::modelsummary(list(Logit = logit_interact.tech), 
@@ -488,76 +435,43 @@ for (survey.name in survey.names){
                                         output = "latex",
                                         stars = c("*" = .1, "**" = .05, "***" = 0.01))
   
-  dt.coefs <- rbindlist(list(dt.coefs,parse_modelsummary_latex(tab.tex,game)),use.names = TRUE,fill = TRUE)   
+  dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
+  dt.cfs.tmp[,group := "all"]
+  dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
   
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
   
   ## Tech heterogeneity ----
-  run_ht_tech <- function(grp.ht.list,run.name){
-    logit.tech.list <- list(Main = logit_interact.tech)
-    coef_names_ht <- c()
-    for (grp.ht in names(grp.ht.list)){
-      
-      dt.tech.tmp <- copy(dt.tech)
-      setnames(dt.tech.tmp,grp.ht.list[[grp.ht]],grp.ht)
-      
-      dt.tech.dum  <- fastDummies::dummy_columns(dt.tech.tmp[grp.ht],
-                                                 remove_most_frequent_dummy = TRUE, 
-                                                 remove_selected_columns  = TRUE)
-      nm.all <- fastDummies::dummy_columns(dt.tech.tmp[grp.ht],
-                                           remove_selected_columns = TRUE,
-                                           return_generated_variables = TRUE)
-      
-      nm.all <- nm.all[!grepl("idx\\.",nm.all)]
-      dt.tech.dum <- dt.tech.dum %>% select(names(dt.tech.dum)[!grepl("idx\\.",names(dt.tech.dum))])
-      
-      common <- Reduce(intersect, strsplit(nm.all, "_"))
-      ref.lvl.ht <- setdiff(nm.all,names(dt.tech.dum))
-      ref.lvl.ht <- gsub(paste0("_?", common, collapse = "|"), "", ref.lvl.ht)
-      ref.lvl.ht <- gsub("\\.|\\_"," ",ref.lvl.ht)
-      
-      
-      names(dt.tech.dum) <- paste0(names(dt.tech.dum)," (ref",ref.lvl.ht,")")
-      
-      dt.tech.tmp <- copy(dt.tech)
-      dt.tech.tmp[, names(dt.tech.dum)] <- dt.tech.dum
-      
-      logit_interact.tech.ht <- mlogit(
-        formula = as.formula(gsub("none",paste0("`",names(dt.tech.dum),"`:none",collapse = " + "),formula.tech)),
-        dt.tech.tmp
-      )
-      logit.tech.list[[grp.ht]] <- logit_interact.tech.ht
-      nm.tmp <- names(logit_interact.tech.ht$coefficients)
-      nm.tmp.org <- nm.tmp[grepl(grp.ht,nm.tmp)]
-      nm.tmp.new <- gsub(grp.ht,"",nm.tmp.org)
-      nm.tmp.new <- gsub("``","",nm.tmp.new)
-      names(nm.tmp.new) <- gsub("`","",nm.tmp.org)
-      coef_names_ht <- c(coef_names_ht,nm.tmp.new)
-    }
-    
-    tab.tex <- modelsummary::modelsummary(logit.tech.list, 
-                                          coef_rename = c(tech.map[names(tech.map) %in% col.att.int],coef_names_ht), 
-                                          add_rows = `attr<-`(do.call(cbind, c(list(rows.refs), rep(list(rows.refs[names(rows.refs) != "term"]), length(logit.tech.list)-1))), "position", attr(rows.refs, "position")),
-                                          shape = term ~ statistic,
-                                          estimate = "{estimate}",
-                                          statistic = stats.table,
-                                          output = "latex",
-                                          stars = c("*" = .1, "**" = .05, "***" = 0.01)) 
-    tab.tex <- add_tinysize(tab.tex,"^\\\\begin\\{table\\}")
-    lines <- unlist(strsplit(tab.tex, "\n"))
-    filtered_lines <- lines[!grepl("\\\\begin\\{table\\}|\\\\end\\{table\\}", lines)]
-    
-    writeLines(filtered_lines, paste0(dir.out, "results_heterogeneity_", game,"_",run.name, ".tex"))
-    
-  }
-  
   grp.ht.list <- fromJSON("input/mlogit_heterogeneity_groups.json")
   
   for (grp.ht in names(grp.ht.list)){
-    run_ht_tech(grp.ht.list[[grp.ht]],grp.ht)
+    # With reference 
+    run_ht_tech_with_ref_level(grp.ht.list[[grp.ht]],grp.ht)
+    
+    # Without reference level
+    for (ht.var in names(grp.ht.list[[grp.ht]])){
+      
+      logit_interact.tech.ht <- mlogit(
+        formula = as.formula(gsub("(none|None)",paste0("`",grp.ht.list[[grp.ht]][[ht.var]],"`:none"),formula.tech)),
+        dt.tech
+      )
+      
+      tab.tex <- modelsummary::modelsummary(list(Logit = logit_interact.tech.ht), 
+                                            coef_rename = tech.map[names(tech.map) %in% col.att.int], 
+                                            add_rows = rows.refs,
+                                            shape = term ~ statistic,
+                                            estimate = "{estimate}",
+                                            statistic = stats.table,
+                                            output = "latex",
+                                            stars = c("*" = .1, "**" = .05, "***" = 0.01))
+      
+      dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
+      dt.cfs.tmp[,group := ht.var]
+      dt.cfs.tmp[grepl(":(None|none)",Term),Term := gsub(grp.ht.list[[grp.ht]][[ht.var]],paste0(ht.var," "),Term,fixed = TRUE)]
+      dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
+      
+    }
   }
-  
-  
   
   
   # Coef table ----
@@ -571,27 +485,9 @@ for (survey.name in survey.names){
   
   # Step 1: Extract attribute group name (everything before the colon)
   dt.coefs[, Attribute := sub(":.*", "", Term)]
+  dt.coefs[grepl("(None|none)$",Term),Attribute := "None"]
   
   # Step 2: Extract numeric cost values for cost-related rows (including references)
-  extract_cost_value <- function(term) {
-    # Handle 'same as now'
-    if (grepl("same as now", term, ignore.case = TRUE)) return(0)
-    
-    # Extract full numeric value, handling commas as thousand separators
-    term_clean <- gsub(",", "", term)  # remove thousand separators
-    num <- as.numeric(sub(".*?(\\d+(\\.\\d+)?).*", "\\1", term_clean))
-    
-    if (is.na(num)) return(NA_real_)
-    
-    if (grepl("less than now", term, ignore.case = TRUE)) {
-      return(-abs(num))
-    } else if (grepl("more than now", term, ignore.case = TRUE)) {
-      return(abs(num))
-    } else {
-      # One-time cost or fixed value
-      return(num)
-    }
-  }
   
   dt.coefs[, CostValue := NA_real_]
   dt.coefs[grepl(reg.costs, Term, ignore.case = TRUE), 
@@ -599,86 +495,224 @@ for (survey.name in survey.names){
   
   # Step 3: Find reference CostValue per Attribute group
   # Reference rows have "(reference)" in Term
-  refs <- dt.coefs[grepl("\\(reference\\)", Term), .(ReferenceCost = CostValue[!is.na(CostValue)][1]), by = Attribute]
+  refs <- dt.coefs[grepl("\\(reference\\)", Term), .(ReferenceCost = CostValue[!is.na(CostValue)][1]), by = .(Attribute,game,group)]
   
   # Step 4: Join reference costs back
-  dt.coefs <- merge(dt.coefs, refs, by = "Attribute", all.x = TRUE)
+  dt.coefs <- merge(dt.coefs, refs, by = c("Attribute","game","group"), all.x = TRUE)
   
   # Step 5: Calculate relative cost level for cost rows (excluding references)
   dt.coefs[, CostLevelRelative := NA_real_]
   dt.coefs[grepl(reg.costs, Term, ignore.case = TRUE), 
            CostLevelRelative := CostValue - ReferenceCost]
   
-  dt.coefs[,(c("CostLevel","CostValue","ReferenceCost")) := NULL]
   
-  dt.coefs <- dt.coefs[order(game,grepl("cost",Attribute),Attribute),]
+  dt.coefs <- dt.coefs[order(group,game,grepl("cost",Attribute),Attribute),]
   
-  # Table for BEcrowd ----
-  for (gm in c("insu","tech")){
-    dt.bcrwd <- dt.coefs[game == gm,]
+  # Table for heatmap ----
+  if (ref.lvl == "_1$"){
+    grps <- dt.coefs[,unique(group)]
+    for (grp in )
+    dt.pw <- rbindlist(list(dt.coefs[group == "all" & game == "tech",CJ(invest = Term[grepl("Heat pump",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat pump",Attribute) & grepl("heating costs",Attribute)])],
+                            dt.coefs[group == "all" & game == "tech",CJ(invest = Term[grepl("Heat network",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat network",Attribute) & grepl("heating costs",Attribute)])]))
     
-    for (i in 1:dim(dt.bcrwd)[1]){
-      dt.bcrwd[i,(names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))]) := lapply(.SD,\(x) stringr::str_to_sentence(gsub(paste0("(",Attribute,": )| (\\(reference\\))"),"",x))),.SDcols = (names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))])]
-    }
+    dt.pw[dt.coefs[group == "all" & game == "tech",],`:=` (coef.invest = i.Estimate,
+                         ref.invest = i.ReferenceCost,
+                         amount.invest = i.CostValue),on=c(invest = "Term")]
+    dt.pw[dt.coefs[group == "all" & game == "tech",],`:=` (coef.savings = i.Estimate,
+                         ref.savings = i.ReferenceCost,
+                         amount.savings = i.CostValue),on=c(savings = "Term")]
+    dt.pw[grepl("Heat network",invest), none := dt.coefs[Attribute == "None" & game == "tech" & group == "all",Estimate] ]
+    dt.pw[grepl("Heat pump",invest), none := dt.coefs[Attribute == "None" & game == "tech" & group == "all",Estimate] - dt.coefs[Attribute == "Heat pump" & game == "tech" & group == "all",Estimate] ]
     
-    dt.bcrwd[Attribute != "None",Attribute_int := 1,by=Attribute]
-    dt.bcrwd[Attribute == "None",Attribute_int := 0]
-    dt.bcrwd[,Level_int := (1:.N)-1,by=Attribute]
+    dt.pw <- dt.pw[order(grepl("Heat pump",invest),amount.invest,amount.savings),]
+    dt.pw[ref.invest == amount.invest,coef.invest := 0]
+    dt.pw[ref.savings == amount.savings,coef.savings := 0]
     
-    dt.bcrwd.val <- dt.bcrwd[,.(Attribute_int = 99,Attribute = "Valuation",Term = "thousand euro",Level_int = 1,Estimate = NA_real_)]
-    dt.bcrwd <- rbindlist(list(dt.bcrwd,dt.bcrwd.val),use.names = TRUE,fill = TRUE)
+    # For costs, give 10K heat pump a value, based on heat networks, and it to higher levels
+    dt.pw[grepl("Heat network",invest),u.invest := coef.invest]
+    dt.pw[grepl("Heat pump",invest) & ref.invest == amount.invest,u.invest := coef.invest + amount.invest*dt.pw[grepl("Heat network",invest),median(u.invest/amount.invest,na.rm=TRUE)] ]
+    dt.pw[grepl("Heat pump",invest) & ref.invest != amount.invest,u.invest := coef.invest + dt.pw[grepl("Heat pump",invest) & ref.invest == amount.invest,unique(u.invest)] ]
     
-    dt.bcrwd.to.csv <- dt.bcrwd[,.(attribute_nr = Attribute_int,attribute_text = Attribute, level_nr = Level_int,level_text = Term,weight = Estimate)]
-    dt.bcrwd.to.csv[is.na(weight),weight := 0]
+    # Extrapolate savings heat netork
+    dt.svgs <- unique(dt.pw[,.(savings,coef.savings,amount.savings,ref.savings)])
+    dt.svgs <- dt.svgs[order(amount.savings,savings)]
+    dt.svgs[grepl("Heat pump",savings),u.savings := coef.savings]
+    dt.svgs[amount.savings %in% dt.svgs[grepl("Heat pump",savings),unique(amount.savings)],u.savings := coef.savings[grepl("Heat pump",savings)],by=amount.savings]
+    rf.hn <- dt.svgs[grepl("Heat net",savings) & !is.na(u.savings),tail(coef.savings,1)]
+    rf.hp <- dt.svgs[grepl("Heat pump",savings) & !is.na(u.savings),tail(coef.savings,1)]
+    dt.svgs[is.na(u.savings), u.savings := coef.savings - rf.hn + rf.hp]
     
-    # Remove nuisance
-    if (gm == "insu"){
-      dt.bcrwd.to.csv <- dt.bcrwd.to.csv[attribute_text != "Nuisance"]
-    }
+    dt.pw[unique(dt.svgs[,.(amount.savings,u.savings)]),u.savings:= i.u.savings,on="amount.savings"]
     
-    # Distinguish HP and HN
-    if (gm == "tech"){
-      dt.bcrwd.to.csv[, tech := stringr::str_extract(attribute_text, "Heat pump|Heat network")]
-    }
+    dt.pw[,u := u.invest + u.savings - none ] 
     
-    names.bcrwd <- read_json(paste0("input/mapping_",gm,"_becrowd.json"))
-    for (cl in names(names.bcrwd)){
-      old.nm <- names(names.bcrwd[[cl]])
-      if (length(old.nm)>0){
-        if (cl == "attribute_text"){
-          dt.bcrwd.to.csv <- dt.bcrwd.to.csv[order(match(get(cl),old.nm)),]
-          dt.bcrwd.to.csv[get(cl) %in% old.nm & get(cl) != "None", attribute_nr := .GRP,by=attribute_text]
-        }
-        dt.bcrwd.to.csv[get(cl) %in% old.nm, (cl) := as.character(names.bcrwd[[cl]][get(cl)])]
-        
-      }
-    }
+    dt.pw.plt <- copy(dt.pw)
+    reg.toclean <- "(Heat pump)|(Heat network)|( \\(reference\\))|(One time costs\\:)|(Heating costs\\:)"
+    dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
+    dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
+    dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
+    dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
+    #dt.pw.plt <- unique(dt.pw.plt,by=c("invest","savings"))
     
-    if ("tech" %in% names(dt.bcrwd.to.csv)){
-      for (tc in dt.bcrwd.to.csv[,unique(na.omit(tech))]){
-        dt.bcrwd.to.csv.tec <- dt.bcrwd.to.csv[is.na(tech) | tech == tc,][,-"tech"]
-        if (tc == "Heat pump"){
-          dt.bcrwd.to.csv.tec[level_text == "None", weight := weight - dt.bcrwd.to.csv.tec[level_text == "Heat pump",weight]]
-          dt.bcrwd.to.csv.tec <- dt.bcrwd.to.csv.tec[level_text != "Heat pump"]
-        }
-        dt.bcrwd.to.csv.tec[!(attribute_text %in% c("None of these","Valuation")), attribute_nr := .GRP,by=attribute_text]
-        
-        lvl <- if_else(tc == "Heat pump",invest.list.lvl$heat_pumps,invest.list.lvl$heat_networks)/1000
-        
-        dt.bcrwd.to.csv.tec[attribute_text == "Valuation", weight := dt.bcrwd.to.csv.tec[attribute_text == "What is the one-time amount I have to pay?" & level_nr == 0,weight]/lvl]
-        
-        write.csv(dt.bcrwd.to.csv.tec,paste0(dir.out, "becrowd_",gm,"_",gsub(" ","_",tolower(tc)),"_table.csv"),row.names = FALSE,quote = TRUE)
-        
-      }
-    } else {
-      # Add valuation
-      dt.bcrwd.to.csv[attribute_text == "Valuation", weight := dt.bcrwd.to.csv[attribute_text == "What will it cost me to insulate my house?" & level_text == "5,000 euros.",weight]/(invest.list.lvl$insu/1000)]
-      
-      write.csv(dt.bcrwd.to.csv,paste0(dir.out, "becrowd_",gm,"_table.csv"),row.names = FALSE,quote = TRUE)
-    }
+    dt.pw.plt[, savings := factor(savings, levels = unique(savings[order(amount.savings)]))]
+    dt.pw.plt[, invest := factor(invest, levels = unique(invest[order(amount.invest)]))]
+    
+    dt.pw.plt[,s := exp(coef.invest + coef.savings)/(exp(coef.invest + coef.savings)+exp(none))]
+    
+    dt.pw.plt[, s_cat := cut(s,
+                             breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
+                             labels = c("0-20%", "20-40%", "40-60%", "60-80%", "80-100%"),
+                             include.lowest = TRUE)]
+    
+    ggplot(dt.pw.plt, aes(x = savings, y = invest, fill = s_cat)) +
+      geom_tile(color = "white") +
+      scale_fill_brewer(palette = "RdYlGn", name = "Support") +  # Or use scale_fill_manual()
+      coord_fixed() +
+      theme_minimal() +
+      labs(
+        title = NULL,
+        x = "Savings",
+        y = "Investment costs"
+      ) +
+      theme(
+        panel.grid = element_blank(),
+        panel.background = element_blank(),
+        axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        axis.text.x = element_text(size = 14,angle = 45, hjust = 1),  # axis label (tick numbers)
+        axis.text.y = element_text(size = 14)   # axis label (tick numbers)
+      )
+    ggsave(paste0(dir.out,"fig_hm_all.png"),width = width*2,height = height, units = "cm")
+    
+    
     
   }
   
+  dt.coefs[,(c("CostLevel","CostValue","ReferenceCost")) := NULL]
+  
+  # Table for BEcrowd ----
+  dt.bcrwd.tot <- data.table(attribute_nr = numeric(),
+                             attribute_text = character(),
+                             level_nr = numeric(),
+                             level_text = character(),
+                             game = character())
+  names.merge <- c("attribute_text", "level_text", "game" )
+  
+  for (grp in dt.coefs[,unique(group)]){
+    
+    for (gm in c("insu","tech")){
+      for (grp.lvl in dt.coefs[game == gm & group == grp & Attribute == "None",unique(Term)]){
+        grp.nm <- paste0("weight_",gsub(" ","_",gsub("(:|none|None)","",grp.lvl)))
+        grp.nm <- gsub("_$","",grp.nm)
+        
+        dt.bcrwd <- dt.coefs[game == gm & group == grp & (Attribute != "None" | Term == grp.lvl ),]
+        if (dt.bcrwd[Attribute == "None",.N] != 1) stop("There should be exactly one none level")
+        dt.bcrwd[Attribute == "None",Term := "None"]
+        
+        # Clean level names
+        for (i in 1:dim(dt.bcrwd)[1]){
+          dt.bcrwd[i,(names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))]) := lapply(.SD,\(x) stringr::str_to_sentence(gsub(paste0("(",Attribute,": )| (\\(reference\\))"),"",x))),.SDcols = (names(dt.bcrwd)[grepl("Term",names(dt.bcrwd))])]
+        }
+        
+        # Attribute 99 for valuation
+        dt.bcrwd.val <- dt.bcrwd[,.(Attribute = "Valuation",Term = "thousand euro",Estimate = NA_real_)]
+        dt.bcrwd <- rbindlist(list(dt.bcrwd,dt.bcrwd.val),use.names = TRUE,fill = TRUE)
+        
+        dt.bcrwd.to.csv <- dt.bcrwd[,.(attribute_text = Attribute,level_text = Term,weight = Estimate)]
+        setnames(dt.bcrwd.to.csv,"weight",grp.nm)
+        #dt.bcrwd.to.csv[is.na(get(grp.nm)),(grp.nm) := 0]
+        
+        # Remove nuisance
+        if (gm == "insu"){
+          dt.bcrwd.to.csv <- dt.bcrwd.to.csv[attribute_text != "Nuisance"]
+        }
+        
+        # Distinguish HP and HN
+        if (gm == "tech"){
+          dt.bcrwd.to.csv[, tech := stringr::str_extract(attribute_text, "Heat pump|Heat network")]
+        }
+        
+        # Rename levels
+        names.bcrwd <- read_json(paste0("input/mapping_",gm,"_becrowd.json"))
+        for (cl in names(names.bcrwd)){
+          old.nm <- names(names.bcrwd[[cl]])
+          if (length(old.nm)>0){
+            if (cl == "attribute_text"){
+              dt.bcrwd.to.csv <- dt.bcrwd.to.csv[order(match(get(cl),old.nm)),]
+              dt.bcrwd.to.csv[get(cl) %in% old.nm & get(cl) != "None", attribute_nr := .GRP,by=attribute_text]
+            }
+            dt.bcrwd.to.csv[get(cl) %in% old.nm, (cl) := as.character(names.bcrwd[[cl]][get(cl)])]
+            
+          }
+        }
+        
+        if ("tech" %in% names(dt.bcrwd.to.csv)){
+          dt.bcrwd.to.merge <- data.table()
+          for (tc in dt.bcrwd.to.csv[,unique(na.omit(tech))]){
+            dt.bcrwd.to.csv.tec <- dt.bcrwd.to.csv[is.na(tech) | tech == tc,][,-"tech"]
+            if (tc == "Heat pump"){
+              dt.bcrwd.to.csv.tec[level_text == "None", (grp.nm) := get(grp.nm) - dt.bcrwd.to.csv.tec[level_text == "Heat pump",get(grp.nm)]]
+              dt.bcrwd.to.csv.tec <- dt.bcrwd.to.csv.tec[level_text != "Heat pump"]
+            }
+            dt.bcrwd.to.csv.tec[!(attribute_text %in% c("None of these","Valuation")), attribute_nr := .GRP,by=attribute_text]
+            
+            lvl <- if_else(tc == "Heat pump",invest.list.lvl$heat_pumps,invest.list.lvl$heat_networks)/1000
+            
+            #dt.bcrwd.to.csv.tec[attribute_text == "Valuation", (grp.nm) := dt.bcrwd.to.csv.tec[attribute_text == "What is the one-time amount I have to pay?" & level_nr == 0,get(grp.nm)]/lvl]
+            
+            #write.csv(dt.bcrwd.to.csv.tec,paste0(dir.out, "becrowd_",gm,"_",gsub(" ","_",tolower(tc)),"_table.csv"),row.names = FALSE,quote = TRUE)
+            dt.bcrwd.to.csv.tec[,game := tc]
+            dt.bcrwd.to.merge <- rbindlist(list(dt.bcrwd.to.merge,dt.bcrwd.to.csv.tec))
+          }
+        } else {
+          # Add valuation
+          dt.bcrwd.to.csv[attribute_text == "Valuation", (grp.nm) := dt.bcrwd.to.csv[attribute_text == "What will it cost me to insulate my house?" & level_text == "5,000 euros.",get(grp.nm)]/(invest.list.lvl$insu/1000)]
+          
+          # write.csv(dt.bcrwd.to.csv,paste0(dir.out, "becrowd_",gm,"_table.csv"),row.names = FALSE,quote = TRUE)
+          dt.bcrwd.to.csv[,game := "Insulation"]
+          dt.bcrwd.to.merge <- copy(dt.bcrwd.to.csv)
+        }
+        
+        # if (grp.nm %in% names(dt.bcrwd.tot)){
+        #   dt.bcrwd.tot <- rbindlist(list(dt.bcrwd.tot,dt.bcrwd.to.merge),use.names = TRUE,fill = TRUE)
+        # } else { 
+        #   }
+        
+        setnames(dt.bcrwd.to.merge,grp.nm,"wtoadd")
+        dt.bcrwd.tot <- merge(dt.bcrwd.tot,dt.bcrwd.to.merge[,.SD,.SDcols = c(names.merge,"wtoadd")],by = names.merge,all=TRUE)
+        if (grp.nm %in% names(dt.bcrwd.tot)){
+          dt.bcrwd.tot[,(grp.nm) := fcoalesce(get(grp.nm),wtoadd)]
+        } else {
+          dt.bcrwd.tot[,(grp.nm) := wtoadd]
+        }
+        dt.bcrwd.tot[,wtoadd := NULL]
+        
+        if (dt.bcrwd.tot[,any(duplicated(.SD)),.SDcols = names.merge[!grepl("_nr",names.merge)]]) stop("Duplicated in dt.bcrwd.tot")
+      }
+    }
+  }
+  for (gm in dt.bcrwd.tot[,unique(game)]){
+    dt.bcrwd.tot[game == gm & !(attribute_text %in% c("None of these","Valuation")) ,attribute_nr := .GRP,by=.(attribute_text)]
+    dt.bcrwd.tot[game == gm & attribute_text == "None of these",attribute_nr := 0]
+    dt.bcrwd.tot[game == gm,level_nr := (1:.N)-1,by=.(attribute_text)]
+  }
+  dt.bcrwd.tot[attribute_text == "Valuation",attribute_nr := 99]
+  dt.bcrwd.tot[attribute_text == "Valuation",level_nr := 1]
+  
+  if (dt.bcrwd.tot[,any(duplicated(.SD)),.SDcols = names(dt.bcrwd.tot)[!grepl("^wei",names(dt.bcrwd.tot))]]) stop("Duplicated in dt.bcrwd.tot")
+  
+  
+  dt.bcrwd.tot <- dt.bcrwd.tot[order(game,attribute_nr,level_nr),]
+  
+  wghts <- c("weight","weight_DH_opinion_5_-_Very_positive","weight_Age_55",
+             "weight_People_PONG_positive_7_-_Almost_everyone","weight_Enjoy_my_neighborhood_4","weight_Employment_Hoorn",
+             "weight_Climate-conscious_4","weight_Age_65" )
+  
+  write.csv(dt.bcrwd.tot[game == "Heat pump",.SD,.SDcols = c("attribute_nr","attribute_text","level_nr","level_text",wghts)],
+            paste0(dir.out, "becrowd_test_table.csv"),
+            row.names = FALSE,
+            quote = TRUE,  
+            na = "")
   
   
   # IRR ----

@@ -122,43 +122,43 @@
     ],
     "question_rank": 11,
     "answers": {
-      "Less than half": {
+      "3 - Less than half": {
         "answer_tags": [
           "Less than half"
         ],
         "answer_rank": 3
       },
-      "Less than a quarter": {
+      "2 - Less than a quarter": {
         "answer_tags": [
           "Less than a quarter"
         ],
         "answer_rank": 2
       },
-      "More than three quarters": {
+      "6 - More than three quarters": {
         "answer_tags": [
           "More than three quarters"
         ],
         "answer_rank": 6
       },
-      "About half": {
+      "4 - About half": {
         "answer_tags": [
           "About half"
         ],
         "answer_rank": 4
       },
-      "Almost everyone": {
+      "7 - Almost everyone": {
         "answer_tags": [
           "Almost everyone"
         ],
         "answer_rank": 7
       },
-      "More than half": {
+      "5 - More than half": {
         "answer_tags": [
           "More than half"
         ],
         "answer_rank": 5
       },
-      "Almost no one": {
+      "1 - Almost no one": {
         "answer_tags": [
           "Almost no one"
         ],
@@ -185,31 +185,31 @@
     ],
     "question_rank": 5,
     "answers": {
-      "Positive": {
+      "4 - Positive": {
         "answer_tags": [
           "Positive"
         ],
         "answer_rank": 5
       },
-      "Very positive": {
+      "5 - Very positive": {
         "answer_tags": [
           "Very positive"
         ],
         "answer_rank": 4
       },
-      "Neutral": {
+      "3 - Neutral": {
         "answer_tags": [
           "Neutral"
         ],
         "answer_rank": 3
       },
-      "Negative": {
+      "2 - Negative": {
         "answer_tags": [
           "Negative"
         ],
         "answer_rank": 2
       },
-      "Very negative": {
+      "1 - Very negative": {
         "answer_tags": [
           "Very negative"
         ],
@@ -227,31 +227,31 @@
     ],
     "question_rank": 6,
     "answers": {
-      "Neutral": {
+      "3 - Neutral": {
         "answer_tags": [
           "Neutral"
         ],
         "answer_rank": 3
       },
-      "Very negative": {
+      "1 - Very negative": {
         "answer_tags": [
           "Very negative"
         ],
         "answer_rank": 1
       },
-      "Positive": {
+      "4 - Positive": {
         "answer_tags": [
           "Positive"
         ],
         "answer_rank": 4
       },
-      "Negative": {
+      "2 - Negative": {
         "answer_tags": [
           "Negative"
         ],
         "answer_rank": 2
       },
-      "Very positive": {
+      "5 - Very positive": {
         "answer_tags": [
           "Very positive"
         ],

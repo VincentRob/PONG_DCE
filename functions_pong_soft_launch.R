@@ -190,6 +190,7 @@ transform_to_mlogit_data <- function(dt.ce.int,ref.lvl.reg,data.desc = NULL){
   if(!is.null(data.desc)){
     setnames(data.desc,names(data.desc),trimws(names(data.desc)))
     cols.to.merge <- names(data.desc)[!(names(data.desc) %in% names(dt.ce.dum))]
+    if (data.desc[,class(`Response ID`) == "character"] & dt.ce.dum[,class(id_respondent) == "numeric"] ) data.desc[,`Response ID` := as.integer(`Response ID`)]
     dt.ce.dum[data.desc,(paste0("desc_",cols.to.merge)) := mget(paste0("i.",cols.to.merge)),on = c("id_respondent" = "Response ID")]
     col.att.dum <- c(col.att.dum,paste0("desc_",cols.to.merge))
   }
@@ -341,3 +342,204 @@ get_df_logit <- function(data,game,cst,ref.lvl,data.desc = NULL){
   dt.insu.to.logit <- transform_to_mlogit_data(dt.insu,ref.lvl, data.desc)
   return(dt.insu.to.logit)
 }
+
+run_ht_insu_with_ref_level <- function(grp.ht.list,run.name){
+  logit.insu.list <- list(Main = logit_interact.insu)
+  coef_names_ht <- c()
+  
+  for (grp.ht in names(grp.ht.list)){
+    
+    dt.insu.tmp <- copy(dt.insu)
+    setnames(dt.insu.tmp,grp.ht.list[[grp.ht]],grp.ht)
+    
+    dt.insu.dum  <- fastDummies::dummy_columns(dt.insu.tmp[grp.ht],
+                                               remove_most_frequent_dummy = TRUE, 
+                                               remove_selected_columns  = TRUE)
+    nm.all <- fastDummies::dummy_columns(dt.insu.tmp[grp.ht],
+                                         remove_selected_columns = TRUE,
+                                         ignore_na = TRUE,
+                                         return_generated_variables = TRUE)
+    
+    nm.all <- nm.all[!grepl("idx\\.",nm.all)]
+    dt.insu.dum <- dt.insu.dum %>% select(names(dt.insu.dum)[!grepl("idx\\.",names(dt.insu.dum))])
+    
+    common <- Reduce(intersect, strsplit(nm.all, "_"))
+    ref.lvl.ht <- setdiff(nm.all,names(dt.insu.dum))
+    if (length(ref.lvl.ht) > 1) stop(paste0(grp.ht,"More than 1 reference level"))
+    ref.lvl.ht <- gsub(paste0("_?", common, collapse = "|"), "", ref.lvl.ht)
+    ref.lvl.ht <- gsub("\\.|\\_"," ",ref.lvl.ht)
+    
+    
+    names(dt.insu.dum) <- paste0(names(dt.insu.dum)," (ref",ref.lvl.ht,")")
+    
+    dt.insu.tmp <- copy(dt.insu)
+    dt.insu.tmp[, names(dt.insu.dum)] <- dt.insu.dum
+    
+    logit_interact.insu.ht <- mlogit(
+      formula = as.formula(gsub("none",paste0("`",names(dt.insu.dum),"`:none",collapse = " + "),formula.insu)),
+      dt.insu.tmp
+    )
+    logit.insu.list[[grp.ht]] <- logit_interact.insu.ht
+    nm.tmp <- names(logit_interact.insu.ht$coefficients)
+    nm.tmp.org <- nm.tmp[grepl(common,nm.tmp)]
+    nm.tmp.new <- gsub(common,"",nm.tmp.org)
+    nm.tmp.new <- gsub("``","",nm.tmp.new)
+    names(nm.tmp.new) <- gsub("`","",nm.tmp.org)
+    nm.tmp.new <- gsub("(\\:none)|(none\\:)","",nm.tmp.new)
+    nm.tmp.new <- gsub("`_","`",nm.tmp.new)
+    nm.tmp.old <- names(nm.tmp.new)
+    nm.tmp.new <- paste0("none:",nm.tmp.new)
+    names(nm.tmp.new) <- nm.tmp.old
+    coef_names_ht <- c(coef_names_ht,nm.tmp.new)
+  }
+  
+  tab.tex <- modelsummary::modelsummary(logit.insu.list, 
+                                        coef_rename = c(coef_names[names(coef_names) %in% col.att.int],coef_names_ht), 
+                                        add_rows = `attr<-`(do.call(cbind, c(list(rows.refs), rep(list(rows.refs[names(rows.refs) != "term"]), length(logit.insu.list)-1))), "position", attr(rows.refs, "position")),
+                                        shape = term ~ statistic,
+                                        estimate = "{estimate}",
+                                        statistic = stats.table,
+                                        output = "latex",
+                                        stars = c("*" = .1, "**" = .05, "***" = 0.01)) 
+  tab.tex <- add_tinysize(tab.tex,"^\\\\begin\\{table\\}")
+  lines <- unlist(strsplit(tab.tex, "\n"))
+  filtered_lines <- lines[!grepl("\\\\begin\\{table\\}|\\\\end\\{table\\}", lines)]
+  
+  writeLines(filtered_lines, paste0(dir.out, "results_heterogeneity_", game,"_",run.name, ".tex"))
+  
+}
+
+run_ht_tech_with_ref_level <- function(grp.ht.list,run.name){
+  logit.tech.list <- list(Main = logit_interact.tech)
+  coef_names_ht <- c()
+  for (grp.ht in names(grp.ht.list)){
+    
+    dt.tech.tmp <- copy(dt.tech)
+    setnames(dt.tech.tmp,grp.ht.list[[grp.ht]],grp.ht)
+    
+    dt.tech.dum  <- fastDummies::dummy_columns(dt.tech.tmp[grp.ht],
+                                               remove_most_frequent_dummy = TRUE, 
+                                               remove_selected_columns  = TRUE)
+    nm.all <- fastDummies::dummy_columns(dt.tech.tmp[grp.ht],
+                                         remove_selected_columns = TRUE,
+                                         ignore_na = TRUE,
+                                         return_generated_variables = TRUE)
+    
+    nm.all <- nm.all[!grepl("idx\\.",nm.all)]
+    dt.tech.dum <- dt.tech.dum %>% select(names(dt.tech.dum)[!grepl("idx\\.",names(dt.tech.dum))])
+    
+    common <- Reduce(intersect, strsplit(nm.all, "_"))
+    ref.lvl.ht <- setdiff(nm.all,names(dt.tech.dum))
+    if (length(ref.lvl.ht) > 1) stop(paste0(grp.ht,"More than 1 reference level"))
+    ref.lvl.ht <- gsub(paste0("_?", common, collapse = "|"), "", ref.lvl.ht)
+    ref.lvl.ht <- gsub("\\.|\\_"," ",ref.lvl.ht)
+    
+    
+    names(dt.tech.dum) <- paste0(names(dt.tech.dum)," (ref",ref.lvl.ht,")")
+    
+    dt.tech.tmp <- copy(dt.tech)
+    dt.tech.tmp[, names(dt.tech.dum)] <- dt.tech.dum
+    
+    logit_interact.tech.ht <- mlogit(
+      formula = as.formula(gsub("none",paste0("`",names(dt.tech.dum),"`:none",collapse = " + "),formula.tech)),
+      dt.tech.tmp
+    )
+    logit.tech.list[[grp.ht]] <- logit_interact.tech.ht
+    nm.tmp <- names(logit_interact.tech.ht$coefficients)
+    nm.tmp.org <- nm.tmp[grepl(common,nm.tmp)]
+    nm.tmp.new <- gsub(common,"",nm.tmp.org)
+    nm.tmp.new <- gsub("``","",nm.tmp.new)
+    names(nm.tmp.new) <- gsub("`","",nm.tmp.org)
+    nm.tmp.new <- gsub("(\\:none)|(none\\:)","",nm.tmp.new)
+    nm.tmp.new <- gsub("`_","`",nm.tmp.new)
+    nm.tmp.old <- names(nm.tmp.new)
+    nm.tmp.new <- paste0("none:",nm.tmp.new)
+    names(nm.tmp.new) <- nm.tmp.old
+    coef_names_ht <- c(coef_names_ht,nm.tmp.new)
+  }
+  
+  tab.tex <- modelsummary::modelsummary(logit.tech.list, 
+                                        coef_rename = c(tech.map[names(tech.map) %in% col.att.int],coef_names_ht), 
+                                        add_rows = `attr<-`(do.call(cbind, c(list(rows.refs), rep(list(rows.refs[names(rows.refs) != "term"]), length(logit.tech.list)-1))), "position", attr(rows.refs, "position")),
+                                        shape = term ~ statistic,
+                                        estimate = "{estimate}",
+                                        statistic = stats.table,
+                                        output = "latex",
+                                        stars = c("*" = .1, "**" = .05, "***" = 0.01)) 
+  tab.tex <- add_tinysize(tab.tex,"^\\\\begin\\{table\\}")
+  lines <- unlist(strsplit(tab.tex, "\n"))
+  filtered_lines <- lines[!grepl("\\\\begin\\{table\\}|\\\\end\\{table\\}", lines)]
+  
+  writeLines(filtered_lines, paste0(dir.out, "results_heterogeneity_", game,"_",run.name, ".tex"))
+  
+}
+
+extract_cost_value <- function(term) {
+  # Handle 'same as now'
+  if (grepl("same as now", term, ignore.case = TRUE)) return(0)
+  
+  # Extract full numeric value, handling commas as thousand separators
+  term_clean <- gsub(",", "", term)  # remove thousand separators
+  num <- as.numeric(sub(".*?(\\d+(\\.\\d+)?).*", "\\1", term_clean))
+  
+  if (is.na(num)) return(NA_real_)
+  
+  if (grepl("less than now", term, ignore.case = TRUE)) {
+    return(-abs(num))
+  } else if (grepl("more than now", term, ignore.case = TRUE)) {
+    return(abs(num))
+  } else {
+    # One-time cost or fixed value
+    return(num)
+  }
+}
+
+
+parse_modelsummary_latex <- function(tex_output,game) {
+  # Split LaTeX into lines
+  tex_lines <- unlist(strsplit(tex_output, "\n"))
+  
+  # Find positions of first and second \midrule
+  midrule_lines <- grep("\\\\midrule", tex_lines)
+  if (length(midrule_lines) < 2) {
+    stop("Expected at least two \\midrule lines in the LaTeX output.")
+  }
+  
+  # Extract only coefficient lines (between first and second \midrule)
+  start_idx <- midrule_lines[1] + 1
+  end_idx <- midrule_lines[2] - 1
+  table_lines <- c(tex_lines[start_idx:end_idx],tex_lines[end_idx+2]) # end_idx+2 to include none coef
+  
+  # Clean formatting
+  table_lines <- gsub("\\\\", "", table_lines)
+  table_lines <- gsub("&", "|", table_lines)
+  table_lines <- trimws(table_lines)
+  table_lines <- table_lines[table_lines != ""]
+  
+  # Split rows into columns
+  split_lines <- strsplit(table_lines, "\\|")
+  df <- do.call(rbind, lapply(split_lines, function(x) {
+    x <- trimws(x)
+    length(x) <- 3  # ensure exactly 3 columns
+    return(x)
+  }))
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
+  names(df) <- c("Term", "Estimate", "StdError")
+  
+  # Convert Estimate to numeric (remove stars)
+  df$Estimate <- suppressWarnings(as.numeric(gsub("\\*+", "", df$Estimate)))
+  
+  # Optional: keep stars separately
+  df$Stars <- regmatches(df$StdError, gregexpr("\\*+", df$StdError))
+  df$Stars <- sapply(df$Stars, function(x) if (length(x)) x else "")
+  
+  # Clean StdError: remove parentheses and stars
+  df$StdError <- gsub("\\(|\\)|\\*", "", df$StdError)
+  df$StdError <- suppressWarnings(as.numeric(df$StdError))
+  
+  setDT(df)
+  df[,game := game]
+  
+  return(df)
+}
+
