@@ -4,7 +4,7 @@ library(data.table)
 library(ggplot2)
 library(jsonlite)
 library(scales) 
-library(Rsymphony)
+library(patchwork)
 
 # Background ----
 source("Figure_theme.R")
@@ -85,7 +85,7 @@ for (survey.name in survey.names){
   
   # Outliers ----
   nm.out <- names(data)[grepl("Group time",names(data)) & grepl("(Explanation of the Choice Game)|(Introduction Game of choice)",names(data))]
-  if (length(nm.out) != 3 ) stop("There should be 3: intro, explanation tech and explanation insu")
+  #if (length(nm.out) != 3 ) stop("There should be 3: intro, explanation tech and explanation insu")
   for (nm in nm.out){
     tab <- data[,.SD,.SDcols = nm]
     fig.nm <- gsub("[^A-Za-z0-9]", "_", nm)
@@ -177,13 +177,26 @@ for (survey.name in survey.names){
         if (grepl("50 per month",monet_question)){
           nm.fig <- "wtp_50_savings_per_month"
           bd <- 10
+          mx <- 10000
         }else if (grepl("lottery",monet_question)){
           nm.fig <- "value_1_year_wait"
           bd <- 10
+          mx <- 1000
         } else {stop(sprintf("Give name to question `%s`",monet_question))}
         
-        ggplot(tab,aes(x = Answer)) + geom_histogram(binwidth = bd, fill=grey2, col=grey3) + theme.graphs + labs(x = stringr::str_to_sentence(gsub("\\_"," ",nm.fig)))
-        ggsave(paste0(dir.out, nm.fig, ".pdf"),device = "pdf", units = "cm",height = height, width = width)
+        median_val <- median(tab$Answer, na.rm = TRUE)
+        
+        ggplot(tab, aes(x = Answer)) +
+          geom_histogram(binwidth = bd, fill = grey2, col = grey3) +
+          scale_x_continuous(limits = c(NA, mx)) +
+          theme.graphs +
+          labs(
+            x = stringr::str_to_sentence(gsub("\\_", " ", nm.fig)),
+            title = paste0("Median: ", round(median_val, 2))
+          )
+        
+        
+        ggsave(paste0(dir.out.figs, paste0("fig_",nm.fig), ".png"), units = "cm",height = height, width = width)
         
         tab.mean <- tab[,.(Mean = mean(Answer,na.rm=TRUE),Median = median(Answer,na.rm=TRUE))]
         
@@ -321,70 +334,83 @@ for (survey.name in survey.names){
   # Biases figure ----
   grp.ht.list <- fromJSON("input/mapping_bias_figure.json")
   
-  col.bias <- gsub("desc_","",unlist(grp.ht.list$bias))
-  dt.bais <- data.desc[,.SD,.SDcols =col.bias]
-  setnames(dt.bais,col.bias,names(grp.ht.list$bias))
-  #setnames(dt.bais,col.bias,sub(".*\\[(.*)\\].*", "\\1", col.bias))
-  
-  dt.long <- melt(dt.bais,
-                  measure.vars = names(dt.bais),
-                  variable.name = "Question",
-                  value.name = "Response"
-  )
-  
-  # Count per Question + Response
-  dt.prop <- dt.long[, .N, by = .(Question, Response)]
-  dt.prop[, Share := N / sum(N), by = Question]
-  
-  # Questions order 
-  dt.prop[, Question := factor(Question, levels = rev(names(grp.ht.list$bias)))]
-  
-  # Reverse factor levels to get "strongly disagree" first (bottom/left)
-  dt.prop[, Response := factor(Response, levels = rev(sort(unique(dt.prop$Response))))]
-  
-  # Try multiple widths and find the minimum one that gives max 2 lines
-  for (w in 20:80) {
-    dt.prop[, Question_wrapped := stringr::str_wrap(Question, width = w)]
-    max_lines <- max(stringr::str_count(dt.prop$Question_wrapped, "\n") + 1)
+  for (bs in names(grp.ht.list)){
+    col.bias <- gsub("desc_","",unlist(grp.ht.list[[bs]]))
+    dt.bais <- data.desc[,.SD,.SDcols =col.bias]
+    setnames(dt.bais,col.bias,names(grp.ht.list[[bs]]))
+    #setnames(dt.bais,col.bias,sub(".*\\[(.*)\\].*", "\\1", col.bias))
     
-    if (max_lines <= 2) {
-      cat("Minimum width for max 2 lines:", w, "\n")
+    dt.long <- melt(dt.bais,
+                    measure.vars = names(dt.bais),
+                    variable.name = "Question",
+                    value.name = "Response"
+    )
+    
+    # Map sentiment responses to agreement scale
+    dt.long[, Response := fcase(
+      Response == "1 - Very negative",       "1 - strongly disagree",
+      Response == "2 - Negative",            "2",
+      Response == "3 - Neutral",             "3 - neither agree nor disagree",
+      Response == "4 - Positive",            "4",
+      Response == "5 - Very positive",       "5 - strongly agree",
+      default = Response  # keep existing values as-is
+    )]
+    
+    # Count per Question + Response
+    dt.prop <- dt.long[, .N, by = .(Question, Response)]
+    dt.prop[, Share := N / sum(N), by = Question]
+    
+    # Questions order 
+    dt.prop[, Question := factor(Question, levels = rev(names(grp.ht.list[[bs]])))]
+    
+    # Reverse factor levels to get "strongly disagree" first (bottom/left)
+    dt.prop[, Response := factor(Response, levels = rev(sort(unique(dt.prop$Response))))]
+    
+    # Try multiple widths and find the minimum one that gives max 2 lines
+    for (w in 20:80) {
+      dt.prop[, Question_wrapped := stringr::str_wrap(Question, width = w)]
+      max_lines <- max(stringr::str_count(dt.prop$Question_wrapped, "\n") + 1)
       
-      # Re-factor to preserve ordering
-      dt.prop[, Question_wrapped := factor(Question_wrapped, 
-                                           levels = unique(Question_wrapped[order(Question)]))]
-      break
+      if (max_lines <= 2) {
+        cat("Minimum width for max 2 lines:", w, "\n")
+        
+        # Re-factor to preserve ordering
+        dt.prop[, Question_wrapped := factor(Question_wrapped, 
+                                             levels = unique(Question_wrapped[order(Question)]))]
+        break
+      }
     }
+    
+    ggplot(dt.prop, aes(x = Question_wrapped, y = Share, fill = Response)) +
+      geom_bar(stat = "identity", position = "stack", color = "white") +
+      scale_y_continuous(
+        labels = scales::percent_format(accuracy = 1),
+        sec.axis = dup_axis(trans = ~1 - ., labels = scales::percent_format(accuracy = 1), name = NULL)
+      ) +
+      scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+      labs(
+        x = NULL,
+        y = "Share of responses",
+        fill =NULL  
+      ) +
+      coord_flip() +
+      theme_pong + 
+      theme(
+        legend.position = c(0.25, -0.2),  # x < 0 moves left outside plot; y < 0 moves below plot
+        legend.direction = "horizontal",
+        plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
+      ) + 
+      guides(fill = guide_legend(reverse = TRUE))
+    
+    
+    ggsave(paste0(dir.out.figs,"fig_desc_biases",bs,".png"),width = width*1.6,height = height, units = "cm")
+    
   }
-  
-  ggplot(dt.prop, aes(x = Question_wrapped, y = Share, fill = Response)) +
-    geom_bar(stat = "identity", position = "stack", color = "white") +
-    scale_y_continuous(
-      labels = scales::percent_format(accuracy = 1),
-      sec.axis = dup_axis(trans = ~1 - ., labels = scales::percent_format(accuracy = 1), name = NULL)
-    ) +
-    scale_fill_brewer(palette = "RdYlBu", direction = -1) +
-    labs(
-      x = NULL,
-      y = "Share of responses",
-      fill =NULL  
-    ) +
-    coord_flip() +
-    theme_pong + 
-    theme(
-      legend.position = c(0.25, -0.2),  # x < 0 moves left outside plot; y < 0 moves below plot
-      legend.direction = "horizontal",
-      plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
-    ) + 
-    guides(fill = guide_legend(reverse = TRUE))
-  
-  
-  ggsave(paste0(dir.out.figs,"fig_desc_biases.png"),width = width*1.6,height = height, units = "cm")
-  
+ 
   # Descriptives figures ----
   clean_str <- \(x) stringr::str_to_sentence(gsub("_"," ",x))
   
-  plot_percent_bar <- function(data, var_name_str) {
+  plot_percent_bar <- function(data, var_name_str, max_limit = 1.05) {
     var_sym <- sym(var_name_str)
     
     ggplot(data, aes(x = !!var_sym)) +
@@ -392,8 +418,8 @@ for (survey.name in survey.names){
       geom_text(aes(
         label = scales::percent((..count..) / sum(..count..), accuracy = 1),
         y = (..count..) / sum(..count..)
-      ), stat = "count", hjust = -0.1, size = 16 * 0.35) +
-      coord_flip() +
+      ), stat = "count", hjust = -0.1, size = font.axis.lbls * 0.35) +
+      coord_flip(clip = "off") +
       labs(
         x = NULL,
         y = NULL,
@@ -403,15 +429,20 @@ for (survey.name in survey.names){
       theme_pong +
       theme(
         axis.text.y = element_text(angle = 0, vjust = 0.5, hjust = 1),
-        axis.text.x = element_blank(),         # Remove x-axis text
-        axis.ticks.x = element_blank(),        # Remove x-axis ticks
-        axis.title.x = element_blank(),        # Remove x-axis title
-        panel.grid.major.x = element_blank(),  # Remove major x grid lines
-        panel.grid.minor.x = element_blank()   # Remove minor x grid lines
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        plot.margin = margin(t = 10, r = 40, b = 10, l = 10)
       ) +
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1), name = "Share of respondents")
-    
+      scale_y_continuous(
+        labels = scales::percent_format(accuracy = 1),
+        name = "Share of respondents",
+        limits = c(0, max_limit)
+      )
   }
+  
   
   grp.ht.list <- fromJSON("input/mlogit_heterogeneity_groups.json")
   
@@ -422,17 +453,21 @@ for (survey.name in survey.names){
     
     for (desc in grp.ht.list[[grp.ht]]){
       
-      colnm <- gsub("desc_","",desc)
+      colnm <- gsub("desc_", "", desc)
       if (!(colnm %in% names(data.desc.adhoc))) next
       dt.plt <- data.desc.adhoc[, .(col = get(colnm))]
       
       new.nm <- names(grp.ht.list[[grp.ht]][which(grp.ht.list[[grp.ht]] == desc)])
       setnames(dt.plt, "col", new.nm)
       
-      plot_percent_bar(dt.plt, new.nm)
+      # Calculate max limit (e.g., 5% above max proportion or fixed upper bound)
+      max_limit <- max((table(dt.plt[[new.nm]]) / nrow(dt.plt))) * 1.1
+      
+      p <- plot_percent_bar(dt.plt, new.nm, max_limit = max_limit)
+      
       fig.nm <- paste0("fig_",grp.ht,"_",new.nm)
       fig.nm <- gsub("[^A-Za-z0-9]", "_", fig.nm)
-      ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width*0.85,height = height*0.75, units = "cm")
+      ggsave(paste0(dir.out.figs,fig.nm,".png"),p,width = width,height = height, units = "cm")
       
     }
   }
@@ -674,11 +709,12 @@ for (survey.name in survey.names){
   # Attributes importance ----
   
   get_50prct_support_package <- function(dt){
+    dt <- copy(dt)
     dt[Attribute == "None",Estimate := -Estimate]
     dt[is.na(Estimate),Estimate := 0]
     
     # Split by attribute
-    split_list <- split(dt, by = "Attribute")
+    split_list <- split(dt[grepl(paste0(reg.costs,"|none|None"),Attribute),], by = "Attribute")
     
     # Get all combinations (Cartesian product)
     combos <- do.call(CJ, lapply(split_list, function(x) seq_len(nrow(x))))
@@ -694,7 +730,8 @@ for (survey.name in survey.names){
     }, by = seq_len(nrow(combos)), .SDcols = names(split_list)][, seq_len := NULL]
     
     # Example best_combo string (from your results)
-    best_combo <- results[which.min(abs(total))]$combo
+    target.support <- 0.65
+    best_combo <- results[which.min(abs(target.support-1/(1+exp(-total))))]$combo
     
     # Split by " | " into terms
     chosen_terms <- stringr::str_split(best_combo, " \\| ")[[1]]
@@ -713,12 +750,17 @@ for (survey.name in survey.names){
     
     dt[Attribute == "None",Estimate := -Estimate]
     
+    dt[Attribute %in% dt[,sum(is_selected),by=Attribute][V1 == 0,Attribute], is_selected := as.integer(grepl("reference",Term) & Estimate == 0)]
+    
+    if (dt[,sum(is_selected) != 1,by=Attribute][,any(V1)]) stop("All attributes should have one selected level")
+    
     return(dt)
   }
   
   for (gm in c("tech","insu")){
     
-    dt.find.50prct <- dt.coefs[game == gm & group == "all" & !grepl("Heat pump",Term),.(Attribute,Term,Estimate)]
+    dt.find.50prct <- dt.coefs[game == gm & group == "all" & !grepl("Heat pump",Term),.(Attribute,Term,Estimate,Stars)]
+    dt.find.50prct[Stars %in% c("","*") ,Estimate := 0]
     if (gm == "insu"){
       dt.find.50prct <- dt.find.50prct[Attribute != "Nuisance",]
     }
@@ -757,23 +799,63 @@ for (survey.name in survey.names){
     dt.exp[, Term := stringr::str_wrap(Term, width = 90)]
     
     dt.exp[is.na(diff),diff := 0.001]
+    dt.exp[is.na(new_supp) & is_selected == 1,new_supp := baseline_support]
     
-    ggplot(dt.exp, aes(x = diff, y = reorder(Term, diff))) +
+    # Add reference
+    dt.exp <- rbindlist(list(dt.exp,dt.exp[1,.(Attribute = "Reference",Term = "Reference",new_supp = baseline_support)]),use.names = TRUE,fill = TRUE)
+    
+    dt.exp <- dt.exp[!grepl("\\(reference\\)", Term), ]
+    # Short names
+    if (gm == "tech"){
+      dt.exp[grepl("2 months of",Term),Term := "More nuisance"]
+      dt.exp[grepl("one day a year",Term),Term := "Power outage"]
+      dt.exp[grepl("one fixed heat supplier",Term),Term := "One supplier"]
+      dt.exp[, Attribute := factor(Attribute, levels = c("Reference", "Supplier", "Nuisance", "Power outages"))]
+    } else {
+      dt.exp[grepl("trees\\.",Term),Term := "Less CO2 savings"]
+      dt.exp[grepl("less problems with street noise",Term),Term := "No cooling, less noise"]
+      dt.exp[grepl("draft-free\\.",Term),Term := "No cooling"]
+      dt.exp[grepl("help with selecting the contractor",Term),Term := "Some help"]
+      dt.exp[grepl("arrange everything yourself",Term),Term := "No help"]
+      dt.exp[, Attribute := factor(Attribute, levels = c("Reference", "Comfort", "Support", "Co2"))]
+      
+    }
+    
+    ggplot(dt.exp, 
+           aes(x = new_supp, y = reorder(Term, new_supp))) +
       geom_col(fill = grey2) +
-      facet_grid(Attribute ~ ., scales = "free_y", space = "free", switch = "y") + 
-      scale_x_continuous(
-        labels = scales::percent_format(),
-        breaks = seq(-0.2, 0.2, by = 0.05),
-        limits = c(-0.2,0.2)
+      geom_text(
+        aes(label = scales::percent(new_supp, accuracy = 1), x = new_supp + 0.005),
+        hjust = 0,
+        size = font.axis.lbls * 0.35
       ) +
+      facet_grid(Attribute ~ ., scales = "free_y", space = "free", switch = "y") + 
+      coord_cartesian(xlim = c(0.40, 0.80)) +
       theme_minimal() +
-      labs(x = "Change in support (%)", y = NULL, title = NULL) +
-      theme_pong + 
+      labs(x = NULL, y = NULL, title = NULL) +
+      theme_pong +
       theme(
-        strip.text.y.left = element_text(size = font.axis.lbls, angle = 90),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        strip.text.y.left = element_blank(),        # <- Hide facet labels
+        strip.background = element_blank(),         # <- Optional: remove background
         panel.spacing = unit(1, "lines")
       )
-    ggsave(paste0(dir.out.figs,"fig_nonmonet_importance_",gm,".png"),width = width*1.9,height = height, units = "cm")
+    
+    ggsave(paste0(dir.out.figs,"fig_nonmonet_importance_",gm,".png"),width = width,height = height, units = "cm")
+    
+    
+    dt[is_selected == 1 & Attribute != "None",Term_ref := gsub(" \\(reference\\)","",Term)]
+    dt[,Term_ref := stringr::str_to_sentence(gsub(paste0(Attribute,": "),"",Term_ref)),by=.I]
+    
+    sink(paste0(dir.out.figs,"tab_nonmonet_importance_",gm,".txt"))
+    print(dt.exp)
+    
+    print(dt)
+    sink()
+    
     
   }
   
@@ -826,10 +908,10 @@ for (survey.name in survey.names){
         dt.pw.plt[,s := exp(coef.invest + coef.savings)/(exp(coef.invest + coef.savings)+exp(none))]
         
         support_colors <- c(
-          "0-25%"   = "#d73027",
+          "25% or less"   = "#d73027",
           "25-50%"  = "#fc8d59",
           "50-75%"  = "#b2df8a",
-          "75-100%" = "#1a9850" 
+          "75% or more" = "#1a9850" 
         )
         
         dt.pw.plt[, s_cat := cut(s,
@@ -978,9 +1060,7 @@ for (survey.name in survey.names){
   
   dt.bcrwd.tot <- dt.bcrwd.tot[order(game,attribute_nr,level_nr),]
   
-  wghts <- c("weight","weight_DH_opinion_5_-_Very_positive","weight_Age_55",
-             "weight_People_PONG_positive_7_-_Almost_everyone","weight_Enjoy_my_neighborhood_4","weight_Employment_Hoorn",
-             "weight_Climate-conscious_4","weight_Age_65" )
+  wghts <- c("weight","weight_People_PONG_positive_5_-_More_than_half" )
   wghts <- wghts[wghts %in% names(dt.bcrwd.tot)]
   write.csv(dt.bcrwd.tot[game == "Heat pump",.SD,.SDcols = c("attribute_nr","attribute_text","level_nr","level_text",wghts)],
             paste0(dir.out, "becrowd_test_table.csv"),

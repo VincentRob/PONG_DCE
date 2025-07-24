@@ -1,11 +1,15 @@
 {
-  "bias": {
+  "perception_people": {
     "Ik woon graag in mijn gemeente": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I enjoy living in my municipality]",
     "Ik woon graag in mijn wijk": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I enjoy living in my neighborhood]",
     "Ik ben iemand die zich klimaatbewust gedraagt": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I am climate-conscious]",
-    "Ik denk dat de gemeente alles over warmtetransitie al heeft besloten, mijn mening doet er niet toe": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]",
+    "Ik denk dat de gemeente alles over warmtetransitie al heeft besloten, mijn mening doet er niet toe": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]"
+  },
+    "perception_heat_transition": {
     "De prijzen voor warmte moeten zo veel mogelijk gelijk zijn voor iedereen in de gemeente": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [Heat prices should be as equal as possible for everyone in the municipality]",
     "Bewoners zijn zelf in staat om te bepalen hoe ze van het gas af gaan": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [Residents are capable of deciding for themselves how to phase out natural gas]",
-    "De gemeente is het beste in staat om te bepalen wat de meest goedkope manier is om van het gas af te gaan": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [The municipality is best able to determine the most affordable way to phase out natural gas]"
+    "De gemeente is het beste in staat om te bepalen wat de meest goedkope manier is om van het gas af te gaan": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [The municipality is best able to determine the most affordable way to phase out natural gas]",
+    "Hoe staat u tegenover warmtenetten?":" What is your opinion on district heating after having heard everything?",
+    "Hoe staat u tegenover warmtepompen?":" What is your opinion on heat pumps after having heard everything?"
   }
 }
