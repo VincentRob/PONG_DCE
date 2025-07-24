@@ -322,8 +322,8 @@ for (survey.name in survey.names){
     grepl("master",get(nm.var)), "4 - master or higher",
     grepl("bachelor",get(nm.var)), "3 - bachelor",
     grepl("HAVO",get(nm.var)), "2 - HAVO",
-    grepl("VMBO|Primary",get(nm.var)), "1 - VMBO or lower"
-    
+    grepl("VMBO|Primary",get(nm.var)), "1 - VMBO or lower",
+    default = "0 - Other"
   )]
   print(data.desc[,.N,by=.(education,get(nm.var))][order(education,N)])
   
