@@ -350,6 +350,7 @@ run_ht_insu_with_ref_level <- function(grp.ht.list,run.name){
   for (grp.ht in names(grp.ht.list)){
     
     dt.insu.tmp <- copy(dt.insu)
+    if (!(grp.ht.list[[grp.ht]] %in% names(dt.insu.tmp))) next
     setnames(dt.insu.tmp,grp.ht.list[[grp.ht]],grp.ht)
     
     dt.insu.dum  <- fastDummies::dummy_columns(dt.insu.tmp[grp.ht],
@@ -415,6 +416,7 @@ run_ht_tech_with_ref_level <- function(grp.ht.list,run.name){
   for (grp.ht in names(grp.ht.list)){
     
     dt.tech.tmp <- copy(dt.tech)
+    if (!(grp.ht.list[[grp.ht]] %in% names(dt.tech.tmp))) next
     setnames(dt.tech.tmp,grp.ht.list[[grp.ht]],grp.ht)
     
     dt.tech.dum  <- fastDummies::dummy_columns(dt.tech.tmp[grp.ht],
