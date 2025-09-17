@@ -1,3 +1,25 @@
+indent_levels <- function(lines, indent = "\\hspace{1em}") {
+  # Find first \midrule to avoid indenting the header row
+  mid_idx <- which(grepl("^\\s*\\\\midrule\\b", lines))[1]
+  before_mid <- if (is.na(mid_idx)) integer(0) else seq_len(mid_idx - 1)
+  
+  # "Level" rows:
+  # - do NOT start with a LaTeX command (\)
+  # - are AFTER \midrule
+  # - have a non-empty right-hand side (some non-space after & before the trailing \\)
+  is_level <- grepl("^\\s*[^\\\\].*?&\\s*\\S.*\\\\\\\\\\s*$", lines, perl = TRUE)
+  is_level[before_mid] <- FALSE
+  
+  # Add indent after any leading spaces. Use a function so backslashes are preserved.
+  lines[is_level] <- sub(
+    "^(\\s*)",
+    function(m) paste0(m, indent),
+    lines[is_level],
+    perl = TRUE
+  )
+  
+  lines
+}
 
 add_scriptsize <- function(tab, insert_after_pattern) {
   # Split the LaTeX content into lines

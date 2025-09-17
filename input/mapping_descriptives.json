@@ -6,6 +6,7 @@
       ]
     ],
     "question_rank": 1,
+    "question_mask": 0,
     "answers": {
       "I agree and want to participate": {
         "answer_tags": [
@@ -23,6 +24,7 @@
       ]
     ],
     "question_rank": 25,
+    "question_mask": 1,
     "question_group": "bias_monet"
   },
   " Suppose you currently had some money available to invest in your home. And suppose that, starting now, a new insulation technique could save you 50 per month (600 per year) on your energy expenses.  How much would you be willing to pay to have that insulation installed?": {
@@ -33,6 +35,7 @@
       ]
     ],
     "question_rank": 26,
+    "question_mask": 1,
     "answers": {
       "2000": {
         "answer_tags": [
@@ -43,6 +46,16 @@
     },
     "question_group": "bias_monet"
   },
+  " Number of home improvements": {
+    "question_tags": [
+      [
+        "nb_house_improvement"
+      ]
+    ],
+    "question_rank": 1,
+    "question_mask": 1,
+    "question_group": "desc"
+  },
   " What sustainability improvements have you already made? Hollow wall insulation": {
     "question_tags": [
       [
@@ -51,6 +64,7 @@
       ]
     ],
     "question_rank": 1,
+    "question_mask": 0,
     "question_group": "desc"
   },
   " What sustainability improvements have you already made? Roof and/or floor insulation": {
@@ -61,6 +75,7 @@
       ]
     ],
     "question_rank": 2,
+    "question_mask": 0,
     "question_group": "desc"
   },
   " What sustainability improvements have you already made? Additional insulation": {
@@ -71,6 +86,7 @@
       ]
     ],
     "question_rank": 3,
+    "question_mask": 0,
     "question_group": "desc"
   },
   " What sustainability improvements have you already made? High-efficiency, double or triple glazing": {
@@ -81,6 +97,7 @@
       ]
     ],
     "question_rank": 4,
+    "question_mask": 0,
     "question_group": "desc"
   },
   " What sustainability improvements have you already made? Hybrid heat pump": {
@@ -91,6 +108,7 @@
       ]
     ],
     "question_rank": 5,
+    "question_mask": 0,
     "question_group": "desc"
   },
   " What sustainability improvements have you already made? Air-source or ground-source heat pump": {
@@ -101,6 +119,7 @@
       ]
     ],
     "question_rank": 6,
+    "question_mask": 0,
     "question_group": "desc"
   },
   " What sustainability improvements have you already made? None of these": {
@@ -111,6 +130,7 @@
       ]
     ],
     "question_rank": 7,
+    "question_mask": 0,
     "question_group": "desc"
   },
   " In your opinion, how many people are positive about phasing out natural gas?": {
@@ -121,6 +141,7 @@
       ]
     ],
     "question_rank": 11,
+    "question_mask": 1,
     "answers": {
       "3 - Less than half": {
         "answer_tags": [
@@ -167,14 +188,15 @@
     },
     "question_group": "bias"
   },
-  " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?":{
+  " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?": {
     "question_tags": [
       [
         " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?",
         " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?"
       ]
     ],
-    "question_rank": 5
+    "question_rank": 5,
+    "question_mask": 1
   },
   " What is your opinion on heat pumps after having heard everything?": {
     "question_tags": [
@@ -184,6 +206,7 @@
       ]
     ],
     "question_rank": 5,
+    "question_mask": 1,
     "answers": {
       "4 - Positive": {
         "answer_tags": [
@@ -226,6 +249,7 @@
       ]
     ],
     "question_rank": 6,
+    "question_mask": 1,
     "answers": {
       "3 - Neutral": {
         "answer_tags": [
@@ -268,6 +292,7 @@
       ]
     ],
     "question_rank": 1,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " If I switch away from natural gas, I would appreciate the following: Receiving tailored advice from an expert: what is technically needed in my home?": {
@@ -278,6 +303,7 @@
       ]
     ],
     "question_rank": 2,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " If I switch away from natural gas, I would appreciate the following: Getting help selecting a contractor and evaluating the quotes": {
@@ -288,6 +314,7 @@
       ]
     ],
     "question_rank": 3,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " If I switch away from natural gas, I would appreciate the following: Receiving independent information about the costs and benefits": {
@@ -298,6 +325,7 @@
       ]
     ],
     "question_rank": 4,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " If I switch away from natural gas, I would appreciate the following: Receiving financial support, such as a subsidy or low-interest loan": {
@@ -308,6 +336,7 @@
       ]
     ],
     "question_rank": 5,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " If I switch away from natural gas, I would appreciate the following: Other": {
@@ -318,6 +347,7 @@
       ]
     ],
     "question_rank": 6,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " What is your energy supplier?": {
@@ -328,6 +358,7 @@
       ]
     ],
     "question_rank": 9,
+    "question_mask": 0,
     "answers": {
       "Vattenfall": {
         "answer_tags": [
@@ -730,6 +761,7 @@
       ]
     ],
     "question_rank": 10,
+    "question_mask": 0,
     "answers": {
       "Detached house": {
         "answer_tags": [
@@ -747,6 +779,7 @@
       ]
     ],
     "question_rank": 1,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way: A community meeting": {
@@ -756,6 +789,7 @@
       ]
     ],
     "question_rank": 2,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way: Through energy coaches": {
@@ -765,6 +799,7 @@
       ]
     ],
     "question_rank": 3,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way: Through a website": {
@@ -774,6 +809,7 @@
       ]
     ],
     "question_rank": 4,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way: I want to be able to ask the municipality questions when needed": {
@@ -783,6 +819,7 @@
       ]
     ],
     "question_rank": 5,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way: I would like to participate in a residents' panel": {
@@ -792,6 +829,7 @@
       ]
     ],
     "question_rank": 6,
+    "question_mask": 1,
     "question_group": "comm"
   },
   " I would like to stay informed about the municipalitys plans to phase out natural gas in my neighborhood in the following way: Other": {
@@ -801,6 +839,7 @@
       ]
     ],
     "question_rank": 7,
+    "question_mask": 1,
     "question_group": "comm"
   },
   "On a scale from 1 to 5, to what extent do you agree with the following statements? [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]": {
@@ -811,6 +850,7 @@
       ]
     ],
     "question_rank": 17,
+    "question_mask": 1,
     "answers": {
       "2": {
         "answer_tags": [
@@ -853,6 +893,7 @@
       ]
     ],
     "question_rank": 18,
+    "question_mask": 1,
     "answers": {
       "2": {
         "answer_tags": [
@@ -895,6 +936,7 @@
       ]
     ],
     "question_rank": 19,
+    "question_mask": 1,
     "answers": {
       "4": {
         "answer_tags": [
@@ -937,6 +979,7 @@
       ]
     ],
     "question_rank": 20,
+    "question_mask": 1,
     "answers": {
       "2": {
         "answer_tags": [
@@ -979,6 +1022,7 @@
       ]
     ],
     "question_rank": 21,
+    "question_mask": 1,
     "answers": {
       "2": {
         "answer_tags": [
@@ -1021,6 +1065,7 @@
       ]
     ],
     "question_rank": 22,
+    "question_mask": 1,
     "answers": {
       "2": {
         "answer_tags": [
@@ -1063,6 +1108,7 @@
       ]
     ],
     "question_rank": 23,
+    "question_mask": 1,
     "answers": {
       "4": {
         "answer_tags": [
@@ -1097,6 +1143,48 @@
     },
     "question_group": "bias"
   },
+  "Employment": {
+    "question_tags": [
+      [
+        "work_status"
+      ]
+    ],
+    "answers": {
+      "2 - one working, one home": {
+        "answer_tags": [
+          "2 - one_working_one_home"
+        ],
+        "answer_rank": 2
+      },
+      "1 - two working": {
+        "answer_tags": [
+          "1 - two_working"
+        ],
+        "answer_rank": 1
+      },
+      "3 - single worker": {
+        "answer_tags": [
+          "3 - single_worker"
+        ],
+        "answer_rank": 3
+      },
+      "4 - all home": {
+        "answer_tags": [
+          "4 - all_home"
+        ],
+        "answer_rank": 4
+      },
+      "5 - other": {
+        "answer_tags": [
+          "5 - other"
+        ],
+        "answer_rank": 5
+      }
+    },
+    "question_rank": 25,
+    "question_mask": 1,
+    "question_group": "desc"
+  },
   " Which best describes the employment situation of your partner?": {
     "question_tags": [
       [
@@ -1105,6 +1193,7 @@
       ]
     ],
     "question_rank": 25,
+    "question_mask": 0,
     "answers": {
       "Working - Full Time (at least 32 hours per week)": {
         "answer_tags": [
@@ -1123,6 +1212,7 @@
       ]
     ],
     "question_rank": 26,
+    "question_mask": 0,
     "answers": {
       "Going to school": {
         "answer_tags": [
@@ -1139,6 +1229,16 @@
     },
     "question_group": "desc"
   },
+  "Age": {
+    "question_tags": [
+      [
+        "age_max"
+      ]
+    ],
+    "question_rank": 27,
+    "question_mask": 0,
+    "question_group": "desc"
+  },
   " To which age group does your partner belong?": {
     "question_tags": [
       [
@@ -1147,6 +1247,7 @@
       ]
     ],
     "question_rank": 27,
+    "question_mask": 0,
     "answers": {
       "25-34": {
         "answer_tags": [
@@ -1201,6 +1302,7 @@
       ]
     ],
     "question_rank": 28,
+    "question_mask": 0,
     "answers": {
       "25-34": {
         "answer_tags": [
@@ -1247,6 +1349,15 @@
     },
     "question_group": "desc"
   },
+  "Household composition": {
+    "question_tags": [
+      [
+        "hh_type"
+      ]
+    ],
+    "question_rank": 29,
+    "question_mask": 1
+  },
   " Who is currently part of your household?": {
     "question_tags": [
       [
@@ -1255,6 +1366,7 @@
       ]
     ],
     "question_rank": 29,
+    "question_mask": 0,
     "answers": {
       "With my partner / spouse": {
         "answer_tags": [
@@ -1300,6 +1412,7 @@
       ]
     ],
     "question_rank": 30,
+    "question_mask": 0,
     "answers": {
       "Dutch": {
         "answer_tags": [
@@ -1310,7 +1423,7 @@
     },
     "question_group": "desc"
   },
-  " Which gender do you identify with the most?": {
+  "Gender": {
     "question_tags": [
       [
         " Which gender do you identify with the most?",
@@ -1318,6 +1431,7 @@
       ]
     ],
     "question_rank": 31,
+    "question_mask": 1,
     "answers": {
       "Woman": {
         "answer_tags": [
@@ -1334,6 +1448,36 @@
     },
     "question_group": "desc"
   },
+  "WOZ dwelling value": {
+    "question_tags": [
+      [
+        "WOZ_quantile"
+      ]
+    ],
+    "question_rank": 32,
+    "question_mask": 1,
+    "answers": {
+      "Less than 300k": {
+        "answer_tags": [
+          "[100,300]"
+        ],
+        "answer_rank": 1
+      },
+      "Between 300k and 400k": {
+        "answer_tags": [
+          "(300,400]"
+        ],
+        "answer_rank": 2
+      },
+      "More than 400k": {
+        "answer_tags": [
+          "(400,900]"
+        ],
+        "answer_rank": 3
+      }
+    },
+    "question_group": "desc"
+  },
   " What is the WOZ value of your dwelling?": {
     "question_tags": [
       [
@@ -1342,6 +1486,7 @@
       ]
     ],
     "question_rank": 32,
+    "question_mask": 0,
     "answers": {
       "200-300 thousand euros": {
         "answer_tags": [
@@ -1408,6 +1553,7 @@
       ]
     ],
     "question_rank": 33,
+    "question_mask": 1,
     "answers": {
       "Yes": {
         "answer_tags": [
@@ -1424,7 +1570,7 @@
     },
     "question_group": "desc"
   },
-  " What do you use for cooking?": {
+  " Cooking equipment": {
     "question_tags": [
       [
         " What do you use for cooking?",
@@ -1432,6 +1578,7 @@
       ]
     ],
     "question_rank": 34,
+    "question_mask": 1,
     "answers": {
       "Natural gas stove": {
         "answer_tags": [
@@ -1466,7 +1613,7 @@
     },
     "question_group": "desc"
   },
-  " How much do you pay monthly for gas?": {
+  " Monthly gas costs": {
     "question_tags": [
       [
         " How much do you pay monthly for gas?",
@@ -1474,6 +1621,7 @@
       ]
     ],
     "question_rank": 35,
+    "question_mask": 1,
     "answers": {
       "Between 50 and 100 euro": {
         "answer_tags": [
@@ -1514,7 +1662,7 @@
     },
     "question_group": "desc"
   },
-  " What is your gas consumption per year?": {
+  "Gas consumption per year?": {
     "question_tags": [
       [
         " What is your gas consumption per year?",
@@ -1522,6 +1670,7 @@
       ]
     ],
     "question_rank": 37,
+    "question_mask": 1,
     "answers": {
       "Between 1200 and 1400m3": {
         "answer_tags": [
@@ -1568,7 +1717,7 @@
     },
     "question_group": "desc"
   },
-  " What is the size of your dwelling?": {
+  " Dwelling size": {
     "question_tags": [
       [
         " What is the size of your dwelling?",
@@ -1576,6 +1725,7 @@
       ]
     ],
     "question_rank": 38,
+    "question_mask": 1,
     "answers": {
       "Between 40 and 80m2": {
         "answer_tags": [
@@ -1618,6 +1768,7 @@
       ]
     ],
     "question_rank": 39,
+    "question_mask": 0,
     "answers": {
       "Computer": {
         "answer_tags": [
@@ -1648,6 +1799,7 @@
       ]
     ],
     "question_rank": 40,
+    "question_mask": 0,
     "answers": {
       "HAVO/VWO/HBS/MBO-niveau 2 t/m 4 of MBO old structure (MTS/UTS/MEAO)": {
         "answer_tags": [
@@ -1714,6 +1866,7 @@
       ]
     ],
     "question_rank": 41,
+    "question_mask": 1,
     "answers": {
       "Yes, natural gas": {
         "answer_tags": [
@@ -1736,7 +1889,7 @@
     },
     "question_group": "desc"
   },
-  " What is the construction period of your dwelling?": {
+  " Dwelling construction period": {
     "question_tags": [
       [
         " What is the construction period of your dwelling?",
@@ -1744,6 +1897,7 @@
       ]
     ],
     "question_rank": 42,
+    "question_mask": 1,
     "answers": {
       "1991-2005": {
         "answer_tags": [
@@ -1786,6 +1940,7 @@
       ]
     ],
     "question_rank": 43,
+    "question_mask": 0,
     "answers": {
       "Owner-occupied house": {
         "answer_tags": [
@@ -1804,6 +1959,7 @@
       ]
     ],
     "question_rank": 44,
+    "question_mask": 0,
     "answers": {
       "nl": {
         "answer_tags": [
@@ -1820,6 +1976,40 @@
     },
     "question_group": "desc"
   },
+  " Education": {
+    "question_tags": [
+      [
+        "education"
+      ]
+    ],
+    "question_rank": 8,
+    "question_mask": 1,
+    "question_group": "desc"
+  },
+  " Survey": {
+    "question_tags": [
+      [
+        "survey_name_4desctiptives"
+      ]
+    ],
+    "question_rank": 1,
+    "question_mask": 1,
+    "answers": {
+      "Panelclix": {
+        "answer_tags": [
+          "complete full launch results-survey743982"
+        ],
+        "answer_rank": 1
+      },
+      "Hoorn": {
+        "answer_tags": [
+          "Hoorn_complete"
+        ],
+        "answer_rank": 2
+      }
+    },
+    "question_group": "desc"
+  },
   " Last page": {
     "question_tags": [
       [
@@ -1828,6 +2018,7 @@
       ]
     ],
     "question_rank": 45,
+    "question_mask": 0,
     "answers": {
       "18": {
         "answer_tags": [

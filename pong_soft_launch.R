@@ -32,7 +32,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("full_launch_panelclix","soft_launch_medemblik_hoorn","panelclix_hoorn")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("pong_wp3_tables")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
@@ -50,6 +50,7 @@ for (survey.name in survey.names){
   for (file.name in input_specs[survey_name == survey.name,unique(data_path)]){
     data_tmp <- readxl::read_excel(paste0(file.name)) %>% as.data.table()
     data_tmp[,survey_name := gsub("^.*/|\\.xlsx$", "", file.name)]
+    data_tmp[,survey_name_4desctiptives := copy(survey_name)]
     
     # Remove emoji
     names(data_tmp) <- sapply(names(data_tmp),\(x) gsub("[^\x01-\x7F]", "", x)) 
@@ -102,7 +103,7 @@ for (survey.name in survey.names){
   cat(paste0("After removing short introduction times: ",dim(data)[1]))
   sink()
   
-  # Descriptives - respondent characteristics ----
+  # Descriptives ----
   col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Date)|(Seed)|(zipcode)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(Thank you for your participation)|(Total time)|(please enter the code that is in your letter)",names(data))]
   data.desc <- data[,.SD,.SDcols = col.desc]
   
@@ -114,7 +115,74 @@ for (survey.name in survey.names){
   
   names(data.desc) <- new.nms
   
-  # Map descriptives
+  ## Groups respondents ----
+  nm.lottery <- names(data.desc)[grepl("lottery",names(data.desc))]
+  if (length(nm.lottery)>0){
+    data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+    data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
+  }
+  
+  data.desc[,WOZ := as.integer(stringr::str_extract(` What is the WOZ value of your dwelling?`,"[0-9]{3}"))]
+  data.desc[,WOZ_quantile := cut(WOZ,breaks = quantile(WOZ,c(0,0.33,0.66,1),na.rm=TRUE),include.lowest=TRUE)]
+  
+  nm.var <- " What is the construction period of your dwelling?"
+  data.desc[, constr_period := fcase(
+    get(nm.var) %in% c("1945 or before"), "1 - 1945 or before",
+    get(nm.var) %in% c("1946-1970", "1971-1990"), "2 - 1946-1990",
+    get(nm.var) %in% c("1991-2005"), "3 - 1991-2005",
+    get(nm.var) %in% c( "2006-2025"),  "4 - 2006-2025")]
+  
+  nm.var <- " Which best describes your employment situation?"
+  nm.var2 <- " Which best describes the employment situation of your partner?"
+  job.var.work <- c("Working - Full Time (at least 32 hours per week)","Working - Part Time")
+  job.var.home <- c("Keeping house or being home maker",
+                    "Retired",
+                    "Unemployed and looking for work",
+                    "Receiving/Awaiting approval for disability payments")
+  if (nm.var %in% names(data.desc)){
+    data.desc[, work_status := fcase(
+      get(nm.var) %in% job.var.home & (get(nm.var2) %in% job.var.home | is.na(get(nm.var2))), "4 - all_home",
+      (get(nm.var) %in% job.var.home & get(nm.var2) %in% job.var.work) | (get(nm.var2) %in% job.var.home & get(nm.var) %in% job.var.work), "2 - one_working_one_home",
+      get(nm.var) %in% job.var.work & get(nm.var2) %in% job.var.work, "1 - two_working",
+      get(nm.var) %in% job.var.work & is.na(get(nm.var2)), "3 - single_worker",
+      !is.na(get(nm.var)) | !is.na(get(nm.var2)),"5 - other"
+    )]
+    print(data.desc[,.N,by=.(work_status,get(nm.var),get(nm.var2))][order(work_status,N)])
+  }
+  # Age
+  nm.var <- " To which age group do you belong?"
+  nm.var2 <- " To which age group does your partner belong?"
+  if (!(nm.var2 %in% names(data.desc))) nm.var2 <- nm.var
+  data.desc[, age_max := max(c(stringr::str_extract(get(nm.var),"[0-9]{2}"),
+                               stringr::str_extract(get(nm.var2),"[0-9]{2}")),
+                             na.rm=TRUE),by=" Response ID"]
+  print(data.desc[,.N,by=.(age_max,get(nm.var),get(nm.var2))][order(age_max,N)])
+  
+  
+  # Household type 
+  nm.var <- " Who is currently part of your household?"
+  data.desc[, hh_type := if_else(grepl("child",get(nm.var)),"Children","No children")]
+  
+  # Device
+  nm.var <- " On which device are you playing this choice game?"
+  data.desc[, device := if_else(grepl("Smartphone",get(nm.var)),"Smartphone","Computer/tablet")]
+  
+  # Education
+  nm.var <- " What is your highest completed education?"
+  data.desc[, education := fcase(
+    grepl("master",get(nm.var)), "4 - master or higher",
+    grepl("bachelor",get(nm.var)), "3 - bachelor",
+    grepl("HAVO",get(nm.var)), "2 - HAVO",
+    grepl("VMBO|Primary",get(nm.var)), "1 - VMBO or lower",
+    default = "0 - Other"
+  )]
+  print(data.desc[,.N,by=.(education,get(nm.var))][order(education,N)])
+  
+  # Home improvement
+  nm.vars <- names(data.desc)[grepl("Do you have solar panels",names(data.desc)) | (grepl("improvements",names(data.desc)) & grepl("insulation",names(data.desc)))]
+  data.desc[,nb_house_improvement := sum(.SD == "Yes",na.rm=TRUE),by=` Response ID`,.SDcols = nm.vars]
+  
+  ## Map descriptives ----
   # Read JSON mapping descriptives
   fljson <- paste0("input/mapping_descriptives.json")
   mapping <- jsonlite::read_json(fljson)
@@ -165,8 +233,13 @@ for (survey.name in survey.names){
   }
   
   grp.q <- sapply(mapping, \(x) x$question_group)
+  grp.q.omit <- unlist(sapply(mapping, \(x) x$question_mask))
+  grp.q.omit <- grp.q.omit[grp.q.omit == 1]
   
+  grp.q <- grp.q[names(grp.q)[names(grp.q) %in% names(grp.q.omit)]]
+  ## Descriptives tables ----
   for (grp in unique(unlist(grp.q))){
+    if ("grp" %in%  names(unlist(grp.q.omit))) next
     
     if (grp == "bias_monet"){
       question_cols <- names(grp.q[grp.q == grp])
@@ -247,7 +320,7 @@ for (survey.name in survey.names){
     tab[,Question_display := gsub("On a scale from 1 to 5, to what extent do you agree with the following statements? ","",Question_display,fixed = TRUE)]
     
     
-    tab.body <-  tab[, .(Question2 = c(as.character(head(Question,1)), Answer),Share = c("", Share)), by = .(Group = Question)][,-"Group"]
+    tab.body <-  tab[, .(Descriptives = c(as.character(head(Question,1)), Answer),Share = c("", Share)), by = .(Group = Question)][,-"Group"]
     latex_body <- knitr::kable(tab.body,
                                format = "latex",
                                longtable  = TRUE,
@@ -260,76 +333,13 @@ for (survey.name in survey.names){
       lines <- append(lines, "\\addlinespace", after = i)
     }
     
+    # Indent levels
+    idx.lvl <- grepl("\\& .*\\(.*\\)",lines)
+    lines[idx.lvl] <- paste0("\\hspace{1em} ",lines[idx.lvl])
+    
     writeLines(paste(lines, collapse = "\n"), paste0(dir.out,"descriptives_",grp,".tex"))
     
   }
-  
-  # Groups respondents ----
-  nm.lottery <- names(data.desc)[grepl("lottery",names(data.desc))]
-  if (length(nm.lottery)>0){
-    data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
-    data.desc[,lottery_quantile := cut(get(nm.lottery),breaks = quantile(get(nm.lottery),c(0,0.25,0.75,1),na.rm=TRUE),include.lowest=TRUE)]
-  }
-  
-  data.desc[,WOZ := as.integer(stringr::str_extract(` What is the WOZ value of your dwelling?`,"[0-9]{3}"))]
-  data.desc[,WOZ_quantile := cut(WOZ,breaks = quantile(WOZ,c(0,0.33,0.66,1),na.rm=TRUE),include.lowest=TRUE)]
-  
-  nm.var <- " What is the construction period of your dwelling?"
-  data.desc[, constr_period := fcase(
-    get(nm.var) %in% c("1945 or before"), "1 - 1945 or before",
-    get(nm.var) %in% c("1946-1970", "1971-1990"), "2 - 1946-1990",
-    get(nm.var) %in% c("1991-2005"), "3 - 1991-2005",
-    get(nm.var) %in% c( "2006-2025"),  "4 - 2006-2025")]
-  
-  nm.var <- " Which best describes your employment situation?"
-  nm.var2 <- " Which best describes the employment situation of your partner?"
-  job.var.work <- c("Working - Full Time (at least 32 hours per week)","Working - Part Time")
-  job.var.home <- c("Keeping house or being home maker",
-                    "Retired",
-                    "Unemployed and looking for work",
-                    "Receiving/Awaiting approval for disability payments")
-  if (nm.var %in% names(data.desc)){
-    data.desc[, work_status := fcase(
-      get(nm.var) %in% job.var.home & (get(nm.var2) %in% job.var.home | is.na(get(nm.var2))), "4 - all_home",
-      (get(nm.var) %in% job.var.home & get(nm.var2) %in% job.var.work) | (get(nm.var2) %in% job.var.home & get(nm.var) %in% job.var.work), "2 - one_working_one_home",
-      get(nm.var) %in% job.var.work & get(nm.var2) %in% job.var.work, "1 - two_working",
-      get(nm.var) %in% job.var.work & is.na(get(nm.var2)), "3 - single_worker",
-      !is.na(get(nm.var)) | !is.na(get(nm.var2)),"5 - other"
-    )]
-    print(data.desc[,.N,by=.(work_status,get(nm.var),get(nm.var2))][order(work_status,N)])
-  }
-  # Age
-  nm.var <- " To which age group do you belong?"
-  nm.var2 <- " To which age group does your partner belong?"
-  if (!(nm.var2 %in% names(data.desc))) nm.var2 <- nm.var
-  data.desc[, age_max := max(c(stringr::str_extract(get(nm.var),"[0-9]{2}"),
-                               stringr::str_extract(get(nm.var2),"[0-9]{2}")),
-                             na.rm=TRUE),by=" Response ID"]
-  print(data.desc[,.N,by=.(age_max,get(nm.var),get(nm.var2))][order(age_max,N)])
-  
-  
-  # Household type 
-  nm.var <- " Who is currently part of your household?"
-  data.desc[, hh_type := if_else(grepl("child",get(nm.var)),"Children","No children")]
-  
-  # Device
-  nm.var <- " On which device are you playing this choice game?"
-  data.desc[, device := if_else(grepl("Smartphone",get(nm.var)),"Smartphone","Computer/tablet")]
-  
-  # Education
-  nm.var <- " What is your highest completed education?"
-  data.desc[, education := fcase(
-    grepl("master",get(nm.var)), "4 - master or higher",
-    grepl("bachelor",get(nm.var)), "3 - bachelor",
-    grepl("HAVO",get(nm.var)), "2 - HAVO",
-    grepl("VMBO|Primary",get(nm.var)), "1 - VMBO or lower",
-    default = "0 - Other"
-  )]
-  print(data.desc[,.N,by=.(education,get(nm.var))][order(education,N)])
-  
-  # Home improvement
-  nm.vars <- names(data.desc)[grepl("Do you have solar panels",names(data.desc)) | (grepl("improvements",names(data.desc)) & grepl("insulation",names(data.desc)))]
-  data.desc[,nb_house_improvement := sum(.SD == "Yes"),by=` Response ID`,.SDcols = nm.vars]
   
   # Biases figure ----
   grp.ht.list <- fromJSON("input/mapping_bias_figure.json")
