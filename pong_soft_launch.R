@@ -78,7 +78,7 @@ for (survey.name in survey.names){
   ),
   by=.(muni,complete = !is.na(submitdate_date_submitted) & !is.na(consent) & consent == "I agree and want to participate")]
   
-  # keep complete responses ----
+  # Keep complete responses ----
   #data <- data[consent. == "I agree and want to participate" & `lastpage. Last page` == data[,max(`lastpage. Last page`,na.rm=TRUE)]]
   data <- data[consent. == "I agree and want to participate" & `lastpage. Last page` >17]
   #stop("Ad hoc data filter below, remove it before to proceed")
@@ -875,7 +875,7 @@ for (survey.name in survey.names){
     for (charac in c("Education","all","Construction year") ){ #dt.coefs[game == gm,unique(group)]
       for (grp in dt.coefs[group == charac & Attribute == "None" & game == gm,unique(gsub(":(None|none)","",Term))]){
         
-        # All cominations of monetary
+        # All combinations of monetary
         if (gm == "insu"){
           dt.pw <- dt.coefs[group == charac & game == gm,CJ(invest = Term[grepl("ne time",Attribute)],savings = Term[grepl("eating costs",Attribute)])]
         } else {
@@ -1137,10 +1137,12 @@ for (survey.name in survey.names){
   
   # WTP ----
   # Use use median value across all models
-  dt.wtp <- dt.coefs[,.(game,Attribute,Term,Estimate)]
+  dt.wtp <- dt.coefs[group == "all",.(game,Attribute,Term,Estimate)]
   dt.wtp[,`WTP (1,000 euro)` := round(Estimate/abs(dt.irr.tp.all[game == "all" & cost_month == FALSE,median_utility]),1)]
   
   print_table(dt.wtp[,.(Term,`WTP (1,000 euro)`)],"results_wtp.tex")
+  print_table(dt.wtp[game == "insu",.(Term,`WTP (1,000 euro)`)],"results_wtp_insu.tex")
+  print_table(dt.wtp[game == "tech",.(Term,`WTP (1,000 euro)`)],"results_wtp_tech.tex")
   
   
   ### Simulations ----
