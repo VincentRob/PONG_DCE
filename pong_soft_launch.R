@@ -32,7 +32,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("pong_wp3_tables")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("pong_dutch_report")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
@@ -104,7 +104,7 @@ for (survey.name in survey.names){
   sink()
   
   # Descriptives ----
-  col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Date)|(Seed)|(zipcode)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(Thank you for your participation)|(Total time)|(please enter the code that is in your letter)",names(data))]
+  col.desc <- names(data)[!grepl("(Choice\\ [0-9])|(Question time)|(groupTime)|(randNumber)|(choice screen)|(GXQ00001)|(randSet1)|(pid$)|(cid$)|(^GXQ)|(^r[0-9])|(Date)|(Seed)|(If yes\\, how many\\?)|(Technology A)|(Technology B)|(Thank you for your participation)|(Total time)",names(data))] # |(please enter the code that is in your letter) |(zipcode)
   data.desc <- data[,.SD,.SDcols = col.desc]
   
   #old.nms <- names(data.desc)[grepl("\\[multiple",names(data.desc))]
@@ -177,6 +177,17 @@ for (survey.name in survey.names){
     default = "0 - Other"
   )]
   print(data.desc[,.N,by=.(education,get(nm.var))][order(education,N)])
+  
+  # Municipality
+  nm.var <- " To continue, please enter the code that is in your letter (4 digits followed by 3 letters)"
+  if (nm.var %in% names(data.desc)){
+    data.desc[, muni := fcase(
+      grepl("15",get(nm.var)), "Hoorn",
+      grepl("37",get(nm.var)), "Medemblik",
+      default = "Other"
+    )]
+    print(data.desc[,.N,by=.(muni,get(nm.var))][order(muni,N)])
+  }
   
   # Home improvement
   nm.vars <- names(data.desc)[grepl("Do you have solar panels",names(data.desc)) | (grepl("improvements",names(data.desc)) & grepl("insulation",names(data.desc)))]

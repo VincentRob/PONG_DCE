@@ -1986,6 +1986,26 @@
     "question_mask": 1,
     "question_group": "desc"
   },
+  " Municipality": {
+    "question_tags": [
+      [
+        "muni"
+      ]
+    ],
+    "question_rank": 8,
+    "question_mask": 1,
+    "question_group": "desc"
+  },
+  " zipcode": {
+    "question_tags": [
+      [
+        "ZipcodeCopy. What is your zipcode? [4 digits and 2 letters without space, so for example 1234AB]"
+      ]
+    ],
+    "question_rank": 8,
+    "question_mask": 1,
+    "question_group": "desc"
+  },
   " Survey": {
     "question_tags": [
       [
