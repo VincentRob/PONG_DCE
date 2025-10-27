@@ -2,7 +2,8 @@
   "house": {
     "House improvement": "desc_nb_house_improvement",
     "Construction year":"desc_constr_period",
-    "WOZ": "desc_WOZ_quantile"
+    "WOZ": "desc_WOZ_quantile",
+    "Municipality": "desc_Municipality"
   },
   "hh": {
     "Device": "desc_device",

@@ -399,7 +399,7 @@ run_ht_insu_with_ref_level <- function(grp.ht.list,run.name){
     dt.insu.tmp[, names(dt.insu.dum)] <- dt.insu.dum
     
     logit_interact.insu.ht <- mlogit(
-      formula = as.formula(gsub("none",paste0("`",names(dt.insu.dum),"`:none",collapse = " + "),formula.insu)),
+      formula = as.formula(gsub("none",paste0(paste0("`",names(dt.insu.dum),"`:none",collapse = " + ")," + none"),formula.insu)),
       dt.insu.tmp
     )
     logit.insu.list[[grp.ht]] <- logit_interact.insu.ht
@@ -411,7 +411,7 @@ run_ht_insu_with_ref_level <- function(grp.ht.list,run.name){
     nm.tmp.new <- gsub("(\\:none)|(none\\:)","",nm.tmp.new)
     nm.tmp.new <- gsub("`_","`",nm.tmp.new)
     nm.tmp.old <- names(nm.tmp.new)
-    nm.tmp.new <- paste0("none:",nm.tmp.new)
+    nm.tmp.new[nm.tmp.new != "none"] <- paste0("none:",nm.tmp.new[nm.tmp.new != "none"])
     names(nm.tmp.new) <- nm.tmp.old
     coef_names_ht <- c(coef_names_ht,nm.tmp.new)
   }

@@ -603,6 +603,8 @@ for (survey.name in survey.names){
                                             output = "latex",
                                             stars = c("*" = .1, "**" = .05, "***" = 0.01))
       
+      writeLines(tab.tex, paste0(dir.out, "results_heterogeneity_no_reference_", game,"_",ht.var, ".tex"))
+      
       dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
       dt.cfs.tmp[,group := ht.var]
       dt.cfs.tmp[grepl(":None",Term),Term := gsub(grp.ht.list[[grp.ht]][[ht.var]],paste0(ht.var," "),Term,fixed = TRUE)]
