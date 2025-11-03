@@ -1,0 +1,74 @@
+{
+  "comfort_1": {
+    "en": "Comfort: warmer house in the winter, draft-free and the house can be cooled in the summer.",
+    "nl": "Comfort: woning warmer in de winter en tochtvrij. De woning kan ’s zomers gekoeld worden."
+  },
+  "comfort_2": {
+    "en": "Comfort: warmer house in the winter, draft-free and you have less problems with street noise.",
+    "nl": "Comfort: woning warmer in de winter en tochtvrij. U hebt minder last van straatgeluid."
+  },
+  "comfort_3": {
+    "en": "Comfort: warmer house in the winter and draft-free.",
+    "nl": "Comfort: woning warmer in de winter en tochtvrij."
+  },
+  "support_1": {
+    "en": "Support: everything is arranged for you, you only have to sign.",
+    "nl": "Ondersteuning: alles wordt voor u geregeld, u hoeft alleen te tekenen."
+  },
+  "support_2": {
+    "en": "Support: you'll get help with selecting the contractor and reviewing the quotations.",
+    "nl": "Ondersteuning: u krijgt hulp bij het selecteren van de aannemer en beoordelen van de offertes."
+  },
+  "support_3": {
+    "en": "Support: you arrange everything yourself.",
+    "nl": "Ondersteuning: u regelt alles zelf."
+  },
+  "nuisance_1": {
+    "en": "Nuisance: 1 day noise and nuisance due to works in the dwelling.",
+    "nl": "Overlast: 1 dag geluidsoverlast en werkzaamheden in de woning."
+  },
+  "nuisance_2": {
+    "en": "Nuisance: 3 days noise and nuisance due to works in the dwelling.",
+    "nl": "Overlast: 3 dagen geluidsoverlast en werkzaamheden in de woning."
+  },
+  "nuisance_3": {
+    "en": "Nuisance: 6 days noise and nuisance due to works in the dwelling.",
+    "nl": "Overlast: 6 dagen geluidsoverlast en werkzaamheden in de woning."
+  },
+  "co2_1": {
+    "en": "Co2: 500 kg/year, equal to planting 20 trees.",
+    "nl": "CO2: 500 kg/jaar, gelijk aan het planten van 20 bomen."
+  },
+  "co2_2": {
+    "en": "Co2: 300 kg/year, equal to planting 12 trees.",
+    "nl": "CO2: 300 kg/jaar, gelijk aan het planten van 12 bomen."
+  },
+  "one_time_amount_1": {
+    "en": "One time amount: 5,000 euros.",
+    "nl": "Eenmalig bedrag: 5.000 euro."
+  },
+  "one_time_amount_2": {
+    "en": "One time amount: 10,000 euros.",
+    "nl": "Eenmalig bedrag: 10.000 euro."
+  },
+  "one_time_amount_3": {
+    "en": "One time amount: 15,000 euros.",
+    "nl": "Eenmalig bedrag: 15.000 euro."
+  },
+  "heating_costs_1": {
+    "en": "Heating costs: 70 euros less than now.",
+    "nl": "Verwarmingskosten: 70 euro minder dan nu."
+  },
+  "heating_costs_2": {
+    "en": "Heating costs: 40 euros less than now.",
+    "nl": "Verwarmingskosten: 40 euro minder dan nu."
+  },
+  "heating_costs_3": {
+    "en": "Heating costs: 10 euros less than now.",
+    "nl": "Verwarmingskosten: 10 euro minder dan nu."
+  },
+  "none": {
+    "en": "None",
+    "nl": "None"
+  }
+}

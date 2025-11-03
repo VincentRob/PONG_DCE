@@ -1,0 +1,98 @@
+{
+  "supplier_1": {
+    "en": "Supplier: you choose the company that supplies heat.",
+    "nl": "Leverancier: u kiest zelf het bedrijf dat warmte levert."
+  },
+  "supplier_2": {
+    "en": "Supplier: there is one fixed heat supplier owned by your municipality.",
+    "nl": "Leverancier: er is één vaste warmteleverancier die eigendom is van uw gemeente."
+  },
+  "nuisance_1": {
+    "en": "Nuisance: 1 month of noise and streets open.",
+    "nl": "Overlast: 1 maand geluid en opengebroken straten."
+  },
+  "nuisance_2": {
+    "en": "Nuisance: 2 months of noise and streets open.",
+    "nl": "Overlast: 2 maanden geluid en opengebroken straten."
+  },
+  "power_outages_1": {
+    "en": "Power outages: never power outage.",
+    "nl": "Stroomuitval: nooit stroomuitval."
+  },
+  "power_outages_2": {
+    "en": "Power outages: on average, one day a year power outage.",
+    "nl": "Stroomuitval: gemiddeld één dag per jaar stroomuitval."
+  },
+  "factor(tech)1": {
+    "en": "Heat pump",
+    "nl": "Warmtepomp"
+  },
+  "factor(tech)1:one_time_costs_1": {
+    "en": "Heat pump one time costs: 10,000 euros.",
+    "nl": "Warmtepomp eenmalige kosten: 10.000 euro."
+  },
+  "factor(tech)1:one_time_costs_2": {
+    "en": "Heat pump one time costs: 17,000 euros.",
+    "nl": "Warmtepomp eenmalige kosten: 17.000 euro."
+  },
+  "factor(tech)1:one_time_costs_3": {
+    "en": "Heat pump one time costs: 24,000 euros.",
+    "nl": "Warmtepomp eenmalige kosten: 24.000 euro."
+  },
+  "factor(tech)1:one_time_costs_4": {
+    "en": "Heat pump one time costs: 31,000 euros.",
+    "nl": "Warmtepomp eenmalige kosten: 31.000 euro."
+  },
+  "factor(tech)1:heating_costs_1": {
+    "en": "Heat pump heating costs: 200 euros less than now.",
+    "nl": "Warmtepomp verwarmingskosten: 200 euro minder dan nu."
+  },
+  "factor(tech)1:heating_costs_2": {
+    "en": "Heat pump heating costs: 150 euros less than now.",
+    "nl": "Warmtepomp verwarmingskosten: 150 euro minder dan nu."
+  },
+  "factor(tech)1:heating_costs_3": {
+    "en": "Heat pump heating costs: 100 euros less than now.",
+    "nl": "Warmtepomp verwarmingskosten: 100 euro minder dan nu."
+  },
+  "factor(tech)1:heating_costs_4": {
+    "en": "Heat pump heating costs: 50 euros less than now.",
+    "nl": "Warmtepomp verwarmingskosten: 50 euro minder dan nu."
+  },
+  "factor(tech)0:one_time_costs_1": {
+    "en": "Heat network one time costs: 0 euros.",
+    "nl": "Warmtenet eenmalige kosten: 0 euro."
+  },
+  "factor(tech)0:one_time_costs_2": {
+    "en": "Heat network one time costs: 2,000 euros.",
+    "nl": "Warmtenet eenmalige kosten: 2.000 euro."
+  },
+  "factor(tech)0:one_time_costs_3": {
+    "en": "Heat network one time costs: 4,000 euros.",
+    "nl": "Warmtenet eenmalige kosten: 4.000 euro."
+  },
+  "factor(tech)0:one_time_costs_4": {
+    "en": "Heat network one time costs: 6,000 euros.",
+    "nl": "Warmtenet eenmalige kosten: 6.000 euro."
+  },
+  "factor(tech)0:heating_costs_1": {
+    "en": "Heat network heating costs: 100 euros less than now.",
+    "nl": "Warmtenet verwarmingskosten: 100 euro minder dan nu."
+  },
+  "factor(tech)0:heating_costs_2": {
+    "en": "Heat network heating costs: 50 euros less than now.",
+    "nl": "Warmtenet verwarmingskosten: 50 euro minder dan nu."
+  },
+  "factor(tech)0:heating_costs_3": {
+    "en": "Heat network heating costs: same as now.",
+    "nl": "Warmtenet verwarmingskosten: hetzelfde als nu."
+  },
+  "factor(tech)0:heating_costs_4": {
+    "en": "Heat network heating costs: 50 euros more than now.",
+    "nl": "Warmtenet verwarmingskosten: 50 euro meer dan nu."
+  },
+  "none": {
+    "en": "None",
+    "nl": "None"
+  }
+}

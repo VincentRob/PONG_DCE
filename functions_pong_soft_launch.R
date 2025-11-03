@@ -55,7 +55,9 @@ add_tinysize <- function(tab, insert_after_pattern) {
 
 get_json_mapping_4_coefs <- function(game,col.att.int){
   # Function to replace number with label
+  
   fljson <- paste0("input/mapping_",game,".json")
+  
   mapping <- jsonlite::read_json(fljson)
   
   # Reverse the mapping: integer -> label
@@ -115,7 +117,7 @@ aar <- function(cst,cf,yrs) {if (cst <=0 | cf <=0) return(NA);
 
 
 get_row_refs <- function(coef_names,col.att.int,col.ref,ref.lvl,stats.table = NA){
-  rows.refs <- data.frame(term = paste0(coef_names[names(coef_names) %in% col.ref]," (reference)"),
+  rows.refs <- data.frame(term = paste0(coef_names[names(coef_names) %in% col.ref],ifelse(lang == "en"," (reference)"," (referentie)")),
                           estimate = "")
   if (!gbutils::isNA(stats.table)){
     for (i in 1:length(stats.table)){
@@ -130,6 +132,69 @@ get_row_refs <- function(coef_names,col.att.int,col.ref,ref.lvl,stats.table = NA
   attr(rows.refs, "position") <- rows.refs.pos
   return(rows.refs)
 }
+
+
+map_levels_to_keys <- function(dt, game, lang = "nl", term_col = "Term", new_col = "key_term", override_dir = "input") {
+  # Make a copy of the input dt
+  dt_copy <- copy(dt)
+  
+  # Build path to JSON override file based on game
+  json_path <- file.path(override_dir, paste0("coef_name_override_", game, ".json"))
+  
+  if (!file.exists(json_path)) {
+    stop("Override JSON file not found for game: ", game, " at path: ", json_path)
+  }
+  
+  # Load JSON mapping
+  mapping <- fromJSON(json_path, simplifyVector = FALSE)
+  
+  # Build lookup: text in chosen language -> key
+  lookup <- sapply(names(mapping), function(k) mapping[[k]][[lang]])
+  names(lookup) <- names(mapping)
+  
+  # Ensure dt_copy is a data.table
+  if (!is.data.table(dt_copy)) dt_copy <- as.data.table(dt_copy)
+  
+  # Add new column with technical key
+  dt_copy[, (new_col) := {
+    sapply(get(term_col), function(term) {
+      term_clean <- sub("\\s*\\(referentie\\)$", "", term)
+      match_key <- names(lookup)[lookup == term_clean]
+      if (length(match_key) == 1) match_key else NA_character_
+    })
+  }]
+  
+  # Return the modified copy
+  return(dt_copy)
+}
+
+translate_coef_names <- function(coef_names, game, lang = "nl", override_dir = "input") {
+  # Validate language
+  stopifnot(lang %in% c("en", "nl"))
+  
+  # Build path to JSON override file
+  override_path <- file.path(override_dir, paste0("coef_name_override_", game, ".json"))
+  
+  if (!file.exists(override_path)) {
+    warning("No override JSON found at: ", override_path)
+    return(coef_names)
+  }
+  
+  # Load override bilingual mapping
+  override <- fromJSON(override_path, simplifyVector = FALSE)
+  
+  # Build lookup from English → target language
+  lookup <- sapply(override, function(x) x[[lang]], USE.NAMES = FALSE)
+  names(lookup) <- sapply(override, function(x) x$en, USE.NAMES = FALSE)
+  
+  # Replace English values with chosen language, if available
+  reencoded <- vapply(coef_names, function(v) {
+    if (v %in% names(lookup)) lookup[[v]] else v
+  }, character(1L))
+  
+  return(reencoded)
+}
+
 
 simu_subsid <- function(cf.simu,invest.lvl,ref.invest.wtp,invest.name,game,ref.lvl){
   
@@ -465,7 +530,7 @@ run_ht_tech_with_ref_level <- function(grp.ht.list,run.name){
     dt.tech.tmp[, names(dt.tech.dum)] <- dt.tech.dum
     
     logit_interact.tech.ht <- mlogit(
-      formula = as.formula(gsub("none",paste0("`",names(dt.tech.dum),"`:none",collapse = " + "),formula.tech)),
+      formula = as.formula(gsub("none",paste0(paste0("`",names(dt.tech.dum),"`:none",collapse = " + ")," + none"),formula.tech)),
       dt.tech.tmp
     )
     logit.tech.list[[grp.ht]] <- logit_interact.tech.ht
@@ -500,7 +565,7 @@ run_ht_tech_with_ref_level <- function(grp.ht.list,run.name){
 
 extract_cost_value <- function(term) {
   # Handle 'same as now'
-  if (grepl("same as now", term, ignore.case = TRUE)) return(0)
+  if (grepl("(same as now)|(hetzelfde als nu)", term, ignore.case = TRUE)) return(0)
   
   # Extract full numeric value, handling commas as thousand separators
   term_clean <- gsub(",", "", term)  # remove thousand separators
@@ -508,9 +573,9 @@ extract_cost_value <- function(term) {
   
   if (is.na(num)) return(NA_real_)
   
-  if (grepl("less than now", term, ignore.case = TRUE)) {
+  if (grepl("(less than now)|(minder dan nu)", term, ignore.case = TRUE)) {
     return(-abs(num))
-  } else if (grepl("more than now", term, ignore.case = TRUE)) {
+  } else if (grepl("(more than now)|(meer dan nu)", term, ignore.case = TRUE)) {
     return(abs(num))
   } else {
     # One-time cost or fixed value

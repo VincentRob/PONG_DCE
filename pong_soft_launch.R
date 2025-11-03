@@ -39,6 +39,8 @@ invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 700
 # For heterogeneity analysis, replace missing by Hoorn when applicable
 hoorn.file.name <- "Hoorn_complete" 
 
+lang = "nl" # default is english, en
+
 for (survey.name in survey.names){
   
   dir.out <- paste0("output/",survey.name,"/")
@@ -557,7 +559,11 @@ for (survey.name in survey.names){
   
   
   coef_names <- get_json_mapping_4_coefs(game,c(col.att.int,col.ref))
+  
+  coef_names <- translate_coef_names(coef_names,game,lang=lang)
+  
   rows.refs <- get_row_refs(coef_names,col.att.int,col.ref,ref.lvl,stats.table)
+  
   
   tab.tex <- modelsummary::modelsummary(list(Logit = logit_interact.insu), 
                                         coef_map = coef_names[names(coef_names) %in% col.att.int], 
@@ -574,6 +580,11 @@ for (survey.name in survey.names){
   
   dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
   dt.cfs.tmp[,group := "all"]
+  dt.cfs.tmp <- map_levels_to_keys(
+    dt = dt.cfs.tmp,
+    game = game,
+    lang = lang
+  )
   dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
   
   ## Insulation heterogeneity ----
@@ -643,6 +654,8 @@ for (survey.name in survey.names){
                 tech.map[grepl("^(Heat net)",tech.map)],
                 tech.map[grepl("^(None)",tech.map)])
   
+  tech.map <- translate_coef_names(tech.map,game,lang=lang)
+  
   rows.refs <- get_row_refs(c(tech.map[names(tech.map) %in% col.att.int],tech.map[names(tech.map) %in% col.ref]),col.att.int,col.ref,ref.lvl,stats.table)
   
   tab.tex <- modelsummary::modelsummary(list(Logit = logit_interact.tech), 
@@ -656,6 +669,11 @@ for (survey.name in survey.names){
   
   dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
   dt.cfs.tmp[,group := "all"]
+  dt.cfs.tmp <- map_levels_to_keys(
+    dt = dt.cfs.tmp,
+    game = game,
+    lang = lang
+  )
   dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
   
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
@@ -700,30 +718,30 @@ for (survey.name in survey.names){
   print(dt.coefs)
   
   # Costs columns
-  reg.onetimecosts <- "(time amount)|(time costs)"
-  reg.monthcosts <- "(eating costs)"
+  reg.onetimecosts <- "(one_time_costs)|(one_time_amount)"
+  reg.monthcosts <- "heating_costs"
   reg.costs <- paste(reg.onetimecosts,reg.monthcosts,sep="|")
   
   # Step 1: Extract attribute group name (everything before the colon)
   dt.coefs[, Attribute := sub(":.*", "", Term)]
-  dt.coefs[grepl("(None|none)$",Term),Attribute := "None"]
+  dt.coefs[grepl("(None|none)$",key_term),Attribute := "None"]
   
   # Step 2: Extract numeric cost values for cost-related rows (including references)
   
   dt.coefs[, CostValue := NA_real_]
-  dt.coefs[grepl(reg.costs, Term, ignore.case = TRUE), 
+  dt.coefs[grepl(reg.costs, key_term, ignore.case = TRUE), 
            CostValue := sapply(Term, extract_cost_value)]
   
   # Step 3: Find reference CostValue per Attribute group
   # Reference rows have "(reference)" in Term
-  refs <- dt.coefs[grepl("\\(reference\\)", Term), .(ReferenceCost = CostValue[!is.na(CostValue)][1]), by = .(Attribute,game,group)]
+  refs <- dt.coefs[grepl("\\((reference)|(referentie)\\)", Term), .(ReferenceCost = CostValue[!is.na(CostValue)][1]), by = .(Attribute,game,group)]
   
   # Step 4: Join reference costs back
   dt.coefs <- merge(dt.coefs, refs, by = c("Attribute","game","group"), all.x = TRUE)
   
   # Step 5: Calculate relative cost level for cost rows (excluding references)
   dt.coefs[, CostLevelRelative := NA_real_]
-  dt.coefs[grepl(reg.costs, Term, ignore.case = TRUE), 
+  dt.coefs[grepl(reg.costs, key_term, ignore.case = TRUE), 
            CostLevelRelative := CostValue - ReferenceCost]
   
   
@@ -733,11 +751,11 @@ for (survey.name in survey.names){
   
   get_50prct_support_package <- function(dt){
     dt <- copy(dt)
-    dt[Attribute == "None",Estimate := -Estimate]
+    dt[key_term == "none",Estimate := -Estimate]
     dt[is.na(Estimate),Estimate := 0]
     
     # Split by attribute
-    split_list <- split(dt[grepl(paste0(reg.costs,"|none|None"),Attribute),], by = "Attribute")
+    split_list <- split(dt[grepl(paste0(reg.costs,"|none|None"),key_term),], by = "Attribute")
     
     # Get all combinations (Cartesian product)
     combos <- do.call(CJ, lapply(split_list, function(x) seq_len(nrow(x))))
@@ -747,7 +765,7 @@ for (survey.name in survey.names){
       selected <- rbindlist(Map(function(tbl, i) tbl[i], split_list, idx_list), fill = TRUE)
       
       list(
-        combo = paste(selected$Term, collapse = " | "),
+        combo = paste(selected$key_term, collapse = " | "),
         total = sum(selected$Estimate, na.rm = TRUE)
       )
     }, by = seq_len(nrow(combos)), .SDcols = names(split_list)][, seq_len := NULL]
@@ -768,12 +786,12 @@ for (survey.name in survey.names){
       attr_name <- stringr::str_extract(term, "^[^:]+")
       
       # Mark rows in dt where Attribute & Term match selected combo term
-      dt[Attribute == attr_name & Term == term, is_selected := 1]
+      dt[ key_term == term, is_selected := 1]
     }
     
-    dt[Attribute == "None",Estimate := -Estimate]
+    dt[key_term == "none",Estimate := -Estimate]
     
-    dt[Attribute %in% dt[,sum(is_selected),by=Attribute][V1 == 0,Attribute], is_selected := as.integer(grepl("reference",Term) & Estimate == 0)]
+    dt[Attribute %in% dt[,sum(is_selected),by=Attribute][V1 == 0,Attribute], is_selected := as.integer(grepl("(reference)|(referentie)",Term) & Estimate == 0)]
     
     if (dt[,sum(is_selected) != 1,by=Attribute][,any(V1)]) stop("All attributes should have one selected level")
     
@@ -782,28 +800,28 @@ for (survey.name in survey.names){
   
   for (gm in c("tech","insu")){
     
-    dt.find.50prct <- dt.coefs[game == gm & group == "all" & !grepl("Heat pump",Term),.(Attribute,Term,Estimate,Stars)]
+    dt.find.50prct <- dt.coefs[game == gm & group == "all" & !grepl("(Heat pump)|(armtepomp)",Term),.(Attribute,Term,Estimate,Stars,key_term)]
     dt.find.50prct[Stars %in% c("","*") ,Estimate := 0]
     if (gm == "insu"){
-      dt.find.50prct <- dt.find.50prct[Attribute != "Nuisance",]
+      dt.find.50prct <- dt.find.50prct[!grepl("nuisance",key_term),]
     }
     # Find package with about 50% support 
     dt <- get_50prct_support_package(dt.find.50prct)
     
-    dt[,baseline_support := exp(dt[is_selected == 1 & Attribute != "None",sum(Estimate)]) / (exp(dt[is_selected == 1 & Attribute != "None",sum(Estimate)]) + exp(dt[is_selected == 1 & Attribute == "None",sum(Estimate)]))]
+    dt[,baseline_support := exp(dt[is_selected == 1 & key_term != "none",sum(Estimate)]) / (exp(dt[is_selected == 1 & key_term != "none",sum(Estimate)]) + exp(dt[is_selected == 1 & key_term == "none",sum(Estimate)]))]
     
     for (i in seq_len(dim(dt)[1])){
-      if (dt[i, Attribute] == "None" | dt[i, is_selected] == 1 | dt[i, grepl(reg.costs,Term)]) next
+      if (dt[i, key_term] == "none" | dt[i, is_selected] == 1 | dt[i, grepl(reg.costs,key_term)]) next
       dt[,new_select := copy(is_selected)]
       dt[Attribute %in% dt[i,Attribute], new_select := 0]
       dt[i, new_select := 1]
-      new_sup <- exp(dt[new_select == 1 & Attribute != "None",sum(Estimate)]) / (exp(dt[new_select == 1 & Attribute != "None",sum(Estimate)]) + exp(dt[new_select == 1 & Attribute == "None",sum(Estimate)]))
+      new_sup <- exp(dt[new_select == 1 & key_term != "none",sum(Estimate)]) / (exp(dt[new_select == 1 & key_term != "none",sum(Estimate)]) + exp(dt[new_select == 1 & key_term == "none",sum(Estimate)]))
       dt[i, new_supp := new_sup]
       dt[,new_select := NULL]
     }
     
-    dt.exp <- dt[!(Attribute == "None" | grepl(reg.costs,Term)),]
-    dt.exp[,Term := gsub(" \\(reference\\)","",Term)]
+    dt.exp <- dt[!(key_term == "none" | grepl(reg.costs,key_term)),]
+    dt.exp[,Term := gsub(" \\((reference|referentie)\\)","",Term)]
     dt.exp[is_selected == 1,Term := paste0(Term," (reference)")]
     dt.exp[,diff := new_supp - baseline_support]
     dt.exp[,Term := stringr::str_to_sentence(gsub(paste0(Attribute,": "),"",Term)),by=.I]
@@ -870,7 +888,7 @@ for (survey.name in survey.names){
     ggsave(paste0(dir.out.figs,"fig_nonmonet_importance_",gm,".png"),width = width,height = height, units = "cm")
     
     
-    dt[is_selected == 1 & Attribute != "None",Term_ref := gsub(" \\(reference\\)","",Term)]
+    dt[is_selected == 1 & key_term != "none",Term_ref := gsub(" \\(reference\\)","",Term)]
     dt[,Term_ref := stringr::str_to_sentence(gsub(paste0(Attribute,": "),"",Term_ref)),by=.I]
     
     sink(paste0(dir.out.figs,"tab_nonmonet_importance_",gm,".txt"))
@@ -886,7 +904,7 @@ for (survey.name in survey.names){
   # Fig heatmap ----
   for (gm in c("insu","tech")){
     for (charac in c("Education","all","Construction year") ){ #dt.coefs[game == gm,unique(group)]
-      for (grp in dt.coefs[group == charac & Attribute == "None" & game == gm,unique(gsub(":(None|none)","",Term))]){
+      for (grp in dt.coefs[group == charac & key_term == "none" & game == gm,unique(gsub(":(None|none)","",Term))]){
         
         # All combinations of monetary
         if (gm == "insu"){
@@ -905,10 +923,10 @@ for (survey.name in survey.names){
                                                             amount.savings = i.CostValue),on=c(savings = "Term")]
         # Add none
         if (gm == "insu"){
-          dt.pw[, none := dt.coefs[Attribute == "None" & game == gm & group == charac & grepl(grp,Term),Estimate] ]
+          dt.pw[, none := dt.coefs[key_term == "none" & game == gm & group == charac & grepl(grp,Term),Estimate] ]
         } else {
-          dt.pw[grepl("Heat network",invest), none := dt.coefs[Attribute == "None" & game == gm & group == charac & grepl(grp,Term),Estimate] ]
-          dt.pw[grepl("Heat pump",invest), none := dt.coefs[Attribute == "None" & game == gm & group == charac & grepl(grp,Term),Estimate] - dt.coefs[Attribute == "Heat pump" & game == gm & group == charac,Estimate] ]
+          dt.pw[grepl("Heat network",invest), none := dt.coefs[key_term == "none" & game == gm & group == charac & grepl(grp,Term),Estimate] ]
+          dt.pw[grepl("Heat pump",invest), none := dt.coefs[key_term == "none" & game == gm & group == charac & grepl(grp,Term),Estimate] - dt.coefs[Attribute == "Heat pump" & game == gm & group == charac,Estimate] ]
         }
         
         dt.pw <- dt.pw[order(grepl("Heat pump",invest),amount.invest,amount.savings),]
@@ -980,13 +998,13 @@ for (survey.name in survey.names){
   for (grp in dt.coefs[,unique(group)]){
     
     for (gm in c("insu","tech")){
-      for (grp.lvl in dt.coefs[game == gm & group == grp & Attribute == "None",unique(Term)]){
+      for (grp.lvl in dt.coefs[game == gm & group == grp & key_term == "none",unique(Term)]){
         grp.nm <- paste0("weight_",gsub(" ","_",gsub("(:|none|None)","",grp.lvl)))
         grp.nm <- gsub("_$","",grp.nm)
         
-        dt.bcrwd <- dt.coefs[game == gm & group == grp & (Attribute != "None" | Term == grp.lvl ),]
-        if (dt.bcrwd[Attribute == "None",.N] != 1) stop("There should be exactly one none level")
-        dt.bcrwd[Attribute == "None",Term := "None"]
+        dt.bcrwd <- dt.coefs[game == gm & group == grp & (key_term != "none" | Term == grp.lvl ),]
+        if (dt.bcrwd[key_term == "none",.N] != 1) stop("There should be exactly one none level")
+        dt.bcrwd[key_term == "none",Term := "None"]
         
         # Clean level names
         for (i in 1:dim(dt.bcrwd)[1]){
@@ -1162,14 +1180,14 @@ for (survey.name in survey.names){
   dt.cf.simu <- copy(dt.coefs)
   dt.cf.simu[is.na(Estimate) & grepl("reference",Term),Estimate := 0]
   
-  pack <- dt.cf.simu[,.(level = if_else(all(Attribute != "None"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
+  pack <- dt.cf.simu[,.(level = if_else(all(key_term != "none"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
   pack[,package := "package1"]
   
-  pack.tmp <- dt.cf.simu[,.(level = if_else(all(Attribute != "None"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
+  pack.tmp <- dt.cf.simu[,.(level = if_else(all(key_term != "none"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
   pack.tmp[,package := "package2"]
   pack <- rbindlist(list(pack,pack.tmp))
   
-  pack.tmp <- dt.cf.simu[,.(level = if_else(all(Attribute == "None"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
+  pack.tmp <- dt.cf.simu[,.(level = if_else(all(key_term == "none"),sample(Term,1),NA_character_)),by=.(game,Attribute)]
   pack.tmp[,package := "none"]
   pack <- rbindlist(list(pack,pack.tmp))
   
@@ -1192,7 +1210,7 @@ for (survey.name in survey.names){
     pack_wide <- rbindlist(list(pack_wide,tab.simu_wide),use.names = TRUE,fill = TRUE)
     
   }
-  pack_wide <- pack_wide[order(game,Attribute %in% c("utility","probability"),Attribute == "None"),]
+  pack_wide <- pack_wide[order(game,Attribute %in% c("utility","probability"),key_term == "none"),]
   
   for (i in 1:dim(pack_wide)[1]){
     pack_wide[i,(names(pack_wide)[grepl("package",names(pack_wide))]) := lapply(.SD,\(x) gsub(paste0("(",Attribute,": )| (\\(reference\\))"),"",x)),.SDcols = (names(pack_wide)[grepl("package",names(pack_wide))])]
