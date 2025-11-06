@@ -67,6 +67,14 @@
     "en": "Heating costs: 10 euros less than now.",
     "nl": "Verwarmingskosten: 10 euro minder dan nu."
   },
+  "heating_costs_continuous":{
+    "en": "Heating savings (in thousand euro per year).",
+    "nl": "Verwarmingsbesparing (duizend euro per jaar)."
+  },
+  "one_time_amount_continuous":{
+    "en": "One time amount (thousand euro).",
+    "nl": "Eenmalig bedrag (duizend euro)."
+  },
   "none": {
     "en": "None",
     "nl": "None"

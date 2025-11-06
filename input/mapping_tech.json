@@ -63,13 +63,13 @@
                 "tags": [
                     "2 months of noise and streets open."
                 ],
-                "rank": 2
+                "rank": 1
             },
             "1 month of noise and streets open.": {
                 "tags": [
                     "1 month of noise and streets open."
                 ],
-                "rank": 1
+                "rank": 2
             },
             "2 months of noise and streets open,because the switch to a gas-free system is going ahead.": {
                 "tags": [
@@ -161,6 +161,10 @@
                     "tech0 2,000 euros."
                 ],
                 "rank": 2
+            },
+            "(in thousand euro)": {
+                "tags": [],
+                "rank": "continuous"
             }
         }
     },
@@ -225,6 +229,14 @@
                     "tech0 50 euros more than now."
                 ],
                 "rank": 4
+            },
+            "(in thousand euro per year)": {
+                "tags": [],
+                "rank": "continuous"
+            },
+            "increase (in thousand euro per year)": {
+                "tags": [],
+                "rank": "negativecontinuous"
             }
         }
     }

@@ -163,6 +163,10 @@
                     " 15,000 euros."
                 ],
                 "rank": 3
+            },
+             "(in thousand euro)": {
+                "tags": [],
+                "rank": "continuous"
             }
         }
     },
@@ -197,7 +201,12 @@
                     " 10 euros less than now."
                 ],
                 "rank": 3
+            },
+            "(in thousand euro per year)": {
+                "tags": [],
+                "rank": "continuous"
             }
         }
     }
+    
 }

@@ -69,11 +69,13 @@ get_json_mapping_4_coefs <- function(game,col.att.int){
     base <- paste(parts[-length(parts)], collapse = "_")
     tech = as.integer(gsub("factor\\(tech\\)([0-9]).*","\\1",base))
     base <- gsub("factor\\(tech\\)[0-9]\\:","",base)
-    code <- as.integer(parts[[length(parts)]])
+    code <- parts[[length(parts)]]#as.integer(parts[[length(parts)]])
     if (!is.null(reverse_mapping[[base]]) && code %in% reverse_mapping[[base]]) {
       label <- names(reverse_mapping[[base]][which(reverse_mapping[[base]] == code)])
       if (!is.na(tech) & (tech %in% c(0,1))){
-        label <- label[grepl(paste0("tech",tech),label)]
+        if (length(label)>1){
+          label <- label[grepl(paste0("tech",tech),label)]
+        }
         label <- gsub(paste0("tech",tech," "),"",label)
         label.sentence <- stringr::str_to_sentence(paste0(if_else(tech == 1,"Heat pump ","Heat network "),gsub("_"," ",base), ": ", label))
       } else {
@@ -164,6 +166,8 @@ map_levels_to_keys <- function(dt, game, lang = "nl", term_col = "Term", new_col
     })
   }]
   
+  dt_copy[grepl("\\:none|none\\:",Term) & is.na(key_term),key_term := paste0("none_",gsub("\\:none|none\\:","",Term))]
+  
   # Return the modified copy
   return(dt_copy)
 }
@@ -183,13 +187,9 @@ translate_coef_names <- function(coef_names, game, lang = "nl", override_dir = "
   # Load override bilingual mapping
   override <- fromJSON(override_path, simplifyVector = FALSE)
   
-  # Build lookup from English → target language
-  lookup <- sapply(override, function(x) x[[lang]], USE.NAMES = FALSE)
-  names(lookup) <- sapply(override, function(x) x$en, USE.NAMES = FALSE)
-  
   # Replace English values with chosen language, if available
-  reencoded <- vapply(coef_names, function(v) {
-    if (v %in% names(lookup)) lookup[[v]] else v
+  reencoded <- vapply(names(coef_names), function(v) {
+    if (v %in% names(override)) override[[v]][[lang]] else v
   }, character(1L))
   
   return(reencoded)
@@ -250,11 +250,14 @@ simu_subsid <- function(cf.simu,invest.lvl,ref.invest.wtp,invest.name,game,ref.l
 get_id_question <- function(choice.str) gsub("^(.*?)\\..*$","\\1",choice.str)
 
 transform_to_mlogit_data <- function(dt.ce.int,ref.lvl.reg,data.desc = NULL){
+  
   # Unique ID
   dt.ce.int[, qid := paste(id_respondent, id_question, sep = "_")]
   
+  col.att.continuous <- names(dt.ce.int)[grepl("continuous$",names(dt.ce.int))]
+  
   # To dummies
-  col.att.int <- names(dt.ce.int)[!(names(dt.ce.int) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","tech"))]
+  col.att.int <- names(dt.ce.int)[!(names(dt.ce.int) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","tech",col.att.continuous))]
   dt.ce.dum  <- fastDummies::dummy_cols(dt.ce.int,select_columns = col.att.int, remove_selected_columns  = TRUE)
   
   # Drop none level 
@@ -267,22 +270,23 @@ transform_to_mlogit_data <- function(dt.ce.int,ref.lvl.reg,data.desc = NULL){
   cols.ref <- names(dt.ce.dum)[grepl(ref.lvl.reg,names(dt.ce.dum))]
   dt.ce.dum[,(cols.ref) := NULL]
   
-  col.att.dum <- names(dt.ce.dum)[!(names(dt.ce.dum) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid"))]
-  
+  col.att.dum <- names(dt.ce.dum)[!(names(dt.ce.dum) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid",col.att.continuous))]
+
   dt.ce.dum[,package_int := as.integer(factor(package))]
   dt.ce.dum[,qid_int := as.integer(factor(qid))]
   dt.ce.dum <- dt.ce.dum[order(qid,-package),]
   dt.ce.dum[,choice := as.integer(choice)]
   
+  col.desc <- NULL
   if(!is.null(data.desc)){
     setnames(data.desc,names(data.desc),trimws(names(data.desc)))
     cols.to.merge <- names(data.desc)[!(names(data.desc) %in% names(dt.ce.dum))]
     if (data.desc[,class(`Response ID`) == "character"] & dt.ce.dum[,class(id_respondent) == "numeric"] ) data.desc[,`Response ID` := as.integer(`Response ID`)]
     dt.ce.dum[data.desc,(paste0("desc_",cols.to.merge)) := mget(paste0("i.",cols.to.merge)),on = c("id_respondent" = "Response ID")]
-    col.att.dum <- c(col.att.dum,paste0("desc_",cols.to.merge))
+    col.desc <- paste0("desc_",cols.to.merge)
   }
   
-  dt.ce.to.logit <- dfidx(as.data.frame(dt.ce.dum[,.SD,.SDcols = c("qid_int","package_int",cst$ch,col.att.dum) ]),shape = "long",choice = cst$ch, idx = c("qid_int","package_int"))
+  dt.ce.to.logit <- dfidx(as.data.frame(dt.ce.dum[,.SD,.SDcols = c("qid_int","package_int",cst$ch,col.att.dum,col.att.continuous,col.desc) ]),shape = "long",choice = cst$ch, idx = c("qid_int","package_int"))
   
   return(dt.ce.to.logit)
 }
@@ -374,6 +378,27 @@ merge_choices_and_situations <- function(data,game,str_question,n.att,n.choices,
     dt.situ[,(cols.costs) := lapply(.SD,\(x) paste0("tech",tech," ",trimws(x))),.SDcols = cols.costs]
   }
   
+  # Continuous costs
+  cols.costs <- names(dt.situ)[grepl("cost|amount",names(dt.situ))]
+  for (col in cols.costs) {
+    nums <- stringr::str_extract(dt.situ[[col]], "\\d{1,3}(?:,\\d{3})*(?=\\s*euros?)")
+    nums <- as.numeric(gsub(",", "", nums))
+    nums[stringr::str_detect(dt.situ[[col]], "(?i)less")] <- -abs(nums[stringr::str_detect(dt.situ[[col]], "(?i)less")])
+    nums[stringr::str_detect(dt.situ[[col]], "((?i)no change)|(?i)same as now")] <- 0
+    
+    if (grepl("heating", col, ignore.case = TRUE)) nums <- - nums * 12
+    nums <- nums / 1000
+    
+    dt.situ[[paste0(col, "_continuous")]] <- nums
+    
+    if (grepl("heating",col) & any(nums < 0) ){
+      dt.situ[[paste0(col, "_negativecontinuous")]] <- pmin(0,nums)
+    }
+    
+  }
+  
+  
+  
   # Loop over each attribute (column) from the JSON
   for (shortname in names(category_map)) {
     if (shortname %in% names(dt.situ)) {
@@ -382,8 +407,10 @@ merge_choices_and_situations <- function(data,game,str_question,n.att,n.choices,
       levels_info <- category_map[[shortname]]$levels
       
       for (lvl in seq_along(levels_info)){
+        if (length(levels_info[[lvl]]$tags) == 0) next
         if (dt.situ[,!any(trimws(get(shortname)) %in% trimws(unlist(levels_info[[lvl]]$tags)))]){
           print(dt.situ[, unique(get(shortname))])
+          browser()
           stop(paste0("Update mapping of ",shortname, " in ",fljson))
         }
         dt.situ[trimws(get(shortname)) %in% trimws(unlist(levels_info[[lvl]]$tags)), (shortname) := levels_info[[lvl]]$rank]
@@ -597,7 +624,7 @@ parse_modelsummary_latex <- function(tex_output,game) {
   # Extract only coefficient lines (between first and second \midrule)
   start_idx <- midrule_lines[1] + 1
   end_idx <- midrule_lines[2] - 1
-  table_lines <- c(tex_lines[start_idx:end_idx],tex_lines[end_idx+2]) # end_idx+2 to include none coef
+  table_lines <- tex_lines[start_idx:end_idx]
   
   # Clean formatting
   table_lines <- gsub("\\\\", "", table_lines)
@@ -631,4 +658,28 @@ parse_modelsummary_latex <- function(tex_output,game) {
   
   return(df)
 }
+
+fix_midrules <- function(tab.tex) {
+  # Split LaTeX table into lines
+  lines <- unlist(strsplit(tab.tex, "\n"))
+  
+  # Find the first midrule (after headers)
+  first_mid <- grep("\\\\midrule", lines)[1]
+  
+  # Find line number containing "Num.Obs."
+  numobs_line <- grep("Num\\.Obs\\.", lines)
+  
+  # Remove all existing midrules
+  lines <- lines[-grep("\\\\midrule", lines)]
+  
+  # Insert first midrule after headers
+  lines <- append(lines, "\\midrule", after = first_mid - 1)
+  
+  # Insert second midrule right before "Num.Obs."
+  lines <- append(lines, "\\midrule", after = numobs_line - 2) # -2 adjusts for earlier removals
+  
+  # Return as a single LaTeX string
+  paste(lines, collapse = "\n")
+}
+
 

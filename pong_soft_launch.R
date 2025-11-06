@@ -5,6 +5,8 @@ library(ggplot2)
 library(jsonlite)
 library(scales) 
 library(patchwork)
+library(car)
+library(knitr)
 
 # Background ----
 source("Figure_theme.R")
@@ -36,10 +38,18 @@ survey.names =c("pong_dutch_report")#,"full_launch_panelclix") # names(files.pat
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
+# Continuous or discrete costs
+bin.costs.cont <- TRUE
+
 # For heterogeneity analysis, replace missing by Hoorn when applicable
 hoorn.file.name <- "Hoorn_complete" 
 
 lang = "nl" # default is english, en
+
+# Costs columns
+reg.onetimecosts <- "(one_time_costs)|(one_time_amount)"
+reg.monthcosts <- "heating_costs"
+reg.costs <- paste(reg.onetimecosts,reg.monthcosts,sep="|")
 
 for (survey.name in survey.names){
   
@@ -359,77 +369,78 @@ for (survey.name in survey.names){
   
   for (bs in names(grp.ht.list)){
     col.bias <- gsub("desc_","",unlist(grp.ht.list[[bs]]))
-    dt.bais <- data.desc[,.SD,.SDcols =col.bias]
-    setnames(dt.bais,col.bias,names(grp.ht.list[[bs]]))
-    #setnames(dt.bais,col.bias,sub(".*\\[(.*)\\].*", "\\1", col.bias))
-    
-    dt.long <- melt(dt.bais,
-                    measure.vars = names(dt.bais),
-                    variable.name = "Question",
-                    value.name = "Response"
-    )
-    
-    # Map sentiment responses to agreement scale
-    dt.long[, Response := fcase(
-      Response == "1 - Very negative",       "1 - strongly disagree",
-      Response == "2 - Negative",            "2",
-      Response == "3 - Neutral",             "3 - neither agree nor disagree",
-      Response == "4 - Positive",            "4",
-      Response == "5 - Very positive",       "5 - strongly agree",
-      default = Response  # keep existing values as-is
-    )]
-    
-    # Count per Question + Response
-    dt.prop <- dt.long[, .N, by = .(Question, Response)]
-    dt.prop[, Share := N / sum(N), by = Question]
-    
-    # Questions order 
-    dt.prop[, Question := factor(Question, levels = rev(names(grp.ht.list[[bs]])))]
-    
-    # Reverse factor levels to get "strongly disagree" first (bottom/left)
-    dt.prop[, Response := factor(Response, levels = rev(sort(unique(dt.prop$Response))))]
-    
-    # Try multiple widths and find the minimum one that gives max 2 lines
-    for (w in 20:80) {
-      dt.prop[, Question_wrapped := stringr::str_wrap(Question, width = w)]
-      max_lines <- max(stringr::str_count(dt.prop$Question_wrapped, "\n") + 1)
+    for (muni in data.desc[,unique(` Municipality`)]){
+      dt.bais <- data.desc[get(" Municipality") == muni,.SD,.SDcols =col.bias]
+      setnames(dt.bais,col.bias,names(grp.ht.list[[bs]]))
+      #setnames(dt.bais,col.bias,sub(".*\\[(.*)\\].*", "\\1", col.bias))
       
-      if (max_lines <= 2) {
-        cat("Minimum width for max 2 lines:", w, "\n")
+      dt.long <- melt(dt.bais,
+                      measure.vars = names(dt.bais),
+                      variable.name = "Question",
+                      value.name = "Response"
+      )
+      
+      # Map sentiment responses to agreement scale
+      dt.long[, Response := fcase(
+        Response == "1 - Very negative",       "1 - strongly disagree",
+        Response == "2 - Negative",            "2",
+        Response == "3 - Neutral",             "3 - neither agree nor disagree",
+        Response == "4 - Positive",            "4",
+        Response == "5 - Very positive",       "5 - strongly agree",
+        default = Response  # keep existing values as-is
+      )]
+      
+      # Count per Question + Response
+      dt.prop <- dt.long[, .N, by = .(Question, Response)]
+      dt.prop[, Share := N / sum(N), by = Question]
+      
+      # Questions order 
+      dt.prop[, Question := factor(Question, levels = rev(names(grp.ht.list[[bs]])))]
+      
+      # Reverse factor levels to get "strongly disagree" first (bottom/left)
+      dt.prop[, Response := factor(Response, levels = rev(sort(unique(dt.prop$Response))))]
+      
+      # Try multiple widths and find the minimum one that gives max 2 lines
+      for (w in 20:80) {
+        dt.prop[, Question_wrapped := stringr::str_wrap(Question, width = w)]
+        max_lines <- max(stringr::str_count(dt.prop$Question_wrapped, "\n") + 1)
         
-        # Re-factor to preserve ordering
-        dt.prop[, Question_wrapped := factor(Question_wrapped, 
-                                             levels = unique(Question_wrapped[order(Question)]))]
-        break
+        if (max_lines <= 2) {
+          cat("Minimum width for max 2 lines:", w, "\n")
+          
+          # Re-factor to preserve ordering
+          dt.prop[, Question_wrapped := factor(Question_wrapped, 
+                                               levels = unique(Question_wrapped[order(Question)]))]
+          break
+        }
       }
+      
+      ggplot(dt.prop, aes(x = Question_wrapped, y = Share, fill = Response)) +
+        geom_bar(stat = "identity", position = "stack", color = "white") +
+        scale_y_continuous(
+          labels = scales::percent_format(accuracy = 1),
+          sec.axis = dup_axis(trans = ~1 - ., labels = scales::percent_format(accuracy = 1), name = NULL)
+        ) +
+        scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+        labs(
+          x = NULL,
+          y = "Share of responses",
+          fill =NULL  
+        ) +
+        coord_flip() +
+        theme_pong + 
+        theme(
+          legend.position = c(0.25, -0.2),  # x < 0 moves left outside plot; y < 0 moves below plot
+          legend.direction = "horizontal",
+          plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
+        ) + 
+        guides(fill = guide_legend(reverse = TRUE))
+      
+      
+      ggsave(paste0(dir.out.figs,"fig_desc_biases",bs,"_",muni,".png"),width = width*1.6,height = height, units = "cm")
+      
     }
-    
-    ggplot(dt.prop, aes(x = Question_wrapped, y = Share, fill = Response)) +
-      geom_bar(stat = "identity", position = "stack", color = "white") +
-      scale_y_continuous(
-        labels = scales::percent_format(accuracy = 1),
-        sec.axis = dup_axis(trans = ~1 - ., labels = scales::percent_format(accuracy = 1), name = NULL)
-      ) +
-      scale_fill_brewer(palette = "RdYlBu", direction = -1) +
-      labs(
-        x = NULL,
-        y = "Share of responses",
-        fill =NULL  
-      ) +
-      coord_flip() +
-      theme_pong + 
-      theme(
-        legend.position = c(0.25, -0.2),  # x < 0 moves left outside plot; y < 0 moves below plot
-        legend.direction = "horizontal",
-        plot.margin = margin(t = 10, r = 10, b = 40, l = 10)
-      ) + 
-      guides(fill = guide_legend(reverse = TRUE))
-    
-    
-    ggsave(paste0(dir.out.figs,"fig_desc_biases",bs,".png"),width = width*1.6,height = height, units = "cm")
-    
   }
- 
   # Descriptives figures ----
   clean_str <- \(x) stringr::str_to_sentence(gsub("_"," ",x))
   
@@ -546,10 +557,15 @@ for (survey.name in survey.names){
   
   write.csv2(dt.insu,paste0(dir.out,"data_mlogit_insu.csv"),quote = TRUE,row.names = FALSE)
   
-  col.att.int <- names(dt.insu)[!(names(dt.insu) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("^desc_",names(dt.insu))]
-  col.ref <- paste0(unique(gsub("_[0-9]$","",col.att.int[grepl("_[0-9]$",col.att.int)])),gsub(".*(_[0-9]).*","\\1",ref.lvl))
+  col.att.int <- names(dt.insu)[!(names(dt.insu) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("^desc_|_continuous$",names(dt.insu))]
+  
+  if (bin.costs.cont == TRUE){
+    col.att.int <- col.att.int[!grepl(reg.costs,col.att.int)]
+    col.att.int <- c(col.att.int,names(dt.insu)[grepl(reg.costs,names(dt.insu)) & grepl("_continuous$",names(dt.insu)) ])
+  }
   
   formula.insu <- paste0("choice ~ ",paste0(col.att.int,collapse = " + ")," | 0 ")
+  
   logit_interact.insu <- mlogit(
     formula = as.formula(formula.insu),
     dt.insu
@@ -557,7 +573,7 @@ for (survey.name in survey.names){
   
   print(summary(logit_interact.insu,digits=2))
   
-  
+  col.ref <- paste0(unique(gsub("_[0-9]$","",col.att.int[grepl("_[0-9]$",col.att.int)])),gsub(".*(_[0-9]).*","\\1",ref.lvl))
   coef_names <- get_json_mapping_4_coefs(game,c(col.att.int,col.ref))
   
   coef_names <- translate_coef_names(coef_names,game,lang=lang)
@@ -575,6 +591,7 @@ for (survey.name in survey.names){
                                         stars = c("*" = .1, "**" = .05, "***" = 0.01))
   
   
+  tab.tex <- fix_midrules(tab.tex)
   
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
   
@@ -614,11 +631,20 @@ for (survey.name in survey.names){
                                             output = "latex",
                                             stars = c("*" = .1, "**" = .05, "***" = 0.01))
       
+      tab.tex <- fix_midrules(tab.tex)
+      
       writeLines(tab.tex, paste0(dir.out, "results_heterogeneity_no_reference_", game,"_",ht.var, ".tex"))
       
       dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
       dt.cfs.tmp[,group := ht.var]
       dt.cfs.tmp[grepl(":None",Term),Term := gsub(grp.ht.list[[grp.ht]][[ht.var]],paste0(ht.var," "),Term,fixed = TRUE)]
+      
+      dt.cfs.tmp <- map_levels_to_keys(
+        dt = dt.cfs.tmp,
+        game = game,
+        lang = lang
+      )
+      
       dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
       
     }
@@ -631,11 +657,16 @@ for (survey.name in survey.names){
   write.csv2(dt.tech,paste0(dir.out,"data_mlogit_tech.csv"),quote = TRUE,row.names = FALSE)
   
   col.mdl <- names(dt.tech)[!(names(dt.tech) %in% c(cst$id_q,cst$id_r,cst$ch,cst$pk,"qid","idx")) & !grepl("(^desc_)|(^support_)",names(dt.tech))]
-  col.interact.tech <- col.mdl[grepl("cost",col.mdl)]
+  if (bin.costs.cont == TRUE){
+    col.mdl <- col.mdl[!grepl(reg.costs,col.mdl)]
+    col.mdl <- c(col.mdl,names(dt.tech)[grepl(reg.costs,names(dt.tech)) & grepl("continuous$",names(dt.tech)) ])
+  }
+  col.interact.tech <- col.mdl[!grepl("^none$|^tech$|^heating",col.mdl)]
   col.rest <- setdiff(col.mdl,col.interact.tech)
   col.rest[col.rest == "tech"] <- "factor(tech)"
   
-  formula.tech <- paste0("choice ~ ",paste0(col.rest[col.rest != "none"],collapse = " + ")," + ",paste0(paste0(col.interact.tech,":factor(tech)"),collapse = " + ")," + none| 0 ")
+  formula.tech <- paste0("choice ~ ",paste0(col.rest[col.rest != "none"],collapse = " + ")," + ",paste0(paste0(col.interact.tech,"*factor(tech)"),collapse = " + ")," + none| 0 ")
+  #formula.tech <- gsub("one_time_costs_continuous\\*factor\\(tech\\)","one_time_costs_continuous:factor(tech)",formula.tech)
   
   logit_interact.tech <- mlogit(
     formula = as.formula(formula.tech),
@@ -645,7 +676,7 @@ for (survey.name in survey.names){
   print(summary(logit_interact.tech,digits=2))
   
   col.att.int <- names(logit_interact.tech$coefficients)
-  col.ref <- paste0(unique(gsub("_[0-9]$","",col.att.int[grepl("_[0-9]$",col.att.int)])),gsub(".*(_[0-9]).*","\\1",ref.lvl))
+  col.ref <- paste0(unique(gsub("_[0-9]$","",col.att.int[grepl("_[0-9]$",col.att.int) & !grepl("factor\\(tech\\)",col.att.int)])),gsub(".*(_[0-9]).*","\\1",ref.lvl))
   
   tech.map <- get_json_mapping_4_coefs(game,c(col.att.int,col.ref))
   tech.map[names(tech.map) == "factor(tech)1"] = "Heat pump"
@@ -666,6 +697,8 @@ for (survey.name in survey.names){
                                         statistic = stats.table,
                                         output = "latex",
                                         stars = c("*" = .1, "**" = .05, "***" = 0.01))
+  
+  tab.tex <- fix_midrules(tab.tex)
   
   dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
   dt.cfs.tmp[,group := "all"]
@@ -688,10 +721,11 @@ for (survey.name in survey.names){
     # Without reference level
     for (ht.var in names(grp.ht.list[[grp.ht]])){
       
-      if (!(grp.ht.list[[grp.ht]][[ht.var]] %in% names(dt.tech))) next
+      var_in_dt <- grp.ht.list[[grp.ht]][[ht.var]]
+      if (!(var_in_dt %in% names(dt.tech))) next
       
       logit_interact.tech.ht <- mlogit(
-        formula = as.formula(gsub("(none|None)",paste0("`",grp.ht.list[[grp.ht]][[ht.var]],"`:none"),formula.tech)),
+        formula = as.formula(gsub("(none|None)",paste0("`",var_in_dt,"`:none"),formula.tech)),
         dt.tech
       )
       
@@ -704,9 +738,31 @@ for (survey.name in survey.names){
                                             output = "latex",
                                             stars = c("*" = .1, "**" = .05, "***" = 0.01))
       
+      tab.tex <- fix_midrules(tab.tex)
+      
       dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
       dt.cfs.tmp[,group := ht.var]
-      dt.cfs.tmp[grepl(":(None|none)",Term),Term := gsub(grp.ht.list[[grp.ht]][[ht.var]],paste0(ht.var," "),Term,fixed = TRUE)]
+      dt.cfs.tmp[grepl(":(None|none)",Term),Term := gsub(var_in_dt,paste0(ht.var," "),Term,fixed = TRUE)]
+      dt.cfs.tmp <- map_levels_to_keys(
+        dt = dt.cfs.tmp,
+        game = game,
+        lang = lang
+      )
+      
+      # Get n obs hetero
+      dt.n <- data.table(dt.tech %>%
+                           group_by(V1 = .data[[var_in_dt]]) %>%
+                           summarise(count = n_distinct(`desc_Response ID`)))
+      dt.n[, key_term := paste0("none_",ht.var," ",V1)]
+      dt.cfs.tmp[dt.n,n_respondents := i.count,on = "key_term" ]
+      
+      # Statistical test
+      #dt.cfs.tmp[grepl(":none",Term),]
+      #for (i in FALSE){
+      #  1+1
+      #}
+      #linearHypothesis(logit_interact.tech.ht, "`desc_Number of home improvements`0:none = `desc_Number of home improvements`1:none")
+      
       dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
       
     }
@@ -716,11 +772,6 @@ for (survey.name in survey.names){
   # Coef table ----
   
   print(dt.coefs)
-  
-  # Costs columns
-  reg.onetimecosts <- "(one_time_costs)|(one_time_amount)"
-  reg.monthcosts <- "heating_costs"
-  reg.costs <- paste(reg.onetimecosts,reg.monthcosts,sep="|")
   
   # Step 1: Extract attribute group name (everything before the colon)
   dt.coefs[, Attribute := sub(":.*", "", Term)]
@@ -901,85 +952,189 @@ for (survey.name in survey.names){
   }
   
   
-  # Fig heatmap ----
-  for (gm in c("insu","tech")){
-    for (charac in c("Education","all","Construction year") ){ #dt.coefs[game == gm,unique(group)]
-      for (grp in dt.coefs[group == charac & key_term == "none" & game == gm,unique(gsub(":(None|none)","",Term))]){
+  # Predictions for heatmap ----
+  dt.grid <- data.table()
+  for (gm in c("tech")){
+    for (charac in dt.coefs[game == gm,unique(group)] ){ #dt.coefs[game == gm,unique(group)]
+      for (none_coef in dt.coefs[group == charac & grepl("^none(_.*)?$",key_term) & game == gm,key_term]){
         
-        # All combinations of monetary
-        if (gm == "insu"){
-          dt.pw <- dt.coefs[group == charac & game == gm,CJ(invest = Term[grepl("ne time",Attribute)],savings = Term[grepl("eating costs",Attribute)])]
-        } else {
-          dt.pw <- rbindlist(list(dt.coefs[group == charac & game == gm,CJ(invest = Term[grepl("Heat pump",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat pump",Attribute) & grepl("heating costs",Attribute)])],
-                                  dt.coefs[group == charac & game == gm,CJ(invest = Term[grepl("Heat network",Attribute) & grepl("one time",Attribute)],savings = Term[grepl("Heat network",Attribute) & grepl("heating costs",Attribute)])]))
+        if (bin.costs.cont == FALSE){
+          stop("Not implemented for discrete costs")
+        }
+        dt.pw <- dt.coefs[group == charac & game == gm & (grepl(reg.costs,key_term) | key_term == none_coef) ,]
+        
+        savings <- \(x) x*dt.pw[key_term == "heating_costs_continuous",Estimate] +
+          (x)*dt.pw[key_term == "heating_costs_negativecontinuous",Estimate]*ifelse(x < 0,1,0)
+        
+        invest <- \(x) x*dt.pw[key_term == "one_time_costs_continuous",Estimate]*ifelse(x < 6 | x > 10,1,0) +
+          (x)*dt.pw[key_term == "factor(tech)1:one_time_costs_continuous",Estimate]*ifelse(x > 10,1,0) +
+          6*dt.pw[key_term == "one_time_costs_continuous",Estimate]*ifelse(x >= 6 & x <=10,1,0)
+        
+        none_fct <- \(x) dt.coefs[key_term == none_coef & game == gm & group == charac,Estimate] -
+          dt.coefs[key_term == "factor(tech)1" & game == gm & group == charac,Estimate]*(ifelse(x > 10,1,0) + 0*ifelse(x > 6 & x < 10,1,0)*(x-6)/4)
+        
+        share_predicted <- \(sav,inv) exp(invest(inv) + savings(sav))/(exp(invest(inv) + savings(sav))+exp(none_fct(inv)))
+        
+        inv_vals <- seq(0, 30, by = 2)
+        sav_vals <- seq(-0.6, 2.4, by = 0.6)
+        
+        grid <- expand.grid(inv = inv_vals, sav = sav_vals)
+        setDT(grid)
+        
+        # Compensation to arrive at 50 and 70%
+        for (trgt in c(0.5,0.7)){
+          root <- uniroot(\(x) share_predicted(0,x) - trgt, interval = c(-100, 100))
+          grid[,(paste0("price_",round(100*trgt),"_approval")) := root$root]
+          
         }
         
-        # Add monetary coefficients
-        dt.pw[dt.coefs[group == charac & game == gm,],`:=` (coef.invest = i.Estimate,
-                                                            ref.invest = i.ReferenceCost,
-                                                            amount.invest = i.CostValue),on=c(invest = "Term")]
-        dt.pw[dt.coefs[group == charac & game == gm,],`:=` (coef.savings = i.Estimate,
-                                                            ref.savings = i.ReferenceCost,
-                                                            amount.savings = i.CostValue),on=c(savings = "Term")]
-        # Add none
-        if (gm == "insu"){
-          dt.pw[, none := dt.coefs[key_term == "none" & game == gm & group == charac & grepl(grp,Term),Estimate] ]
-        } else {
-          dt.pw[grepl("Heat network",invest), none := dt.coefs[key_term == "none" & game == gm & group == charac & grepl(grp,Term),Estimate] ]
-          dt.pw[grepl("Heat pump",invest), none := dt.coefs[key_term == "none" & game == gm & group == charac & grepl(grp,Term),Estimate] - dt.coefs[Attribute == "Heat pump" & game == gm & group == charac,Estimate] ]
-        }
+        grid[,n_respondents := dt.pw[key_term == none_coef,n_respondents]]
         
-        dt.pw <- dt.pw[order(grepl("Heat pump",invest),amount.invest,amount.savings),]
-        dt.pw[ref.invest == amount.invest,coef.invest := 0]
-        dt.pw[ref.savings == amount.savings,coef.savings := 0]
-        
-        dt.pw.plt <- copy(dt.pw)
-        reg.toclean <- "(Heat pump)|(Heat network)|( \\(reference\\))|(One time costs\\:)|(One time amount\\:)|(Heating costs\\:)"
-        dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
-        dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
-        dt.pw.plt[,savings := stringr::str_to_sentence(gsub(reg.toclean,"",savings))]
-        dt.pw.plt[,invest := stringr::str_to_sentence(gsub(reg.toclean,"",invest))]
-        
-        dt.pw.plt[,savings := stringr::str_to_sentence(gsub(" than now\\.","",savings))]
-        dt.pw.plt[,savings := stringr::str_to_sentence(gsub(" euros","€",savings))]
-        
-        dt.pw.plt[, savings := factor(savings, levels = unique(savings[order(amount.savings)]))]
-        dt.pw.plt[, invest := factor(invest, levels = unique(invest[order(amount.invest)]))]
-        
-        dt.pw.plt[,s := exp(coef.invest + coef.savings)/(exp(coef.invest + coef.savings)+exp(none))]
-        
-        support_colors <- c(
-          "25% or less"   = "#d73027",
-          "25-50%"  = "#fc8d59",
-          "50-75%"  = "#b2df8a",
-          "75% or more" = "#1a9850" 
+        grid$share_predicted <- with(grid,
+                                     exp(invest(inv) + savings(sav)) /
+                                       (exp(invest(inv) + savings(sav)) + exp(none_fct(inv)))
         )
         
-        dt.pw.plt[, s_cat := cut(s,
-                                 breaks = c(0, 0.25, 0.5, 0.75, 1),
-                                 labels = names(support_colors),
-                                 include.lowest = TRUE)]
-        ttl = if_else(charac == "all","All",grp)
-        ggplot(dt.pw.plt, aes(x = savings, y = invest, fill = s_cat)) +
-          geom_tile(color = "white") +
-          scale_fill_manual(values = support_colors, name = "Support") +
-          coord_fixed() +
-          theme_minimal() +
-          labs(
-            title = paste0(ttl),
-            x = "Savings",
-            y = "Investment costs"
-          ) +
-          theme_pong + 
-          theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        grp <- gsub("^none$","All",gsub("^none_","",none_coef))
         
-        fig.nm <- paste0("fig_hm_",gm,"_",ttl)
-        fig.nm <- gsub("[^A-Za-z0-9]", "_", fig.nm)
+        grid[, c("game", "hetero","group") := .(gm, charac,grp)]
         
-        ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width,height = height, units = "cm")
+        dt.grid <- rbindlist(list(dt.grid,grid),use.names = TRUE,fill = TRUE)   
       }
     }
   }
+  
+  if (dt.grid[,.N,by=.(game,hetero,group,inv,sav)][,any(N != 1)]){stop("Duplicated predictions")}
+  
+  export_WTP_heterogeneity  =dt.grid[inv == 0 & sav == 0,.(Characteristic = hetero,Group = gsub(hetero,"",group),`Median WTP unburdening` = round(price_50_approval,1),`70% WTP unburdening` = round(price_70_approval,1),`N respondents` = n_respondents),by=.I][,-"I"]
+  export_WTP_heterogeneity <- export_WTP_heterogeneity[order(-Characteristic),]
+  
+  cat(
+    paste0(
+      "\\tiny\n",
+      kable(export_WTP_heterogeneity, 
+            format = "latex", 
+            booktabs = FALSE, 
+            longtable = TRUE, 
+            linesep = "", 
+            caption = "WTP Heterogeneity Table")
+    ),
+    file = paste0(dir.out, "WTP_heterogeneity_table.tex")
+  )
+  
+  
+  
+  
+  
+  dt.grid[, share_cat := cut(share_predicted,
+                             breaks = seq(0, 1, by = 0.1),  # 0.0, 0.1, 0.2, …, 1.0
+                             labels = c(
+                               "0–10%", "10–20%", "20–30%", "30–40%", "40–50%",
+                               "50–60%", "60–70%", "70–80%", "80–90%", "90–100%"
+                             ),
+                             include.lowest = TRUE,
+                             right = TRUE
+  )]
+  
+  
+  support_colors <- c(
+    "0–10%"   = "#d73027",  # red
+    "10–20%"  = "#f46d43",  # orange-red
+    "20–30%"  = "#fdae61",  # orange
+    "30–40%"  = "#fee08b",  # light yellow
+    "40–50%"  = "#ffffbf",  # bright yellow
+    "50–60%"  = "#a6d96a",  # light green
+    "60–70%"  = "#66bd63",  # medium green
+    "70–80%"  = "#1a9d4c",  # darker green
+    "80–90%"  = "#006837",  # deep green
+    "90–100%" = "#004529"   # very dark green
+  )
+  
+  
+  
+  
+  dt.grid$inv_f <- factor(dt.grid$inv)
+  dt.grid$sav_f <- factor(dt.grid$sav)
+  
+  # Custom y-axis label function
+  y_labels <- function(y) {
+    y_num <- as.numeric(y) * 1000       # annual savings in euros
+    monthly <- round(y_num / 12)        # monthly savings
+    paste0(round(y_num / 1000, 1), "k (", monthly, "/maand)")
+  }
+  
+  # Custom x-axis label function
+  x_labels <- function(x) {
+    x_num <- as.numeric(x) * 1000       # convert factor to numeric euro amount
+    paste0(round(x_num / 1000, 0), "k") # show in 'k' format
+  }
+  
+  ggplot(dt.grid[group == "Education 0 - Other",], aes(x = inv_f, y = sav_f, fill = share_cat)) +
+    geom_tile(color = "white", width = 0.9, height = 0.9) +
+    scale_fill_manual(
+      values = support_colors,
+      name = "Draagvlak in %"  
+    ) +
+    scale_x_discrete(labels = x_labels) +  
+    scale_y_discrete(labels = y_labels) + 
+    coord_equal() +
+    labs(
+      title = NULL,
+      x = "Eenmalige investeringskosten",
+      y = "Besparingen per jaar"      
+    ) +
+    theme_minimal(base_size = sz.txt) +
+    theme(
+      axis.text.y = element_text(hjust = 0),  # left-align y-axis labels
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      panel.grid = element_blank(),
+      axis.ticks = element_blank(),
+      legend.position = "right",
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      plot.background = element_rect(fill = "white", color = NA)
+    )
+  
+  
+  ttl = if_else(charac == "all","All",grp)
+  fig.nm <- paste0("fig_hm_",gm,"_",ttl)
+  fig.nm <- gsub("[^A-Za-z0-9]", "_", fig.nm)
+  
+  ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width,height = height, units = "cm")
+  
+  
+  
+  # OLD ---- 
+  dt.pw.plt[,s := exp(coef.invest + coef.savings)/(exp(coef.invest + coef.savings)+exp(none))]
+  
+  support_colors <- c(
+    "25% or less"   = "#d73027",
+    "25-50%"  = "#fc8d59",
+    "50-75%"  = "#b2df8a",
+    "75% or more" = "#1a9850" 
+  )
+  
+  dt.pw.plt[, s_cat := cut(s,
+                           breaks = c(0, 0.25, 0.5, 0.75, 1),
+                           labels = names(support_colors),
+                           include.lowest = TRUE)]
+  ttl = if_else(charac == "all","All",grp)
+  ggplot(dt.pw.plt, aes(x = savings, y = invest, fill = s_cat)) +
+    geom_tile(color = "white") +
+    scale_fill_manual(values = support_colors, name = "Support") +
+    coord_fixed() +
+    theme_minimal() +
+    labs(
+      title = paste0(ttl),
+      x = "Savings",
+      y = "Investment costs"
+    ) +
+    theme_pong + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  fig.nm <- paste0("fig_hm_",gm,"_",ttl)
+  fig.nm <- gsub("[^A-Za-z0-9]", "_", fig.nm)
+  
+  ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width,height = height, units = "cm")
   
   
   
