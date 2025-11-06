@@ -757,12 +757,24 @@ for (survey.name in survey.names){
       dt.cfs.tmp[dt.n,n_respondents := i.count,on = "key_term" ]
       
       # Statistical test
-      #dt.cfs.tmp[grepl(":none",Term),]
-      #for (i in FALSE){
-      #  1+1
-      #}
-      #linearHypothesis(logit_interact.tech.ht, "`desc_Number of home improvements`0:none = `desc_Number of home improvements`1:none")
+      dt.none <- dt.cfs.tmp[grepl(":none",Term),]
+      idx.ref <- dt.none[,first(which(n_respondents == max(n_respondents)))]
       
+      nm.ref.in.logit <- names(logit_interact.tech.ht$coefficients)[gsub("[^[:alnum:]]", "", names(logit_interact.tech.ht$coefficients)) == gsub("[^[:alnum:]]", "", gsub(paste0(ht.var," "),var_in_dt,dt.none[idx.ref,Term]))] 
+      for (none_not_ref in dt.none[-idx.ref,Term]){
+        nm.noref.in.logit <- names(logit_interact.tech.ht$coefficients)[gsub("[^[:alnum:]]", "", names(logit_interact.tech.ht$coefficients)) == gsub("[^[:alnum:]]", "", gsub(paste0(ht.var," "),var_in_dt,none_not_ref))] 
+        
+        if (length(length(nm.noref.in.logit))!=1 | length(length(nm.ref.in.logit))!=1){
+          stop("None coefficient not properly identified")
+        }
+        
+        tst <- linearHypothesis(logit_interact.tech.ht, paste0(nm.ref.in.logit," = ",nm.noref.in.logit))
+        dt.cfs.tmp[Term == none_not_ref,pval_none := tst$`Pr(>Chisq)`[2]]
+      }
+      
+      dt.cfs.tmp[Term == dt.none[idx.ref,Term],pval_none := Inf]
+      
+      #
       dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
       
     }
@@ -989,6 +1001,8 @@ for (survey.name in survey.names){
         }
         
         grid[,n_respondents := dt.pw[key_term == none_coef,n_respondents]]
+        grid[,pval_none := dt.pw[key_term == none_coef,pval_none]]
+        grid[,Estimate := dt.pw[key_term == none_coef,Estimate]]
         
         grid$share_predicted <- with(grid,
                                      exp(invest(inv) + savings(sav)) /
@@ -1006,7 +1020,7 @@ for (survey.name in survey.names){
   
   if (dt.grid[,.N,by=.(game,hetero,group,inv,sav)][,any(N != 1)]){stop("Duplicated predictions")}
   
-  export_WTP_heterogeneity  =dt.grid[inv == 0 & sav == 0,.(Characteristic = hetero,Group = gsub(hetero,"",group),`Median WTP unburdening` = round(price_50_approval,1),`70% WTP unburdening` = round(price_70_approval,1),`N respondents` = n_respondents),by=.I][,-"I"]
+  export_WTP_heterogeneity  = dt.grid[inv == 0 & sav == 0,.(Characteristic = hetero,Group = gsub(hetero,"",group),`Median WTP unburdening` = round(price_50_approval,1),`None` = round(Estimate,2),`None p-value` = ifelse(!is.finite(pval_none),"Reference",as.character(round(pval_none,2))),`N respondents` = n_respondents),by=.I][,-"I"]
   export_WTP_heterogeneity <- export_WTP_heterogeneity[order(-Characteristic),]
   
   cat(
