@@ -69,7 +69,7 @@
   },
   "heating_costs_continuous":{
     "en": "Heating savings (in thousand euro per year).",
-    "nl": "Verwarmingsbesparing (duizend euro per jaar)."
+    "nl": "Besparing op warmtekosten (duizend euro per jaar)."
   },
   "one_time_amount_continuous":{
     "en": "One time amount (thousand euro).",

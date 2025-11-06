@@ -25,11 +25,11 @@
   },
   "heating_costs_continuous": {
     "en": "Heating savings (in thousand euro per year).",
-    "nl": "Verwarmingsbesparing (duizend euro per jaar)."
+    "nl": "Besparing op warmtekosten (duizend euro per jaar)."
   },
   "heating_costs_negativecontinuous": {
     "en": "Heating savings negative (in thousand euro per year).",
-    "nl": "Negatieve verwarmingsbesparing (duizend euro per jaar)."
+    "nl": "Besparing op warmtekosten X besparing is negatief (duizend euro per jaar)."
   },
   "one_time_costs_continuous": {
     "en": "One time amount (thousand euro).",
@@ -37,35 +37,35 @@
   },
   "factor(tech)1:one_time_costs_continuous": {
     "en": "Heat pump one time amount (thousand euro).",
-    "nl": "Warmtepomp eenmalig bedrag (duizend euro)."
+    "nl": "Techniek met hoge investeringskosten X eenmalig bedrag (duizend euro)."
   },
   "factor(tech)1": {
     "en": "Heat pump",
-    "nl": "Warmtepomp"
+    "nl": "Techniek met hoge investeringskosten"
   },
   "factor(tech)1:supplier_1": {
     "en": "Heat pump supplier: you choose the company that supplies heat.",
-    "nl": "Warmtepomp leverancier: u kiest zelf het bedrijf dat warmte levert."
+    "nl": "Techniek met hoge investeringskosten X leverancier: u kiest zelf het bedrijf dat warmte levert."
   },
   "factor(tech)1:supplier_2": {
     "en": "Heat pump supplier: there is one fixed heat supplier owned by your municipality.",
-    "nl": "Warmtepomp leverancier: er is één vaste warmteleverancier die eigendom is van uw gemeente."
+    "nl": "Techniek met hoge investeringskosten X leverancier: er is één vaste warmteleverancier die eigendom is van uw gemeente."
   },
   "factor(tech)1:nuisance_1": {
     "en": "Heat pump nuisance: 2 months of noise and streets open.",
-    "nl": "Warmtepomp overlast: 2 maanden geluid en opengebroken straten."
+    "nl": "Techniek met hoge investeringskosten X overlast: 2 maanden geluid en opengebroken straten."
   },
   "factor(tech)1:nuisance_2": {
     "en": "Heat pump nuisance: 1 month of noise and streets open.",
-    "nl": "Warmtepomp overlast: 1 maand geluid en opengebroken straten."
+    "nl": "Techniek met hoge investeringskosten X overlast: 1 maand geluid en opengebroken straten."
   },
   "factor(tech)1:power_outages_1": {
     "en": "Heat pump power outages: never power outage.",
-    "nl": "Warmtepomp stroomuitval: nooit stroomuitval."
+    "nl": "Techniek met hoge investeringskosten X stroomuitval: nooit stroomuitval."
   },
   "factor(tech)1:power_outages_2": {
     "en": "Heat pump power outages: on average, one day a year power outage.",
-    "nl": "Warmtepomp stroomuitval: gemiddeld één dag per jaar stroomuitval."
+    "nl": "Techniek met hoge investeringskosten X stroomuitval: gemiddeld één dag per jaar stroomuitval."
   },
   "factor(tech)1:one_time_costs_1": {
     "en": "Heat pump one time costs: 10,000 euros.",

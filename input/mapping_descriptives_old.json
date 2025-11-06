@@ -143,27 +143,47 @@
     "question_rank": 11,
     "question_mask": 1,
     "answers": {
-      "1 - Less than half": {
+      "3 - Less than half": {
         "answer_tags": [
-          "Almost no one",
-          "Less than half",
-          "Less than a quarter"
+          "Less than half"
         ],
         "answer_rank": 3
       },
-      "2 - About half": {
+      "2 - Less than a quarter": {
+        "answer_tags": [
+          "Less than a quarter"
+        ],
+        "answer_rank": 2
+      },
+      "6 - More than three quarters": {
+        "answer_tags": [
+          "More than three quarters"
+        ],
+        "answer_rank": 6
+      },
+      "4 - About half": {
         "answer_tags": [
           "About half"
         ],
         "answer_rank": 4
       },
-      "3 - More than half": {
+      "7 - Almost everyone": {
         "answer_tags": [
-          "More than half",
-          "More than three quarters",
           "Almost everyone"
         ],
+        "answer_rank": 7
+      },
+      "5 - More than half": {
+        "answer_tags": [
+          "More than half"
+        ],
         "answer_rank": 5
+      },
+      "1 - Almost no one": {
+        "answer_tags": [
+          "Almost no one"
+        ],
+        "answer_rank": 1
       }
     },
     "question_group": "bias"
@@ -175,22 +195,6 @@
         " Had you heard about the alternatives to natural gas (heating network and/or heat pump) before this research?"
       ]
     ],
-    "answers": {
-      "No": {
-        "answer_tags": [
-          "No"
-        ],
-        "answer_rank": 3
-      },
-      "Yes, at least one": {
-        "answer_tags": [
-          "Yes about heat pump",
-          "Yes about heat network",
-          "Yes about both"
-        ],
-        "answer_rank": 2
-      }
-    },
     "question_rank": 5,
     "question_mask": 1
   },
@@ -204,22 +208,32 @@
     "question_rank": 5,
     "question_mask": 1,
     "answers": {
-      "3 - Positive": {
+      "4 - Positive": {
         "answer_tags": [
-          "Positive",
+          "Positive"
+        ],
+        "answer_rank": 5
+      },
+      "5 - Very positive": {
+        "answer_tags": [
           "Very positive"
         ],
-        "answer_rank": 3
+        "answer_rank": 4
       },
-      "2 - Neutral": {
+      "3 - Neutral": {
         "answer_tags": [
           "Neutral"
         ],
+        "answer_rank": 3
+      },
+      "2 - Negative": {
+        "answer_tags": [
+          "Negative"
+        ],
         "answer_rank": 2
       },
-      "1 - Negative": {
+      "1 - Very negative": {
         "answer_tags": [
-          "Negative",
           "Very negative"
         ],
         "answer_rank": 1
@@ -237,25 +251,35 @@
     "question_rank": 6,
     "question_mask": 1,
     "answers": {
-      "3 - Positive": {
-        "answer_tags": [
-          "Positive",
-          "Very positive"
-        ],
-        "answer_rank": 3
-      },
-      "2 - Neutral": {
+      "3 - Neutral": {
         "answer_tags": [
           "Neutral"
         ],
-        "answer_rank": 2
+        "answer_rank": 3
       },
-      "1 - Negative": {
+      "1 - Very negative": {
         "answer_tags": [
-          "Negative",
           "Very negative"
         ],
         "answer_rank": 1
+      },
+      "4 - Positive": {
+        "answer_tags": [
+          "Positive"
+        ],
+        "answer_rank": 4
+      },
+      "2 - Negative": {
+        "answer_tags": [
+          "Negative"
+        ],
+        "answer_rank": 2
+      },
+      "5 - Very positive": {
+        "answer_tags": [
+          "Very positive"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"
@@ -828,25 +852,35 @@
     "question_rank": 17,
     "question_mask": 1,
     "answers": {
-      "1 - disagree": {
+      "2": {
         "answer_tags": [
-          "2",
-          "1 - strongly disagree"
+          "2"
         ],
         "answer_rank": 1
       },
-      "2 - neither agree nor disagree": {
+      "3 - neither agree nor disagree": {
         "answer_tags": [
           "3 - neither agree nor disagree"
         ],
         "answer_rank": 2
       },
-      "3 - agree": {
+      "4": {
         "answer_tags": [
-          "4",
-          "5 - strongly agree"
+          "4"
         ],
         "answer_rank": 3
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 4
+      },
+      "5 - strongly agree": {
+        "answer_tags": [
+          "5 - strongly agree"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"
@@ -861,25 +895,35 @@
     "question_rank": 18,
     "question_mask": 1,
     "answers": {
-      "2 - neither agree nor disagree": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
         "answer_tags": [
           "3 - neither agree nor disagree"
         ],
         "answer_rank": 2
       },
-      "3 - agree": {
+      "4": {
         "answer_tags": [
-          "5 - strongly agree",
           "4"
         ],
         "answer_rank": 3
       },
-      "1 - disagree": {
+      "5 - strongly agree": {
         "answer_tags": [
-          "1 - strongly disagree",
-          "2"
+          "5 - strongly agree"
         ],
-        "answer_rank": 1
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"
@@ -894,25 +938,35 @@
     "question_rank": 19,
     "question_mask": 1,
     "answers": {
-      "2 - neither agree nor disagree": {
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
         "answer_tags": [
           "3 - neither agree nor disagree"
         ],
         "answer_rank": 2
       },
-      "3 - agree": {
+      "5 - strongly agree": {
         "answer_tags": [
-          "5 - strongly agree",
-          "4"
+          "5 - strongly agree"
         ],
         "answer_rank": 3
       },
-      "1 - disagree": {
+      "2": {
         "answer_tags": [
-          "1 - strongly disagree",
           "2"
         ],
-        "answer_rank": 1
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"
@@ -927,25 +981,35 @@
     "question_rank": 20,
     "question_mask": 1,
     "answers": {
-      "2 - neither agree nor disagree": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
         "answer_tags": [
           "3 - neither agree nor disagree"
         ],
         "answer_rank": 2
       },
-      "3 - agree": {
+      "4": {
         "answer_tags": [
-          "5 - strongly agree",
           "4"
         ],
         "answer_rank": 3
       },
-      "1 - disagree": {
+      "5 - strongly agree": {
         "answer_tags": [
-          "1 - strongly disagree",
-          "2"
+          "5 - strongly agree"
         ],
-        "answer_rank": 1
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"
@@ -960,25 +1024,35 @@
     "question_rank": 21,
     "question_mask": 1,
     "answers": {
-      "2 - neither agree nor disagree": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
         "answer_tags": [
           "3 - neither agree nor disagree"
         ],
         "answer_rank": 2
       },
-      "3 - agree": {
+      "5 - strongly agree": {
         "answer_tags": [
-          "5 - strongly agree",
-          "4"
+          "5 - strongly agree"
         ],
         "answer_rank": 3
       },
-      "1 - disagree": {
+      "4": {
         "answer_tags": [
-          "1 - strongly disagree",
-          "2"
+          "4"
         ],
-        "answer_rank": 1
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"
@@ -993,25 +1067,35 @@
     "question_rank": 22,
     "question_mask": 1,
     "answers": {
-      "2 - neither agree nor disagree": {
+      "2": {
+        "answer_tags": [
+          "2"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
         "answer_tags": [
           "3 - neither agree nor disagree"
         ],
         "answer_rank": 2
       },
-      "3 - agree": {
+      "4": {
         "answer_tags": [
-          "5 - strongly agree",
           "4"
         ],
         "answer_rank": 3
       },
-      "1 - disagree": {
+      "5 - strongly agree": {
         "answer_tags": [
-          "1 - strongly disagree",
-          "2"
+          "5 - strongly agree"
         ],
-        "answer_rank": 1
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"
@@ -1026,25 +1110,35 @@
     "question_rank": 23,
     "question_mask": 1,
     "answers": {
-      "2 - neither agree nor disagree": {
+      "4": {
+        "answer_tags": [
+          "4"
+        ],
+        "answer_rank": 1
+      },
+      "3 - neither agree nor disagree": {
         "answer_tags": [
           "3 - neither agree nor disagree"
         ],
         "answer_rank": 2
       },
-      "3 - agree": {
+      "5 - strongly agree": {
         "answer_tags": [
-          "5 - strongly agree",
-          "4"
+          "5 - strongly agree"
         ],
         "answer_rank": 3
       },
-      "1 - disagree": {
+      "2": {
         "answer_tags": [
-          "1 - strongly disagree",
           "2"
         ],
-        "answer_rank": 1
+        "answer_rank": 4
+      },
+      "1 - strongly disagree": {
+        "answer_tags": [
+          "1 - strongly disagree"
+        ],
+        "answer_rank": 5
       }
     },
     "question_group": "bias"

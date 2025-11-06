@@ -168,6 +168,8 @@ for (survey.name in survey.names){
   data.desc[, age_max := max(c(stringr::str_extract(get(nm.var),"[0-9]{2}"),
                                stringr::str_extract(get(nm.var2),"[0-9]{2}")),
                              na.rm=TRUE),by=" Response ID"]
+  data.desc[age_max >= 55,age_max := "55+"]
+  data.desc[age_max <= 35,age_max := "35-"]
   print(data.desc[,.N,by=.(age_max,get(nm.var),get(nm.var2))][order(age_max,N)])
   
   
@@ -203,7 +205,8 @@ for (survey.name in survey.names){
   
   # Home improvement
   nm.vars <- names(data.desc)[grepl("Do you have solar panels",names(data.desc)) | (grepl("improvements",names(data.desc)) & grepl("insulation",names(data.desc)))]
-  data.desc[,nb_house_improvement := sum(.SD == "Yes",na.rm=TRUE),by=` Response ID`,.SDcols = nm.vars]
+  data.desc[,nb_house_improvement := as.character(sum(.SD == "Yes",na.rm=TRUE)),by=` Response ID`,.SDcols = nm.vars]
+  data.desc[nb_house_improvement >= 3,nb_house_improvement := "3+"]
   
   ## Map descriptives ----
   # Read JSON mapping descriptives
@@ -1037,7 +1040,7 @@ for (survey.name in survey.names){
   )
   
   
-  
+  stop()
   
   
   dt.grid[, share_cat := cut(share_predicted,
