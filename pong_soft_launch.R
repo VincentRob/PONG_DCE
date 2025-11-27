@@ -714,6 +714,51 @@ for (survey.name in survey.names){
   
   writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, ".tex"))
   
+  ## TMP 3 ways hetero muni ----
+  for (mn in c("Hoorn","Medemblik")){
+    
+    dt.tech.ht <- dt.tech %>% mutate(muni_hoorn_medemblik = as.integer(desc_Municipality == mn))
+    dt.tech.ht <- dt.tech.ht %>% mutate(notnone_muni_hoorn_medemblik = as.integer(desc_Municipality == mn  & none == 0))
+    dt.tech.ht <- dt.tech.ht %>% mutate(none_muni_hoorn_medemblik = as.integer(muni_hoorn_medemblik == 1 & none == 1))
+    dt.tech.ht <- dt.tech.ht %>% mutate(tech1_muni_hoorn_medemblik = as.integer(muni_hoorn_medemblik == 1 & tech == 1 & none == 0))
+    
+    col.all <- c("supplier_2","nuisance_2","power_outages_2","one_time_costs_continuous","heating_costs_continuous","heating_costs_negativecontinuous")
+    col.inter.tech <- col.all[!(col.all %in% c("heating_costs_negativecontinuous","heating_costs_continuous"))]
+    col.inter.muni <- col.all[!(col.all %in% c("one_time_costs_continuous"))]
+    
+    for (v in col.inter.muni) {
+      dt.tech.ht <- dt.tech.ht %>%
+        mutate(!!paste0(v, "_muni_hoorn_medemblik") := as.integer((!!sym(v) * (muni_hoorn_medemblik == 1)) & none == 0))
+    }
+    
+    formula.tech.tmp <- paste0("choice ~ ",
+                               paste0(col.all,collapse = " + "),
+                               " + ",
+                               paste0(paste0(col.inter.tech,"*factor(tech)"),collapse = " + "),
+                               " + ",
+                               paste0(paste0(col.inter.muni,"_muni_hoorn_medemblik"),collapse = " + "),
+                               " + ",
+                               paste0(paste0(col.inter.tech[col.inter.tech != "one_time_costs_continuous" ],"*tech1_muni_hoorn_medemblik"),collapse = " + "),
+                               " + none + muni_hoorn_medemblik:none| 0 ")
+    
+    logit_interact.tech.tmp <- mlogit(
+      formula = as.formula(formula.tech.tmp),
+      dt.tech.ht %>% filter(desc_Municipality %in% c("Other",mn))
+    )
+    print(summary(logit_interact.tech.tmp,digits=2))
+    
+    tab.tex <- modelsummary::modelsummary(list(Logit = logit_interact.tech.tmp), 
+                                          coef_rename = tech.map[names(tech.map) %in% col.att.int], 
+                                          add_rows = rows.refs,
+                                          shape = term ~ statistic,
+                                          estimate = "{estimate}",
+                                          statistic = stats.table,
+                                          output = "latex",
+                                          stars = c("*" = .1, "**" = .05, "***" = 0.01))
+    
+    tab.tex <- fix_midrules(tab.tex)
+    writeLines(add_scriptsize(tab.tex,"^\\\\begin\\{table\\}"), paste0(dir.out, "results_", game, "_", mn ,".tex"))
+  }
   ## Tech heterogeneity ----
   grp.ht.list <- fromJSON("input/mlogit_heterogeneity_groups.json")
   
@@ -1023,7 +1068,8 @@ for (survey.name in survey.names){
   
   if (dt.grid[,.N,by=.(game,hetero,group,inv,sav)][,any(N != 1)]){stop("Duplicated predictions")}
   
-  export_WTP_heterogeneity  = dt.grid[inv == 0 & sav == 0,.(Characteristic = hetero,Group = gsub(hetero,"",group),`Median WTP unburdening` = round(price_50_approval,1),`None` = round(Estimate,2),`None p-value` = ifelse(!is.finite(pval_none),"Reference",as.character(round(pval_none,2))),`N respondents` = n_respondents),by=.I][,-"I"]
+  #export_WTP_heterogeneity  = dt.grid[inv == 0 & sav == 0,.(Characteristic = hetero,Group = gsub(hetero,"",group),`Predicted support` = paste0(round(share_predicted*100),"%"),`Median WTP unburdening` = round(price_50_approval,1),`None` = round(Estimate,2),`None p-value` = ifelse(!is.finite(pval_none),"Reference",as.character(round(pval_none,2))),`N respondents` = n_respondents),by=.I][,-"I"]
+  export_WTP_heterogeneity  = dt.grid[inv == 4 & sav == 0,.(Characteristic = hetero,Group = gsub(hetero,"",group),`Predicted support` = paste0(round(share_predicted*100),"%"),`None` = round(Estimate,2),`None p-value` = ifelse(!is.finite(pval_none),"Reference",as.character(round(pval_none,2))),`N respondents` = n_respondents),by=.I][,-"I"]
   export_WTP_heterogeneity <- export_WTP_heterogeneity[order(-Characteristic),]
   
   cat(
@@ -1086,7 +1132,7 @@ for (survey.name in survey.names){
     paste0(round(x_num / 1000, 0), "k") # show in 'k' format
   }
   
-  ggplot(dt.grid[group == "Education 0 - Other",], aes(x = inv_f, y = sav_f, fill = share_cat)) +
+  ggplot(dt.grid, aes(x = inv_f, y = sav_f, fill = share_cat)) +
     geom_tile(color = "white", width = 0.9, height = 0.9) +
     scale_fill_manual(
       values = support_colors,
@@ -1108,8 +1154,10 @@ for (survey.name in survey.names){
       axis.ticks = element_blank(),
       legend.position = "right",
       plot.title = element_text(face = "bold", hjust = 0.5),
-      plot.background = element_rect(fill = "white", color = NA)
-    )
+      plot.background = element_rect(fill = NA, color = NA)
+    ) + 
+    
+    annotate("rect", xmin = 0.5, xmax = 16.5, ymin = 1.5, ymax = 2.5,alpha = 0.1,fill = NA,color = "blue",size = 2)
   
   
   ttl = if_else(charac == "all","All",grp)
