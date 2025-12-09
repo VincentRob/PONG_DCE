@@ -16,20 +16,19 @@
     "Gender": "desc_Gender"
   },
   "bias1": {
-    "Capable individuals": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [Residents are capable of deciding for themselves how to phase out natural gas]",
-    "Reactance municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]",
-    "Capable municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [The municipality is best able to determine the most affordable way to phase out natural gas]",
-    "Equal heat price": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [Heat prices should be as equal as possible for everyone in the municipality]"
-  },
-  "bias2": {
-    "Lottery": "desc_lottery_quantile",
+    "PONG alternatives": "desc_Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?",
+    "People PONG positive": "desc_In your opinion, how many people are positive about phasing out natural gas?"
+    },
+  "perception_people": {
     "Enjoy my municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I enjoy living in my municipality]",
     "Enjoy my neighborhood": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I enjoy living in my neighborhood]",
-    "Climate-conscious": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I am climate-conscious]"
+    "Climate-conscious": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I am climate-conscious]",
+    "Reactance municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [I believe the municipality has already decided everything about the heat transition, and my opinion does not matter]"
   },
-  "bias3": {
-    "PONG alternatives": "desc_Had you heard about the alternatives to natural gas (heating network and/or heat pump) before participating in this choice game?",
-    "People PONG positive": "desc_In your opinion, how many people are positive about phasing out natural gas?",
+  "perception_heat_transition": {
+    "Equal heat price": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [Heat prices should be as equal as possible for everyone in the municipality]",
+    "Capable individuals": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [Residents are capable of deciding for themselves how to phase out natural gas]",
+    "Capable municipality": "desc_On a scale from 1 to 5, to what extent do you agree with the following statements? [The municipality is best able to determine the most affordable way to phase out natural gas]",
     "DH opinion": "desc_What is your opinion on district heating after having heard everything?",
     "HP opinion": "desc_What is your opinion on heat pumps after having heard everything?"
   }
