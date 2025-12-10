@@ -886,7 +886,7 @@ for (survey.name in survey.names){
         #   stop("Package not defined for this non financial scenario")
         # }
         
-        package.support.ht <- list("50prct_no_savings_low_cost" = c(0,4.303483),
+        package.support.ht <- list("50prct_no_savings_low_cost" = c(0,4.29),
                                    "44prct_2400_savings_high_cost" = c(2.4,20))
         
         grid[, (paste0("support_",names(package.support.ht))) := lapply(package.support.ht, function(v) share_predicted(v[1], v[2]))]
@@ -989,9 +989,7 @@ for (survey.name in survey.names){
       legend.position = "right",
       plot.title = element_text(face = "bold", hjust = 0.5),
       plot.background = element_rect(fill = NA, color = NA)
-    ) + 
-    
-    annotate("rect", xmin = 0.5, xmax = 16.5, ymin = 1.5, ymax = 2.5,alpha = 0.1,fill = NA,color = "blue",size = 2)
+    )
   
   
   ttl = if_else(charac == "all","All",grp)
@@ -1040,105 +1038,91 @@ for (survey.name in survey.names){
   # Packages average predictions ----
   
   # 1 - low cost package 
-  dt.s <- unique(dt.grid[group == "All",],by=c("game","hetero","group","attributes_non_financials"))
-  scenario = "support_50prct_no_savings_low_cost"
-  dt.s[, share_cat_ht := cut(get(scenario),
+  dt.s <- rbindlist(list(unique(dt.grid[group == "All" & attributes_non_financials %in% c("baseline","power"),],by=c("game","hetero","group","attributes_non_financials"))[,.(game,hetero,group,attributes_non_financials,predicted = support_50prct_no_savings_low_cost,scenario = "support_50prct_no_savings_low_cost")],
+                         unique(dt.grid[group == "All" & attributes_non_financials %in% c("baseline","power_supplier"),],by=c("game","hetero","group","attributes_non_financials"))[,.(game,hetero,group,attributes_non_financials,predicted = support_44prct_2400_savings_high_cost,scenario = "support_44prct_2400_savings_high_cost")]))
+  
+  dt.s[scenario == "support_50prct_no_savings_low_cost", dutch_scenario := "Warmte-aanbod 4Keuro investering, 0 euro/maand besparing"]
+  dt.s[scenario == "support_44prct_2400_savings_high_cost", dutch_scenario := "Warmte-aanbod 20Keuro investering, 200euro/maand besparing"]
+  
+  dt.s[scenario == "support_50prct_no_savings_low_cost" & attributes_non_financials == "baseline", dutch_attributes_non_financials := "Nooit stroomstoring"]
+  dt.s[scenario == "support_50prct_no_savings_low_cost" & attributes_non_financials == "power", dutch_attributes_non_financials := "1 dag/jaar stroomstoring"]
+  dt.s[scenario == "support_44prct_2400_savings_high_cost" & attributes_non_financials == "baseline", dutch_attributes_non_financials := "Nooit stroomstoring - Vrije keuze warmteleverancier"]
+  dt.s[scenario == "support_44prct_2400_savings_high_cost" & attributes_non_financials == "power_supplier", dutch_attributes_non_financials := "1 dag/jaar stroomstoring - Geen vrije keuze"]
+  
+  dt.s[,dutch_scenario := factor(dutch_scenario,levels = unique(dutch_scenario))]
+  
+  dt.s[, share_cat_ht := cut(predicted,
                              breaks = seq(0, 1, by = 0.1),  # 0.0, 0.1, 0.2, …, 1.0
                              labels = names(support_colors),
                              include.lowest = TRUE,
                              right = TRUE
   )]
-  ggplot(dt.s[attributes_non_financials %in% c("baseline","power"),], aes(x = attributes_non_financials, y = !!sym(scenario),fill = share_cat_ht)) +
+  ggplot(dt.s, aes(x = dutch_attributes_non_financials, y = predicted,fill = share_cat_ht)) +
     geom_col() +
     scale_fill_manual(
       values = support_colors,
       name = "Draagvlak in %"  
     ) +
-    geom_hline(yintercept = as.numeric(gsub(".*([0-9]{2})prct.*","\\1",scenario))/100) + 
+    #geom_hline(yintercept = as.numeric(gsub(".*([0-9]{2})prct.*","\\1",scenario))/100) + 
     coord_flip() +
-    labs(
-      title = NULL,#stringr::str_to_sentence(gsub("_"," ",gsub("prct","%",scenario))),
-      x = NULL,
-      y = NULL    
-    ) +
-    
+    scale_y_continuous(limits = c(0,0.8),labels = scales::percent) + 
+    labs(x = NULL, y = NULL) +
     theme_minimal(base_size = sz.txt) +
-    theme(
-      axis.text.y = element_text(hjust = 0),  # left-align y-axis labels
-      axis.text.x = element_text(angle = 45, hjust = 1),
-      panel.grid = element_blank(),
-      axis.ticks = element_blank(),
-      legend.position = "right",
-      plot.title = element_text(face = "bold", hjust = 0.5)
-      #plot.background = element_rect(fill = NA, color = NA)
-    )
-  
-  fig.nm <- paste0("packages_",scenario)
-  ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width*2,height = height, units = "cm")
-  
-  
-  # 2 - high cost package 
-  dt.s <- unique(dt.grid[group == "All",],by=c("game","hetero","group","attributes_non_financials"))
-  scenario = "support_44prct_2400_savings_high_cost"
-  dt.s[, share_cat_ht := cut(get(scenario),
-                             breaks = seq(0, 1, by = 0.1),  # 0.0, 0.1, 0.2, …, 1.0
-                             labels = names(support_colors),
-                             include.lowest = TRUE,
-                             right = TRUE
-  )]
-  ggplot(dt.s[attributes_non_financials %in% c("baseline","power","supplier","power_supplier"),], aes(x = attributes_non_financials, y = !!sym(scenario),fill = share_cat_ht)) +
-    geom_col() +
-    scale_fill_manual(
-      values = support_colors,
-      name = "Draagvlak in %"  
-    ) +
-    geom_hline(yintercept = as.numeric(gsub(".*([0-9]{2})prct.*","\\1",scenario))/100) + 
-    coord_flip() +
-    labs(
-      title = NULL,#stringr::str_to_sentence(gsub("_"," ",gsub("prct","%",scenario))),
-      x = NULL,
-      y = NULL    
-    ) +
-    scale_y_continuous(labels = scales::percent) + 
-  theme_minimal(base_size = sz.txt) +
     guides(
       fill = guide_legend(
         title.position = "top",
         label.position = "bottom",
         keywidth = 1,
         keyheight = 1
-      )) + 
+      )
+    ) +
     theme(
-      axis.text.y = element_text(hjust = 0),  # left-align y-axis labels
-      axis.text.x = element_text(angle = 90, hjust = 1),
+      axis.text.y = element_text(hjust = 0,color = "black"),
+      text = element_text(color = "black"),          # all text in black
+      axis.text.x = element_text(angle = 90, hjust = 1,color = "black"),
       panel.grid = element_blank(),
       axis.ticks = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(face = "bold", hjust = 0.5)
-      #plot.background = element_rect(fill = NA, color = NA)
-    )
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      strip.text = element_text(angle = 0, hjust = 0),
+      panel.background = element_blank(),   # blank panel
+      plot.background = element_blank()     # blank overall background
+    ) +
+    facet_wrap(~dutch_scenario, ncol = 1, strip.position = "top", scales = "free_y")  # free_y ensures only relevant x labels show
   
-  fig.nm <- paste0("packages_",scenario)
-  ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width*2,height = height, units = "cm")
   
+  fig.nm <- paste0("packages_best_worst_high_low_cost")
+  ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width*1.5,height = height*0.8, units = "cm")
   
+  # Support heterogeneity bars ----
+  grps.ht <- list(perception_people = c("Municipality","Construction year","Education","Climate-conscious","Reactance municipality"),
+                  perception_heat_transition = names(grp.ht.list$perception_heat_transition))
   
-  # Support heterogeneity heat map ----
-  grps.ht <- list(perception_people = names(grp.ht.list$perception_people),
-                  perception_heat_transition = names(grp.ht.list$perception_heat_transition),
-                  municipality = "Municipality")
+  dutch_mapping <- data.table(readxl::read_excel("C:\\Users\\20204133\\Documents\\GitHub\\PONG_DCE\\input\\group_names_to_translate.xlsx"))
+  dutch_mapping[, dutch := paste0(`Dutch Translation matching the figure`," ",Statement)]
   
-  for (nf in names(non_financials_list)){
+  dt.grid[,answer_dutch := NULL]
+  dt.grid[,hetero_dutch := NULL]
+  
+  dt.grid[dutch_mapping, hetero_dutch := get("i.Dutch Translation matching the figure"), on = "group"]
+  dt.grid[dutch_mapping, answer_dutch := get("i.Statement"), on = "group"]
+  
+  dt.grid[,answer_dutch := paste0(answer_dutch," (",n_respondents,")")]
+  
+  dt.grid[,answer_dutch := factor(answer_dutch,levels = dt.grid[,unique(answer_dutch)])]
+  
+  library(forcats)
+  
+  for (nf in c("baseline")){
     
     for (nm in names(grps.ht)){
-      lst.scenarios <- names(dt.grid)[grepl("^support_",names(dt.grid))]
+      lst.scenarios <- "support_50prct_no_savings_low_cost"# names(dt.grid)[grepl("^support_",names(dt.grid))]
       for (scenario in lst.scenarios){
         
-        dt.s <- unique(dt.grid[grepl(paste0("^(",paste0(unlist(grps.ht[nm]),collapse = "|"),")"),group) & attributes_non_financials == nf,],by=c("game","hetero","group"))[,.SD,.SDcols = c("hetero","group","game","pval_none","n_respondents",scenario)]
+        dt.s <- unique(dt.grid[grepl(paste0("^(",paste0(unlist(grps.ht[nm]),collapse = "|"),")"),group) & attributes_non_financials == nf,],by=c("game","hetero","group"))[,.SD,.SDcols = c("hetero","group","game","pval_none","n_respondents",scenario,"hetero_dutch","answer_dutch")]
+        dt.s <- dt.s[group != "Education 0 - Other",]
+        dt.s[,hetero_dutch := factor(hetero_dutch,levels = dt.s[, hetero_dutch[match( grps.ht[[nm]], hetero)]])]
         dt.s[,levels := gsub(paste0(hetero," "),"",group),by=.I]
-        
-        scale_definitions <- dt.s[,.(level_set = paste(sort(unique(levels)), collapse = " || ")),by = hetero]
-        scale_definitions[,level_set := as.integer(factor(level_set))]
         
         dt.s[, share_cat_ht := cut(get(scenario),
                                    breaks = seq(0, 1, by = 0.1),  # 0.0, 0.1, 0.2, …, 1.0
@@ -1147,66 +1131,43 @@ for (survey.name in survey.names){
                                    right = TRUE
         )]
         
-        for (scl in scale_definitions[,unique(level_set)]){
-          
-          # Heat map
-          ggplot(dt.s[hetero %in% scale_definitions[level_set == scl,hetero],], aes(x = levels, y = hetero, fill = share_cat_ht)) +
-            geom_tile(color = "white", width = 0.9, height = 0.9) +
-            scale_fill_manual(
-              values = support_colors,
-              name = "Draagvlak in %"  
-            ) +
-            coord_equal() +
-            labs(
-              title = stringr::str_to_sentence(gsub("_"," ",gsub("prct","%",scenario))),
-              x = NULL,
-              y = NULL    
-            ) +
-            theme_minimal(base_size = sz.txt) +
-            theme(
-              axis.text.y = element_text(hjust = 0),  # left-align y-axis labels
-              axis.text.x = element_text(angle = 45, hjust = 1),
-              panel.grid = element_blank(),
-              axis.ticks = element_blank(),
-              legend.position = "right",
-              plot.title = element_text(face = "bold", hjust = 0.5),
-              plot.background = element_rect(fill = NA, color = NA)
-            )
-          
-          fig.nm <- paste0("heat_map_ht_",scenario,"_",nf,"_",nm,"_",scl)
-          #ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width,height = height, units = "cm")
-          
-          
-          # Bars
-          
-          ggplot(dt.s[hetero %in% scale_definitions[level_set == scl,hetero],], aes(x = group, y = !!sym(scenario), fill = share_cat_ht)) +
-            geom_col() +
-            scale_fill_manual(
-              values = support_colors,
-              name = "Draagvlak in %"  
-            ) +
-            geom_hline(yintercept = as.numeric(gsub(".*([0-9]{2})prct.*","\\1",scenario))/100) + 
-            coord_flip() +
-            labs(
-              title = NULL,#stringr::str_to_sentence(gsub("_"," ",gsub("prct","%",scenario))),
-              x = NULL,
-              y = NULL    
-            ) +
-            
-            theme_minimal(base_size = sz.txt) +
-            theme(
-              axis.text.y = element_text(hjust = 0),  # left-align y-axis labels
-              axis.text.x = element_text(angle = 45, hjust = 1),
-              panel.grid = element_blank(),
-              axis.ticks = element_blank(),
-              legend.position = "right",
-              plot.title = element_text(face = "bold", hjust = 0.5),
-              plot.background = element_rect(fill = NA, color = NA)
-            )
-          
-          fig.nm <- paste0("bars_ht_",scenario,"_",nf,"_",nm,"_",scl)
-          ggsave(paste0(dir.out.figs,fig.nm,".png"),width = width*2,height = height, units = "cm")
-        }
+        # Bars
+        
+        dt_plot <- copy(dt.s)
+        dt_plot$answer_dutch <- factor(dt_plot$answer_dutch, levels = unique(dt_plot$answer_dutch))  # drop unused levels
+        
+        ggplot(dt_plot, aes(x = answer_dutch, y = !!sym(scenario), fill = share_cat_ht)) +
+          geom_col() +
+          scale_fill_manual(
+            values = support_colors,
+            name = "Draagvlak in %"  
+          ) +
+          geom_hline(yintercept = 0.5001) + 
+          coord_flip() +
+          scale_y_continuous(limits = c(0,0.8), labels = scales::percent) + 
+          labs(x = NULL, y = NULL) +
+          theme_minimal(base_size = sz.txt) +
+          guides(
+            fill = guide_legend(
+              title.position = "top",
+              label.position = "bottom",
+              keywidth = 1,
+              keyheight = 1
+            )) +
+          theme(
+            axis.text.y = element_text(hjust = 0,color = "black"),
+            text = element_text(color = "black"),       
+            axis.text.x = element_text(angle = 90, hjust = 1,color = "black"),
+            panel.grid = element_blank(),
+            axis.ticks = element_blank(),
+            legend.position = "bottom",
+            plot.title = element_text(face = "bold", hjust = 0.5),
+            strip.text = element_text(angle = 0, hjust = 0)
+          ) +
+          facet_wrap(~hetero_dutch, ncol = 1, strip.position = "top", scales = "free_y")  # free_y ensures only relevant x labels show
+        
+        fig.nm <- paste0("bars_ht_",scenario,"_",nf,"_",nm)
+        ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width*1.5,height = height*2, units = "cm")
       }
     }
   }
