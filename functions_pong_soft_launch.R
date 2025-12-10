@@ -166,7 +166,7 @@ map_levels_to_keys <- function(dt, game, lang = "nl", term_col = "Term", new_col
     })
   }]
   
-  dt_copy[grepl("\\:none|none\\:",Term) & is.na(key_term),key_term := paste0("none_",gsub("\\:none|none\\:","",Term))]
+  dt_copy[grepl("\\:none|none\\:",Term,ignore.case=TRUE) & is.na(key_term),key_term := paste0("none_",gsub("\\:none|none\\:","",Term,ignore.case=TRUE))]
   
   # Return the modified copy
   return(dt_copy)
