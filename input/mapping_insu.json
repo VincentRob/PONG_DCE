@@ -57,13 +57,13 @@
                 "tags": [
                     " You arrange everything yourself."
                 ],
-                "rank": 3
+                "rank": 1
             },
             "Everything is arranged for you, you only have to sign.": {
                 "tags": [
                     " Everything is arranged for you, you only have to sign."
                 ],
-                "rank": 1
+                "rank": 3
             }
         }
     },
@@ -116,7 +116,7 @@
                 "tags": [
                     " 300 kg/year, equal to planting 12 trees."
                 ],
-                "rank": 2
+                "rank": 1
             },
             "No change,until you switch.": {
                 "tags": [
@@ -128,7 +128,7 @@
                 "tags": [
                     " 500 kg/year, equal to planting 20 trees."
                 ],
-                "rank": 1
+                "rank": 2
             }
         }
     },

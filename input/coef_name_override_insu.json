@@ -11,7 +11,7 @@
     "en": "Comfort: warmer house in the winter and draft-free.",
     "nl": "Comfort: woning warmer in de winter en tochtvrij."
   },
-  "support_1": {
+  "support_3": {
     "en": "Support: everything is arranged for you, you only have to sign.",
     "nl": "Ondersteuning: alles wordt voor u geregeld, u hoeft alleen te tekenen."
   },
@@ -19,7 +19,7 @@
     "en": "Support: you'll get help with selecting the contractor and reviewing the quotations.",
     "nl": "Ondersteuning: u krijgt hulp bij het selecteren van de aannemer en beoordelen van de offertes."
   },
-  "support_3": {
+  "support_1": {
     "en": "Support: you arrange everything yourself.",
     "nl": "Ondersteuning: u regelt alles zelf."
   },
@@ -35,11 +35,11 @@
     "en": "Nuisance: 6 days noise and nuisance due to works in the dwelling.",
     "nl": "Overlast: 6 dagen geluidsoverlast en werkzaamheden in de woning."
   },
-  "co2_1": {
+  "co2_2": {
     "en": "Co2: 500 kg/year, equal to planting 20 trees.",
     "nl": "CO2: 500 kg/jaar, gelijk aan het planten van 20 bomen."
   },
-  "co2_2": {
+  "co2_1": {
     "en": "Co2: 300 kg/year, equal to planting 12 trees.",
     "nl": "CO2: 300 kg/jaar, gelijk aan het planten van 12 bomen."
   },

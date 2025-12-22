@@ -859,12 +859,9 @@ for (survey.name in survey.names){
                                           supplier = "supplier_2",
                                           power_supplier = c("power_outages_2","supplier_2")),
                               insu = list(baseline = NULL,
-                                          cooling = "comfort_3",
-                                          support = "support_3",
-                                          cooling_support = c("comfort_3","support_3")
-                                          ))
+                                          cooling = "comfort_3"))
   
-  for (gm in c("tech","insu")){
+  for (gm in c("insu","tech")){
     for (charac in dt.coefs[game == gm,unique(group)] ){ #dt.coefs[game == gm,unique(group)]
       for (none_coef in dt.coefs[group == charac & grepl("^none(_.*)?$",key_term) & game == gm,key_term]){
         for (nf in names(non_financials_list[[gm]])){
@@ -899,8 +896,8 @@ for (survey.name in survey.names){
             
             none_fct <- \(x) dt.coefs[key_term == none_coef & game == gm & group == charac,Estimate] 
             
-            inv_vals <- seq(0, 16, by = 2)
-            sav_vals <- seq(0.12, 0.84, length.out = 3)
+            inv_vals <- seq(3, 15, by = 1)
+            sav_vals <- seq(0, 0.84, length.out = 6)
             
             package.support.ht <- list("50prct_no_savings" = c(0,4.516))
           }
@@ -930,7 +927,11 @@ for (survey.name in survey.names){
           grid[,pval_none := dt.pw[key_term == none_coef,pval_none]]
           grid[,Estimate := dt.pw[key_term == none_coef,Estimate]]
           
-          grid$share_predicted <- with(grid,share_predicted(sav,inv))
+          grid$share_predicted <- with(grid,
+                                       exp(invest(inv) + savings(sav)) /
+                                         (exp(invest(inv) + savings(sav)) + exp(none_fct(inv)))
+          )
+          
           
           grid[, (paste0("support_",names(package.support.ht))) := lapply(package.support.ht, function(v) share_predicted(v[1], v[2]))]
           
@@ -991,40 +992,28 @@ for (survey.name in survey.names){
   
   
   dt.grid$inv_f <- factor(dt.grid$inv)
-  dt.grid$sav_f <- factor(dt.grid$sav)
+  dt.grid$sav_f <- factor(-dt.grid$sav)
   
+  # Custom y-axis label function
+  y_labels <- function(y) {
+    y_num <- as.numeric(y) * 1000       # annual savings in euros
+    monthly <- round(y_num / 12)        # monthly savings
+    paste0(round(y_num / 1000, 1), "k (", monthly, "/maand)")
+  }
+  
+  # Custom x-axis label function
+  x_labels <- function(x) {
+    x_num <- as.numeric(x) * 1000       # convert factor to numeric euro amount
+    paste0(round(x_num / 1000, 0), "k") # show in 'k' format
+  }
   
   charac = "all"
   grp = "All"
   for (gm in c("insu","tech")){
     
-    if (gm == "insu"){
-      y_labels <- function(y) {
-        y_num <- as.numeric(y) * 1000       # annual savings in euros
-        monthly <- round(y_num / 12)        # monthly savings
-        paste0(round(y_num, 1), " (", monthly, "/maand)")
-      }
-      
-      x_labels <- function(x) {
-        x_num <- as.numeric(x) * 1000       # convert factor to numeric euro amount
-        paste0(round(x_num / 1000, 0), "k") # show in 'k' format
-      }
-    } else if (gm == "tech"){
-      y_labels <- function(y) {
-        y_num <- as.numeric(y) * 1000       # annual savings in euros
-        monthly <- round(y_num / 12)        # monthly savings
-        paste0(round(y_num / 1000, 1), "k (", monthly, "/maand)")
-      }
-      
-      x_labels <- function(x) {
-        x_num <- as.numeric(x) * 1000       # convert factor to numeric euro amount
-        paste0(round(x_num / 1000, 0), "k") # show in 'k' format
-      }  
-    }
-    
-    for (show.only.no.savings in c(FALSE,TRUE)){
-      
-      dt.plt <- dt.grid[group == grp & game == gm,]
+    for (show.only.no.savings in c(TRUE,FALSE)){
+        
+      dt.plt <- dt.grid[group == grp & attributes_non_financials == "baseline" & game == gm,]
       
       ttl = if_else(charac == "all","All",grp)
       fig.nm <- paste0("fig_hm_",gm,"_",ttl)
@@ -1035,47 +1024,35 @@ for (survey.name in survey.names){
         fig.nm <- paste0(fig.nm,"_no_savings_only")
       } 
       
-      library(patchwork)  # or gridExtra
-      
-      # Create a plot for each category
-      plot_list <- lapply(c("baseline", "cooling", "support", "cooling_support"), function(cat) {
-        dt.plt <- dt.grid[group == grp & game == gm & attributes_non_financials == cat]
-        
-        ggplot(dt.plt, aes(x = inv_f, y = sav_f, fill = share_cat)) +
-          geom_point(shape = 21, size = 6, show.legend = (cat == "baseline")) +  # Only show legend for first plot
-          geom_tile(color = "white", width = 0.9, height = 0.9, show.legend = FALSE) +
-          scale_fill_manual(
-            values = support_colors,
-            name = "Draagvlak in %"  
-          ) +
-          scale_x_discrete(labels = x_labels) +  
-          scale_y_discrete(labels = y_labels) + 
-          coord_equal() +
-          labs(
-            title = cat,  # Add title to distinguish categories
-            x = "Eenmalige investeringskosten",
-            y = "Besparingen per jaar"      
-          ) +
-          theme_pong +
-          guides(fill = guide_legend(
-            nrow = 1,
-            label.position = "bottom",
-            title.position = "top",
-            title.hjust = 0.5
-          ))
-      })
-      
-      # Combine into 2x2 grid with shared legend
-      combined_plot <- (plot_list[[1]] | plot_list[[2]]) / 
-        (plot_list[[3]] | plot_list[[4]]) +
-        plot_layout(guides = "collect") & 
-        theme(legend.position = "bottom")
-      
-      combined_plot
-      
-      ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width,height = height, units = "cm")
-    }
+      # Heat map
+      ggplot(dt.plt, aes(x = inv_f, y = sav_f, fill = share_cat)) +
+        # Dummy points for circular legend (drawn first, hidden under tiles)
+        geom_point(shape = 21, size = 6, show.legend = TRUE) +
+        scale_x_discrete(breaks = c(0,30),labels = c("low","high")) + 
+        scale_y_discrete(breaks = c(-2.4,0.6),labels = c("short","long")) + 
+        geom_tile(color = "white", width = 0.9, height = 0.9, show.legend = FALSE) +
+        scale_fill_manual(
+          values = support_colors,
+          name = "Percentage of passengers who would buy a ticket"  
+        ) +
+        coord_equal() +
+        labs(
+          title = NULL,
+          x = "Plane ticket price",
+          y = "Connection time"      
+        ) +
+        theme_pong +
+        theme(axis.text.y = element_text(size = ft.bs-2, hjust = 0.5, family = base_family, color = "black"),
+              axis.text.x = element_text(size = ft.bs-2, angle = 0, hjust = 1, vjust = 0.5, family = base_family, color = "black")) + 
+        guides(fill = guide_legend(
+          nrow = 1,
+          label.position = "bottom",
+          title.position = "top",
+          title.hjust = 0.5
+        ))
     
+      ggsave(paste0("heat_map_4_adc.pdf"),width = width,height = height, units = "cm")
+    }
     # Frontier ----
     # Keep only 50%
     dt.front <- dt.grid[share_cat == "50–60%",.(sav_f = min(sav)),by=.(game,hetero,group,inv_f)][order(game,hetero,group,as.numeric(inv_f),sav_f),]
