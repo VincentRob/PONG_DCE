@@ -11,25 +11,24 @@ library(knitr)
 # Background ----
 source("Figure_theme.R")
 
-font.axis.lbls <- 20
-font.ttls <- 20
+ft.bs <- 18
+ft.ttl <- ft.bs + 2 
 base_family = ""
-ft.bs <- 14
 theme_pong <- theme_minimal(base_size = ft.bs, base_family = base_family) +
   theme(
     text = element_text(family = base_family, face = "plain"),
-    axis.text.y = element_text(size = ft.bs-2, hjust = 0.5, family = base_family, color = "black"),
-    axis.text.x = element_text(size = ft.bs-2, angle = 90, hjust = 1, vjust = 0.5, family = base_family, color = "black"),
-    axis.title.x = element_text(size = ft.bs, margin = margin(t = 12), hjust = 0.5),
-    axis.title.y = element_text(size = ft.bs, margin = margin(r = 12), hjust = 0.5),
+    axis.text.y = element_text(size = ft.bs, hjust = 0.5, family = base_family, color = "black"),
+    axis.text.x = element_text(size = ft.bs, angle = 90, hjust = 1, vjust = 0.5, family = base_family, color = "black"),
+    axis.title.x = element_text(size = ft.ttl, margin = margin(t = 12), hjust = 0.5),
+    axis.title.y = element_text(size = ft.ttl, margin = margin(r = 12), hjust = 0.5),
     panel.grid = element_blank(),
     axis.ticks = element_blank(),
     strip.text = element_text(size = ft.bs, family = base_family, face = "bold", hjust = 0),
     legend.position      = "bottom",
     legend.direction     = "horizontal",
     legend.justification = "center",
-    legend.text          = element_text(size = ft.bs-2),
-    legend.title         = element_text(size = ft.bs, hjust = 0.5),
+    legend.text          = element_text(size = ft.bs - 1),
+    legend.title         = element_text(size = ft.ttl, hjust = 0.5),
     legend.key.size      = unit(0.8, "cm"),   # slightly larger circles
     legend.key.width     = unit(1.0, "cm"),
     legend.box.spacing   = unit(0.3, "cm"),
@@ -468,7 +467,7 @@ for (survey.name in survey.names){
       geom_text(aes(
         label = scales::percent((..count..) / sum(..count..), accuracy = 1),
         y = (..count..) / sum(..count..)
-      ), stat = "count", hjust = -0.1, size = font.axis.lbls * 0.35) +
+      ), stat = "count", hjust = -0.1, size = ft.bs * 0.35) +
       coord_flip(clip = "off") +
       labs(
         x = NULL,
@@ -862,7 +861,7 @@ for (survey.name in survey.names){
                                           cooling = "comfort_3",
                                           support = "support_3",
                                           cooling_support = c("comfort_3","support_3")
-                                          ))
+                              ))
   
   for (gm in c("tech","insu")){
     for (charac in dt.coefs[game == gm,unique(group)] ){ #dt.coefs[game == gm,unique(group)]
@@ -902,7 +901,8 @@ for (survey.name in survey.names){
             inv_vals <- seq(0, 16, by = 2)
             sav_vals <- seq(0.12, 0.84, length.out = 3)
             
-            package.support.ht <- list("50prct_no_savings" = c(0,4.516))
+            package.support.ht <- list("50prct_no_savings_no_support_no_cooling" = c(0,1.573643),
+                                       "Xprct_120_no_support_no_cooling" = c(0.12,2))
           }
           
           
@@ -1037,26 +1037,35 @@ for (survey.name in survey.names){
       
       library(patchwork)  # or gridExtra
       
+      list.name.packages <- list("baseline" = "Panel A: basisaanbod",
+                                 "cooling" = "Panel B: basisaanbod + koelen" ,
+                                 "support" = "Panel C: basisaanbod + ontzorgen" ,
+                                 "cooling_support" = "Panel D: basisaanbod + koelen + ontzorgen" )
+      
       # Create a plot for each category
       plot_list <- lapply(c("baseline", "cooling", "support", "cooling_support"), function(cat) {
-        dt.plt <- dt.grid[group == grp & game == gm & attributes_non_financials == cat]
         
-        ggplot(dt.plt, aes(x = inv_f, y = sav_f, fill = share_cat)) +
+        ggplot(dt.plt[attributes_non_financials == cat,], aes(x = inv_f, y = sav_f, fill = share_cat)) +
           geom_point(shape = 21, size = 6, show.legend = (cat == "baseline")) +  # Only show legend for first plot
           geom_tile(color = "white", width = 0.9, height = 0.9, show.legend = FALSE) +
           scale_fill_manual(
             values = support_colors,
+            drop = FALSE,
             name = "Draagvlak in %"  
           ) +
           scale_x_discrete(labels = x_labels) +  
           scale_y_discrete(labels = y_labels) + 
           coord_equal() +
           labs(
-            title = cat,  # Add title to distinguish categories
+            title = list.name.packages[[cat]],  # Add title to distinguish categories
             x = "Eenmalige investeringskosten",
             y = "Besparingen per jaar"      
           ) +
           theme_pong +
+          theme(
+            plot.title = element_text(hjust = 0, vjust = 8),  # Add vertical adjustment
+            plot.title.position = "plot",
+            ) +
           guides(fill = guide_legend(
             nrow = 1,
             label.position = "bottom",
@@ -1065,15 +1074,25 @@ for (survey.name in survey.names){
           ))
       })
       
-      # Combine into 2x2 grid with shared legend
-      combined_plot <- (plot_list[[1]] | plot_list[[2]]) / 
-        (plot_list[[3]] | plot_list[[4]]) +
-        plot_layout(guides = "collect") & 
-        theme(legend.position = "bottom")
+      if (show.only.no.savings == TRUE){
+        
+        # Combine into 2x2 grid with shared legend
+        combined_plot <- plot_list[[1]] + labs(title = NULL)
+        
+        combined_plot
+      } else {
+        
+        # Combine into 2x2 grid with shared legend
+        combined_plot <- (plot_list[[1]] | plot_list[[2]]) / 
+          (plot_list[[3]] | plot_list[[4]]) +
+          plot_layout(guides = "collect") & 
+          theme(legend.position = "bottom")
+        
+        combined_plot        
+      }
       
-      combined_plot
       
-      ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width,height = height, units = "cm")
+      ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width*1.22,height = height*1.05, units = "cm")
     }
     
     # Frontier ----
@@ -1129,10 +1148,12 @@ for (survey.name in survey.names){
       dt.s[scenario == "support_44prct_2400_savings_high_cost" & attributes_non_financials == "power_supplier", dutch_attributes_non_financials := "1 dag/jaar stroomstoring - Geen vrije keuze"]
       
     } else{
-      dt.s <- unique(dt.grid[group == "All" & attributes_non_financials %in% c("baseline","cooling"),],by=c("game","hetero","group","attributes_non_financials"))[,.(game,hetero,group,attributes_non_financials,predicted = support_50prct_no_savings,scenario = "support_50prct_no_savings")]
+      dt.s <- unique(dt.grid[group == "All" & attributes_non_financials %in% c("baseline","support","cooling","cooling_support"),],by=c("game","hetero","group","attributes_non_financials"))[,.(game,hetero,group,attributes_non_financials,predicted = support_50prct_no_savings_no_support_no_cooling,scenario = "support_50prct_no_savings_no_support_no_cooling")]
       dt.s[,dutch_scenario := copy(scenario)]
-      dt.s[scenario == "support_50prct_no_savings" & attributes_non_financials == "baseline", dutch_attributes_non_financials := "No cooling"]
-      dt.s[scenario == "support_50prct_no_savings" & attributes_non_financials == "cooling", dutch_attributes_non_financials := "Yes cooling"]
+      dt.s[scenario == "support_50prct_no_savings_no_support_no_cooling" & attributes_non_financials == "baseline", dutch_attributes_non_financials := "Referentie"]
+      dt.s[scenario == "support_50prct_no_savings_no_support_no_cooling" & attributes_non_financials == "support", dutch_attributes_non_financials := "Referentie + ontzorgen"]
+      dt.s[scenario == "support_50prct_no_savings_no_support_no_cooling" & attributes_non_financials == "cooling", dutch_attributes_non_financials := "Referentie + koelen"]
+      dt.s[scenario == "support_50prct_no_savings_no_support_no_cooling" & attributes_non_financials == "cooling_support", dutch_attributes_non_financials := "Referentie + koelen + ontzorgen"]
       
     }
     dt.s <- dt.s[game == gm,]
@@ -1209,7 +1230,13 @@ for (survey.name in survey.names){
     for (nf in c("baseline")){
       
       for (nm in names(grps.ht)){
-        lst.scenarios <- c("support_50prct_no_savings_low_cost","support_50prct_no_savings")# names(dt.grid)[grepl("^support_",names(dt.grid))]
+        if (gm == "insu"){
+          lst.scenarios <- "support_50prct_no_savings_no_support_no_cooling"
+        } else if (gm == "tech"){
+          lst.scenarios <- "support_50prct_no_savings_low_cost"         #c("support_50prct_no_savings_low_cost","support_50prct_no_savings")# names(dt.grid)[grepl("^support_",names(dt.grid))]
+
+          
+        }
         for (scenario in lst.scenarios){
           
           dt.s <- unique(dt.grid[game == gm & grepl(paste0("^(",paste0(unlist(grps.ht[nm]),collapse = "|"),")"),group) & attributes_non_financials == nf,],by=c("game","hetero","group"))[,.SD,.SDcols = c("hetero","group","game","pval_none","n_respondents",scenario,"hetero_dutch","answer_dutch")]
