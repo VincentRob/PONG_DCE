@@ -765,8 +765,15 @@ for (survey.name in survey.names){
       var_in_dt <- grp.ht.list[[grp.ht]][[ht.var]]
       if (!(var_in_dt %in% names(dt.tech))) next
       
+      # Interact none with group
+      formula.tech.ht <- gsub("(none|None)",paste0("`",var_in_dt,"`:low_tech_nn"," + ","`",var_in_dt,"`:high_tech_nn"),formula.tech)
+      
+      # Interact tech with group
+      formula.tech.ht <- gsub("\\ factor\\(tech\\)\\ ",paste0("`",var_in_dt,"`*factor(tech) "),formula.tech.ht)
+      
+      
       logit_interact.tech.ht <- mlogit(
-        formula = as.formula(gsub("(none|None)",paste0("`",var_in_dt,"`:none"),formula.tech)),
+        formula = as.formula(formula.tech.ht),
         dt.tech
       )
       
