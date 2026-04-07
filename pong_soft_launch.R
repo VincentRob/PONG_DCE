@@ -7,6 +7,8 @@ library(scales)
 library(patchwork)
 library(car)
 library(knitr)
+library(fastDummies)
+
 
 # Background ----
 source("Figure_theme.R")
@@ -46,7 +48,7 @@ if (input_specs[,anyDuplicated(.SD),.SDcols = c("survey_name","data_path")]){
   stop("Sample-data file pairs should be unique")
 }
 
-survey.names =c("pong_dutch_report")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
+survey.names =c("pong_english_report")#,"full_launch_panelclix") # names(files.path)#c("soft_launch_pooled")
 
 invest.list.lvl <- list("insu" = 5000,"heat_networks" = 2000, "heat_pumps" = 7000)
 
@@ -56,7 +58,7 @@ bin.costs.cont <- TRUE
 # For heterogeneity analysis, replace missing by Hoorn when applicable
 hoorn.file.name <- "Hoorn_complete" 
 
-lang = "nl" # default is english, en
+lang = "en" # default is english, en
 
 # Costs columns
 reg.onetimecosts <- "(one_time_costs)|(one_time_amount)"
@@ -706,7 +708,10 @@ for (survey.name in survey.names){
   col.rest <- setdiff(col.mdl,col.interact.tech)
   col.rest[col.rest == "tech"] <- "factor(tech)"
   
-  formula.tech <- paste0("choice ~ ",paste0(col.rest[col.rest != "none"],collapse = " + ")," + ",paste0(paste0(col.interact.tech,"*factor(tech)"),collapse = " + ")," + none| 0 ")
+  formula.tech <- paste0("choice ~ ",paste0(col.rest[col.rest != "none"],collapse = " + "),
+                         " + ",paste0(paste0(col.interact.tech,":factor(tech)"),collapse = " + "),
+                         " + ",paste0(col.interact.tech,collapse = " + "),
+                         " + none| 0 ")
   #formula.tech <- gsub("one_time_costs_continuous\\*factor\\(tech\\)","one_time_costs_continuous:factor(tech)",formula.tech)
   
   logit_interact.tech <- mlogit(
@@ -764,17 +769,38 @@ for (survey.name in survey.names){
       
       var_in_dt <- grp.ht.list[[grp.ht]][[ht.var]]
       if (!(var_in_dt %in% names(dt.tech))) next
+            
+      dt.tech.dummies <- dt.tech
+      dt.tech.dummies$ht_tech_var <- dt.tech[[var_in_dt]]
+      
+      dt.tech.dummies["techis1"]    <- ifelse(dt.tech$tech == 1, 1, 0)
+      dt.tech.dummies["techis0"]    <- ifelse(dt.tech$tech == 0 & dt.tech$none == 0, 1, 0)
+      
+      dummy_df <- dummy_cols(data.frame(ht_tech_var = dt.tech.dummies$ht_tech_var), 
+                             "ht_tech_var", remove_selected_columns = FALSE)
+      
+      dummy_cols_names <- names(dummy_df)[startsWith(names(dummy_df), "ht_tech_var_")]
+      
+      for (col in dummy_cols_names[!grepl("_NA$",dummy_cols_names)]) {
+        # zero out when none == 1
+        dt.tech.dummies[[paste0(col, "_notnn")]] <- ifelse(dt.tech$none == 1, 0, dummy_df[[col]])
+        
+        # zero out when none == 0
+        dt.tech.dummies[[paste0(col, "_yesnn")]]    <- ifelse(dt.tech$none == 0, 0, dummy_df[[col]])
+      }
       
       # Interact none with group
-      formula.tech.ht <- gsub("(none|None)",paste0("`",var_in_dt,"`:low_tech_nn"," + ","`",var_in_dt,"`:high_tech_nn"),formula.tech)
+      formula.tech.ht <- gsub("(none|None)",paste0("`",names(dt.tech.dummies)[endsWith(names(dt.tech.dummies),"_yesnn")],"`:none",collapse =  " + "),formula.tech)
       
       # Interact tech with group
-      formula.tech.ht <- gsub("\\ factor\\(tech\\)\\ ",paste0("`",var_in_dt,"`*factor(tech) "),formula.tech.ht)
+      formula.tech.ht <- gsub("\\ factor\\(tech\\)\\ ",
+                              paste0("`",names(dt.tech.dummies)[endsWith(names(dt.tech.dummies),"_notnn")],"`:techis1 ",collapse =  " + "),
+                              formula.tech.ht)
       
       
       logit_interact.tech.ht <- mlogit(
         formula = as.formula(formula.tech.ht),
-        dt.tech
+        dt.tech.dummies
       )
       
       tab.tex <- modelsummary::modelsummary(list(Logit = logit_interact.tech.ht), 
@@ -790,12 +816,29 @@ for (survey.name in survey.names){
       
       dt.cfs.tmp <- parse_modelsummary_latex(tab.tex,game)
       dt.cfs.tmp[,group := ht.var]
-      dt.cfs.tmp[grepl(":(None|none)",Term),Term := gsub(var_in_dt,paste0(ht.var," "),Term,fixed = TRUE)]
+      dt.cfs.tmp[,Term_logit := copy(Term)]
+      
+      # Fix none name
+      dt.cfs.tmp[grepl(":(none|None)", Term), Term := gsub("^(.+):(none|None)$", "\\2:\\1", Term)]
+      dt.cfs.tmp[grepl("(None|none):",Term),Term := gsub("ht_tech_var_",paste0(ht.var," "),Term,fixed = TRUE)]
+      dt.cfs.tmp[grepl("_yesnn",Term),Term := gsub("_yesnn","",Term,fixed = TRUE)]
+      
+      # Fix tech1 name
+      dt.cfs.tmp[grepl(":(techis1)", Term), Term := gsub("^(.+):(techis1)$", "\\2:\\1", Term)]
+      dt.cfs.tmp[grepl("techis1:",Term),Term := gsub("ht_tech_var_",paste0(ht.var," "),Term,fixed = TRUE)]
+      dt.cfs.tmp[grepl("_notnn",Term),Term := gsub("_notnn","",Term,fixed = TRUE)]
+      dt.cfs.tmp[grepl("techis1",Term),Term := gsub("techis1","factor(tech)1",Term,fixed = TRUE)]
+      
+      dt.cfs.tmp[grepl(":(factor\\(tech\\)1)", Term), Term := gsub("^(.+):(factor\\(tech\\)1)$", "\\2:\\1", Term)]
+      
+      
       dt.cfs.tmp <- map_levels_to_keys(
         dt = dt.cfs.tmp,
         game = game,
         lang = lang
       )
+      
+      dt.cfs.tmp[is.na(key_term),key_term := Term]
       
       # Get n obs hetero
       dt.n <- data.table(dt.tech %>%
@@ -803,31 +846,37 @@ for (survey.name in survey.names){
                            summarise(count = n_distinct(`desc_Response ID`)))
       dt.n[, key_term := paste0("none_",ht.var," ",V1)]
       dt.cfs.tmp[dt.n,n_respondents := i.count,on = "key_term" ]
+      dt.n[, key_term := paste0("factor(tech)1:",ht.var," ",V1)]
+      dt.cfs.tmp[dt.n,n_respondents := i.count,on = "key_term" ]
       
       # Statistical test
-      dt.none <- dt.cfs.tmp[grepl(":none",Term),]
-      idx.ref <- dt.none[,first(which(n_respondents == max(n_respondents)))]
-      
-      nm.ref.in.logit <- names(logit_interact.tech.ht$coefficients)[gsub("[^[:alnum:]]", "", names(logit_interact.tech.ht$coefficients)) == gsub("[^[:alnum:]]", "", gsub(paste0(ht.var," "),var_in_dt,dt.none[idx.ref,Term]))] 
-      for (none_not_ref in dt.none[-idx.ref,Term]){
-        nm.noref.in.logit <- names(logit_interact.tech.ht$coefficients)[gsub("[^[:alnum:]]", "", names(logit_interact.tech.ht$coefficients)) == gsub("[^[:alnum:]]", "", gsub(paste0(ht.var," "),var_in_dt,none_not_ref))] 
+      for (vartotest in c("none","techis1")){
+        dt.none <- dt.cfs.tmp[grepl(paste0("(",vartotest,"):|:(",vartotest,")"),Term_logit),]
+        idx.ref <- dt.none[,first(which(n_respondents == max(n_respondents)))]
         
-        if (length(length(nm.noref.in.logit))!=1 | length(length(nm.ref.in.logit))!=1){
-          stop("None coefficient not properly identified")
+        nm.ref.in.logit <- names(logit_interact.tech.ht$coefficients)[gsub("[^[:alnum:]]", "", names(logit_interact.tech.ht$coefficients)) == gsub("[^[:alnum:]]", "", gsub(paste0(ht.var," "),var_in_dt,dt.none[idx.ref,Term_logit]))] 
+        for (none_not_ref in dt.none[-idx.ref,Term_logit]){
+          nm.noref.in.logit <- names(logit_interact.tech.ht$coefficients)[gsub("[^[:alnum:]]", "", names(logit_interact.tech.ht$coefficients)) == gsub("[^[:alnum:]]", "", gsub(paste0(ht.var," "),var_in_dt,none_not_ref))] 
+          
+          if (length(nm.noref.in.logit)!=1 | length(nm.ref.in.logit)!=1){
+            stop("None coefficient not properly identified")
+          }
+          
+          tst <- linearHypothesis(logit_interact.tech.ht, paste0(nm.ref.in.logit," = ",nm.noref.in.logit))
+          dt.cfs.tmp[Term_logit == none_not_ref,pval_none := tst$`Pr(>Chisq)`[2]]
         }
         
-        tst <- linearHypothesis(logit_interact.tech.ht, paste0(nm.ref.in.logit," = ",nm.noref.in.logit))
-        dt.cfs.tmp[Term == none_not_ref,pval_none := tst$`Pr(>Chisq)`[2]]
+        dt.cfs.tmp[Term_logit == dt.none[idx.ref,Term_logit],pval_none := Inf]
+        
       }
-      
-      dt.cfs.tmp[Term == dt.none[idx.ref,Term],pval_none := Inf]
-      
       #
       dt.coefs <- rbindlist(list(dt.coefs,dt.cfs.tmp),use.names = TRUE,fill = TRUE)   
-      
     }
   }
   
+  
+  write.csv2(dt.coefs[game == "insu" & !is.na(Estimate),.(Term = key_term,Estimate,StdError,Stars,game,group,n_respondents,pval_none),],paste0(dir.out,"coefficients_heterogeneity_insu.csv"),quote = TRUE,row.names = FALSE)
+  write.csv2(dt.coefs[game == "tech" & !is.na(Estimate),.(Term = key_term,Estimate,StdError,Stars,game,group,n_respondents,pval_none),],paste0(dir.out,"coefficients_heterogeneity_tech.csv"),quote = TRUE,row.names = FALSE)
   
   # Coef table ----
   
@@ -1072,7 +1121,7 @@ for (survey.name in survey.names){
           theme(
             plot.title = element_text(hjust = 0, vjust = 8),  # Add vertical adjustment
             plot.title.position = "plot",
-            ) +
+          ) +
           guides(fill = guide_legend(
             nrow = 1,
             label.position = "bottom",
@@ -1241,7 +1290,7 @@ for (survey.name in survey.names){
           lst.scenarios <- "support_50prct_no_savings_no_support_no_cooling"
         } else if (gm == "tech"){
           lst.scenarios <- "support_50prct_no_savings_low_cost"         #c("support_50prct_no_savings_low_cost","support_50prct_no_savings")# names(dt.grid)[grepl("^support_",names(dt.grid))]
-
+          
           
         }
         for (scenario in lst.scenarios){
