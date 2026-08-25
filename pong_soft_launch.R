@@ -7,8 +7,6 @@ library(scales)
 library(patchwork)
 library(car)
 library(knitr)
-library(fastDummies)
-
 
 # Background ----
 source("Figure_theme.R")
@@ -769,7 +767,9 @@ for (survey.name in survey.names){
       
       var_in_dt <- grp.ht.list[[grp.ht]][[ht.var]]
       if (!(var_in_dt %in% names(dt.tech))) next
-            
+      
+      library(fastDummies)
+      
       dt.tech.dummies <- dt.tech
       dt.tech.dummies$ht_tech_var <- dt.tech[[var_in_dt]]
       
@@ -788,6 +788,25 @@ for (survey.name in survey.names){
         # zero out when none == 0
         dt.tech.dummies[[paste0(col, "_yesnn")]]    <- ifelse(dt.tech$none == 0, 0, dummy_df[[col]])
       }
+      
+      # # Baseline 
+      # mlogit(
+      #   formula = as.formula("choice ~ heating_costs_continuous + heating_costs_negativecontinuous + supplier_2 + supplier_2:techis1 + nuisance_2 + nuisance_2:techis1 + power_outages_2 + power_outages_2:techis1 + one_time_costs_continuous + one_time_costs_continuous:techis1 + techis1 + `ht_tech_var_0_yesnn`:none + `ht_tech_var_1_yesnn`:none + `ht_tech_var_2_yesnn`:none + `ht_tech_var_3+_yesnn`:none| 0"),
+      #   dt.tech.dummies
+      # )
+      # 
+      # # Breakdown techis1
+      # mlogit(
+      #   formula = as.formula("choice ~ heating_costs_continuous + heating_costs_negativecontinuous + 
+      #                        supplier_2 + supplier_2:techis1 + 
+      #                        nuisance_2 + nuisance_2:techis1 + 
+      #                        power_outages_2 + power_outages_2:techis1 + 
+      #                        one_time_costs_continuous + one_time_costs_continuous:techis1 + 
+      #                        `ht_tech_var_0_notnn`:techis1 + `ht_tech_var_1_notnn`:techis1 + `ht_tech_var_2_notnn`:techis1 + `ht_tech_var_3+_notnn`:techis1 +
+      #                        `ht_tech_var_0_yesnn`:none + `ht_tech_var_1_yesnn`:none + `ht_tech_var_2_yesnn`:none + `ht_tech_var_3+_yesnn`:none| 0"),
+      #   dt.tech.dummies
+      # )
+      # 
       
       # Interact none with group
       formula.tech.ht <- gsub("(none|None)",paste0("`",names(dt.tech.dummies)[endsWith(names(dt.tech.dummies),"_yesnn")],"`:none",collapse =  " + "),formula.tech)
@@ -878,6 +897,11 @@ for (survey.name in survey.names){
   write.csv2(dt.coefs[game == "insu" & !is.na(Estimate),.(Term = key_term,Estimate,StdError,Stars,game,group,n_respondents,pval_none),],paste0(dir.out,"coefficients_heterogeneity_insu.csv"),quote = TRUE,row.names = FALSE)
   write.csv2(dt.coefs[game == "tech" & !is.na(Estimate),.(Term = key_term,Estimate,StdError,Stars,game,group,n_respondents,pval_none),],paste0(dir.out,"coefficients_heterogeneity_tech.csv"),quote = TRUE,row.names = FALSE)
   
+  # TMP
+  dt <- data.table(read.csv("C:\\Users\\20204133\\Downloads\\nb2_coefficients_heterogeneity_tech.csv"))
+  
+  dt.me <- data.table(read.csv2(paste0(dir.out,"coefficients_heterogeneity_tech.csv")))
+  
   # Coef table ----
   
   print(dt.coefs)
@@ -928,7 +952,7 @@ for (survey.name in survey.names){
             warning("Not implemented for discrete costs")
             next
           }
-          dt.pw <- dt.coefs[group == charac & game == gm & (grepl(reg.costs,key_term) | key_term == none_coef) ,]
+          dt.pw <- dt.coefs[group == charac & game == gm & (grepl(reg.costs,key_term) | key_term == none_coef | key_term == "factor(tech)1" | key_term == paste0("factor(tech)1:",gsub("none_","",none_coef)) ) ,]
           
           if (gm == "tech"){
             savings <- \(x) x*dt.pw[key_term == "heating_costs_continuous",Estimate] +
@@ -938,8 +962,8 @@ for (survey.name in survey.names){
               (x)*dt.pw[key_term == "factor(tech)1:one_time_costs_continuous",Estimate]*ifelse(x > 10,1,0) +
               6*dt.pw[key_term == "one_time_costs_continuous",Estimate]*ifelse(x >= 6 & x <=10,1,0)
             
-            none_fct <- \(x) dt.coefs[key_term == none_coef & game == gm & group == charac,Estimate] -
-              dt.coefs[key_term == "factor(tech)1" & game == gm & group == charac,Estimate]*(ifelse(x > 10,1,0) + 0*ifelse(x > 6 & x < 10,1,0)*(x-6)/4)
+            none_fct <- \(x) dt.pw[key_term == none_coef & game == gm & group == charac,Estimate] -
+              dt.pw[(key_term == "factor(tech)1" | key_term == paste0("factor(tech)1:",gsub("none_","",none_coef))) & game == gm & group == charac,Estimate]*(ifelse(x > 10,1,0) + 0*ifelse(x > 6 & x < 10,1,0)*(x-6)/4)
             
             inv_vals <- seq(0, 30, by = 2)
             sav_vals <- seq(-0.6, 2.4, by = 0.6)
@@ -952,7 +976,7 @@ for (survey.name in survey.names){
             
             invest <- \(x) x*dt.pw[key_term == "one_time_amount_continuous",Estimate]
             
-            none_fct <- \(x) dt.coefs[key_term == none_coef & game == gm & group == charac,Estimate] 
+            none_fct <- \(x) dt.pw[key_term == none_coef & game == gm & group == charac,Estimate] 
             
             inv_vals <- seq(0, 16, by = 2)
             sav_vals <- seq(0.12, 0.84, length.out = 3)
@@ -1058,7 +1082,7 @@ for (survey.name in survey.names){
       y_labels <- function(y) {
         y_num <- as.numeric(y) * 1000       # annual savings in euros
         monthly <- round(y_num / 12)        # monthly savings
-        paste0(round(y_num, 1), " (", monthly, "/maand)")
+        paste0(round(y_num, 1), "/jaar (", monthly, "/maand)")
       }
       
       x_labels <- function(x) {
@@ -1069,7 +1093,7 @@ for (survey.name in survey.names){
       y_labels <- function(y) {
         y_num <- as.numeric(y) * 1000       # annual savings in euros
         monthly <- round(y_num / 12)        # monthly savings
-        paste0(round(y_num / 1000, 1), "k (", monthly, "/maand)")
+        paste0(round(y_num / 1000, 1), "k/jaar (", monthly, "/maand)")
       }
       
       x_labels <- function(x) {
@@ -1107,27 +1131,31 @@ for (survey.name in survey.names){
           scale_fill_manual(
             values = support_colors,
             drop = FALSE,
-            name = "Draagvlak in %"  
+            name = "Voorspeld draag-\nvlak per kleur:"
           ) +
           scale_x_discrete(labels = x_labels) +  
           scale_y_discrete(labels = y_labels) + 
           coord_equal() +
           labs(
             title = list.name.packages[[cat]],  # Add title to distinguish categories
-            x = "Eenmalige investeringskosten",
-            y = "Besparingen per jaar"      
+            x = "Eenmalige investeringskosten in euro",
+            y = "Besparingen in euro"      
           ) +
           theme_pong +
           theme(
-            plot.title = element_text(hjust = 0, vjust = 8),  # Add vertical adjustment
+            plot.title = element_text(hjust = 0, vjust = 8),
             plot.title.position = "plot",
+            legend.text = element_text(size = sz.txt*0.75),   # legend labels (e.g. "10%", "20%")
+            legend.title = element_text(size = sz.txt*0.75)   # legend title ("Draagvlak in %")
           ) +
           guides(fill = guide_legend(
             nrow = 1,
             label.position = "bottom",
-            title.position = "top",
+            title.position = "left",
             title.hjust = 0.5
-          ))
+          )) + 
+          theme(legend.box.spacing = unit(2, "cm")) +
+          theme(legend.margin = margin(l = ifelse(show.only.no.savings,-6,-7.5), unit = "cm"))
       })
       
       if (show.only.no.savings == TRUE){
@@ -1149,6 +1177,10 @@ for (survey.name in survey.names){
       
       
       ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width*1.22,height = height*1.05, units = "cm")
+      
+      ggsave(plot = plot_list[[1]] + labs(title = NULL),filename = paste0(dir.out.figs,"baseline_",fig.nm,".pdf"),width = width*1.2,height = height*1.05, units = "cm")
+      
+      
     }
     
     # Frontier ----
@@ -1195,13 +1227,13 @@ for (survey.name in survey.names){
       dt.s <- rbindlist(list(unique(dt.grid[group == "All" & attributes_non_financials %in% c("baseline","power"),],by=c("game","hetero","group","attributes_non_financials"))[,.(game,hetero,group,attributes_non_financials,predicted = support_50prct_no_savings_low_cost,scenario = "support_50prct_no_savings_low_cost")],
                              unique(dt.grid[group == "All" & attributes_non_financials %in% c("baseline","power_supplier"),],by=c("game","hetero","group","attributes_non_financials"))[,.(game,hetero,group,attributes_non_financials,predicted = support_44prct_2400_savings_high_cost,scenario = "support_44prct_2400_savings_high_cost")]))
       
-      dt.s[scenario == "support_50prct_no_savings_low_cost", dutch_scenario := "Warmte-aanbod 4Keuro investering, 0 euro/maand besparing"]
-      dt.s[scenario == "support_44prct_2400_savings_high_cost", dutch_scenario := "Warmte-aanbod 20Keuro investering, 200euro/maand besparing"]
+      dt.s[scenario == "support_50prct_no_savings_low_cost", dutch_scenario := "Draagvlak goedkopere techniek (4K investering, geen besparing)"]
+      dt.s[scenario == "support_44prct_2400_savings_high_cost", dutch_scenario := "Draagvlak duurdere techniek (20K investering, 2.4K/jaar besparing)"]
       
       dt.s[scenario == "support_50prct_no_savings_low_cost" & attributes_non_financials == "baseline", dutch_attributes_non_financials := "Nooit stroomstoring"]
       dt.s[scenario == "support_50prct_no_savings_low_cost" & attributes_non_financials == "power", dutch_attributes_non_financials := "1 dag/jaar stroomstoring"]
-      dt.s[scenario == "support_44prct_2400_savings_high_cost" & attributes_non_financials == "baseline", dutch_attributes_non_financials := "Nooit stroomstoring - Vrije keuze warmteleverancier"]
-      dt.s[scenario == "support_44prct_2400_savings_high_cost" & attributes_non_financials == "power_supplier", dutch_attributes_non_financials := "1 dag/jaar stroomstoring - Geen vrije keuze"]
+      dt.s[scenario == "support_44prct_2400_savings_high_cost" & attributes_non_financials == "baseline", dutch_attributes_non_financials := "Nooit stroomstoring & Vrije keuze warmteleverancier"]
+      dt.s[scenario == "support_44prct_2400_savings_high_cost" & attributes_non_financials == "power_supplier", dutch_attributes_non_financials := "1 dag/jaar stroomstoring & Geen vrije keuze leverancier"]
       
     } else{
       dt.s <- unique(dt.grid[group == "All" & attributes_non_financials %in% c("baseline","support","cooling","cooling_support"),],by=c("game","hetero","group","attributes_non_financials"))[,.(game,hetero,group,attributes_non_financials,predicted = support_50prct_no_savings_no_support_no_cooling,scenario = "support_50prct_no_savings_no_support_no_cooling")]
@@ -1228,7 +1260,7 @@ for (survey.name in survey.names){
       geom_col(show.legend = FALSE) +
       scale_fill_manual(
         values = support_colors,
-        name = "Draagvlak in %"  
+        name = "Voorspeld draagvlak per kleur:"  
       ) +
       #geom_hline(yintercept = as.numeric(gsub(".*([0-9]{2})prct.*","\\1",scenario))/100) + 
       coord_flip() +
@@ -1236,18 +1268,20 @@ for (survey.name in survey.names){
       labs(x = NULL, y = NULL) +
       guides(
         fill = guide_legend(
-          title.position = "top",
+          title.position = "left",
           label.position = "bottom",
           keywidth = 1,
           keyheight = 1
         )
       ) +
+      theme(legend.box.spacing = unit(2, "cm")) +
       theme_pong +
+      theme(axis.text.y = element_text(hjust = 1)) + 
       facet_wrap(~dutch_scenario, ncol = 1, strip.position = "top", scales = "free_y")  # free_y ensures only relevant x labels show
     
     
     fig.nm <- paste0("packages_",gm)
-    ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width*1.1,height = height*0.8, units = "cm")
+    ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width*1.5,height = height*0.8, units = "cm")
     
     # Support heterogeneity bars ----
     
@@ -1263,6 +1297,7 @@ for (survey.name in survey.names){
     
     # TMP consider tech groups always
     grps.ht <- list(perception_people = c("Municipality","Construction year","Education","Climate-conscious","Reactance municipality"),
+                    social_norm = c("People PONG"),
                     perception_heat_transition = names(grp.ht.list$perception_heat_transition))
     
     dutch_mapping <- data.table(readxl::read_excel("C:\\Users\\20204133\\Documents\\GitHub\\PONG_DCE\\input\\group_names_to_translate.xlsx"))
@@ -1321,7 +1356,7 @@ for (survey.name in survey.names){
             geom_col(show.legend = FALSE) +
             scale_fill_manual(
               values = support_colors,
-              name = "Draagvlak in %"  
+              name = "Voorspeld draagvlak per kleur:"  
             ) +
             geom_hline(yintercept = 0.5001) + 
             coord_flip() +
@@ -1330,11 +1365,12 @@ for (survey.name in survey.names){
             theme_pong + 
             guides(
               fill = guide_legend(
-                title.position = "top",
+                title.position = "left",
                 label.position = "bottom",
                 keywidth = 1,
                 keyheight = 1
               )) +
+            theme(legend.box.spacing = unit(2, "cm")) +
             facet_wrap(~hetero_dutch, ncol = 1, strip.position = "top", scales = "free_y")  # free_y ensures only relevant x labels show
           
           fig.nm <- paste0("bars_ht_",gm,"_",scenario,"_",nf,"_",nm)
