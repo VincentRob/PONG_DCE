@@ -953,6 +953,9 @@ for (survey.name in survey.names){
             next
           }
           dt.pw <- dt.coefs[group == charac & game == gm & (grepl(reg.costs,key_term) | key_term == none_coef | key_term == "factor(tech)1" | key_term == paste0("factor(tech)1:",gsub("none_","",none_coef)) ) ,]
+          dt.pw <- unique(dt.pw)
+          
+          if (dt.pw[,any(duplicated(key_term))]){stop("Non unique estimates")}
           
           if (gm == "tech"){
             savings <- \(x) x*dt.pw[key_term == "heating_costs_continuous",Estimate] +
@@ -1175,11 +1178,14 @@ for (survey.name in survey.names){
         combined_plot        
       }
       
+      ggsave(paste0(dir.out.figs,fig.nm,".pdf"),
+             width = ifelse(gm == "insu" & show.only.no.savings == FALSE,width*1.7,width*1.2),
+             height = ifelse(gm == "insu" & show.only.no.savings == FALSE,height*1.50,height*1.05),
+             units = "cm")
       
-      ggsave(paste0(dir.out.figs,fig.nm,".pdf"),width = width*1.22,height = height*1.05, units = "cm")
-      
-      ggsave(plot = plot_list[[1]] + labs(title = NULL),filename = paste0(dir.out.figs,"baseline_",fig.nm,".pdf"),width = width*1.2,height = height*1.05, units = "cm")
-      
+      ggsave(plot = plot_list[[1]] + labs(title = NULL),filename = paste0(dir.out.figs,"baseline_",fig.nm,".pdf"),
+             width = width*1.2,
+             height = height*1.05, units = "cm")
       
     }
     
@@ -1276,6 +1282,7 @@ for (survey.name in survey.names){
       ) +
       theme(legend.box.spacing = unit(2, "cm")) +
       theme_pong +
+      geom_hline(yintercept = 0.5001) + 
       theme(axis.text.y = element_text(hjust = 1)) + 
       facet_wrap(~dutch_scenario, ncol = 1, strip.position = "top", scales = "free_y")  # free_y ensures only relevant x labels show
     
@@ -1297,7 +1304,6 @@ for (survey.name in survey.names){
     
     # TMP consider tech groups always
     grps.ht <- list(perception_people = c("Municipality","Construction year","Education","Climate-conscious","Reactance municipality"),
-                    social_norm = c("People PONG"),
                     perception_heat_transition = names(grp.ht.list$perception_heat_transition))
     
     dutch_mapping <- data.table(readxl::read_excel("C:\\Users\\20204133\\Documents\\GitHub\\PONG_DCE\\input\\group_names_to_translate.xlsx"))
@@ -1336,6 +1342,8 @@ for (survey.name in survey.names){
           
           if (dim(dt.s)[1] == 0) next
           
+          dt.s[, hetero_dutch := gsub("(.{69}[^ ]*) ", "\\1\n", hetero_dutch)]
+          
           dt.s[,hetero_dutch := factor(hetero_dutch,levels = dt.s[, hetero_dutch[match( grps.ht[[nm]], hetero)]])]
           dt.s[,levels := gsub(paste0(hetero," "),"",group),by=.I]
           
@@ -1371,6 +1379,8 @@ for (survey.name in survey.names){
                 keyheight = 1
               )) +
             theme(legend.box.spacing = unit(2, "cm")) +
+            theme(legend.margin = margin(l = -8, unit = "cm")) + 
+            theme(axis.text.y = element_text(hjust = 1)) + 
             facet_wrap(~hetero_dutch, ncol = 1, strip.position = "top", scales = "free_y")  # free_y ensures only relevant x labels show
           
           fig.nm <- paste0("bars_ht_",gm,"_",scenario,"_",nf,"_",nm)
